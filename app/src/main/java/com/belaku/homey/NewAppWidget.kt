@@ -58,8 +58,15 @@ class NewAppWidget : AppWidgetProvider() {
     @SuppressLint("Range")
     override fun onReceive(context: Context, intent: Intent) {
 
+        views = RemoteViews(context.packageName, R.layout.new_app_widget)
+
         // Handle the button click intent
-        Toast.makeText(context, "onReceive : ", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "onReceive : " + intent.getIntExtra("calls", 0), Toast.LENGTH_SHORT).show();
+
+     //   if (intent.getIntExtra("calls", 0) != 0)
+
+        //    if (this::views.isInitialized)
+          //  views.setTextViewText(R.id.tx_calls, intent.getIntExtra("calls", 0).toString())
 
         val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         var timeOfDay = if (currentHour >= 0 && currentHour < 12) {
@@ -90,12 +97,27 @@ class NewAppWidget : AppWidgetProvider() {
             name = exc.message
         }
         println(name)
+        /*
+        "Morning - \uD83C\uDF3B"
+        "Afternoon - ☀\uFE0F"
+        "Evening - \uD83C\uDF41"
+        "Night - \uD83D\uDCA4"
+        */
+
+
+
+
         if (name != null) {
-            if (timeOfDay.equals("Night"))
-            timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83D\uDCA4 "
+            if (timeOfDay.equals("Morning"))
+                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83C\uDF3B "
+            else if (timeOfDay.equals("Afternoon"))
+                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  ☀\uFE0F "
+            else if (timeOfDay.equals("Evening"))
+                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83C\uDF41 "
+            else if (timeOfDay.equals("Night"))
+                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83D\uDCA4 "
         }
 
-        views = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         views.setTextViewText(R.id.time_text_view, timeOfDay)
 

@@ -1,18 +1,32 @@
 package com.belaku.homey
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.database.Cursor
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.provider.CallLog
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
 import com.belaku.homey.databinding.ActivityMainBinding
+import com.google.android.material.snackbar.Snackbar
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var sinceDate: Date
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
@@ -35,10 +49,35 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
+
+       //     notifyW()
          //   NewAppWidget.updateW("1,2,3...")
         }
 
      //   NewAppWidget.
+    }
+
+
+    private fun makeToast(s: String) {
+        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
+    }
+
+    private fun notifyW() {
+
+                try {
+                    val intent: Intent = Intent(
+                        applicationContext,
+                        NewAppWidget::class.java)
+                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                    val ids: IntArray = AppWidgetManager.getInstance(application)
+                        .getAppWidgetIds(ComponentName(getApplication(), NewAppWidget::class.java))
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+                    intent.putExtra("calls", 5)
+                    sendBroadcast(intent);
+                } catch (e: Exception) {
+                    // TODO: handle exception
+                }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
