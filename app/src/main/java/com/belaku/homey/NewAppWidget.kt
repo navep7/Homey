@@ -1,7 +1,6 @@
 package com.belaku.homey
 
 import android.annotation.SuppressLint
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ContentResolver
@@ -11,10 +10,8 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.widget.RemoteViews
 import android.widget.Toast
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
+
 
 
 class NewAppWidget : AppWidgetProvider() {
@@ -29,26 +26,7 @@ class NewAppWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
          //   views = RemoteViews(context.packageName, R.layout.new_app_widget)
 
-            // Set the text on the TextView
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            val currentDate = Date()
-            val timeString = sdf.format(currentDate)
-         //   views.setTextViewText(R.id.time_text_view, timeString)
 
-            // Set up a PendingIntent for the button click
-            val intent = Intent(
-                context,
-                NewAppWidget::class.java
-            )
-            intent.setAction(ACTION_BUTTON_CLICKED)
-            intent.putExtra(EXTRA_TIME_VALUE, timeString)
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-           // views.setOnClickPendingIntent(R.id.button, pendingIntent)
 
             // Update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
