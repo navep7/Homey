@@ -17,6 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:format12Hour="k:mm:ss"
+        android:textColor="@android:color/holo_red_light"
+        android:textStyle="bold"
         android:format24Hour="k:mm:ss"
         android:gravity="center" />
 

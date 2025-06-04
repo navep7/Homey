@@ -1,9 +1,11 @@
 package com.belaku.homey
 
+import android.Manifest
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.os.Bundle
 import android.provider.CallLog
@@ -12,6 +14,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -26,6 +30,7 @@ import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
+    private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
     private lateinit var sinceDate: Date
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -37,6 +42,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+
+        checkP()
 
   //      NewAppWidget.views.setTextViewText(R.id.appwidget_text, "Qwerty")
     //    NewAppWidget.updateW("1,2,3...")
@@ -55,6 +62,23 @@ class MainActivity : AppCompatActivity() {
         }
 
      //   NewAppWidget.
+    }
+
+    private fun checkP() {
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+            != PackageManager.PERMISSION_GRANTED) {
+
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.READ_CONTACTS),
+                MY_PERMISSIONS_REQUEST_READ_CONTACTS
+            )
+
+
+        }
     }
 
 
