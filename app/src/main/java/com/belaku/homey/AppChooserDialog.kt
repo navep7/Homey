@@ -8,6 +8,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.widget.GridView
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import java.util.Collections
@@ -29,6 +32,22 @@ class AppChooserDialog : Activity() {
 
         val adapter = GridViewAdapter(this, list)
         gridView.adapter = adapter
+
+        gridView.setOnItemClickListener { parent, v, position, id ->
+            val string = (v.findViewById<TextView>(R.id.text_view)).text.toString()
+          //  Log.d("string", string)
+
+            //THE PROBLEM OCCURS HERE
+            val capture = v.findViewById<ImageView>(R.id.image_view)
+            capture.setOnClickListener {
+                // Handle click here
+                Toast.makeText(applicationContext, string, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
