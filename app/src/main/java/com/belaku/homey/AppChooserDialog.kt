@@ -3,13 +3,13 @@ package com.belaku.homey
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.widget.AdapterView.OnItemClickListener
 import android.widget.GridView
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,16 +33,11 @@ class AppChooserDialog : Activity() {
         val adapter = GridViewAdapter(this, list)
         gridView.adapter = adapter
 
-        gridView.setOnItemClickListener { parent, v, position, id ->
-            val string = (v.findViewById<TextView>(R.id.text_view)).text.toString()
-          //  Log.d("string", string)
 
-            //THE PROBLEM OCCURS HERE
-            val capture = v.findViewById<ImageView>(R.id.image_view)
-            capture.setOnClickListener {
-                // Handle click here
-                Toast.makeText(applicationContext, string, Toast.LENGTH_SHORT).show()
-            }
+        gridView.onItemClickListener = OnItemClickListener { _, _, position, _ ->
+            Toast.makeText(applicationContext, list.get(position).name, Toast.LENGTH_SHORT).show()
+            NewAppWidget.addAppInWidget(list.get(position))
+            goHome()
         }
 
 
@@ -53,6 +48,13 @@ class AppChooserDialog : Activity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    private fun goHome() {
+        val startMain = Intent(Intent.ACTION_MAIN)
+        startMain.addCategory(Intent.CATEGORY_HOME)
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(startMain)
     }
 
     private fun getApps(applicationContext: Context) {

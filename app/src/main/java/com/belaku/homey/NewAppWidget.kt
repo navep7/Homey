@@ -1,8 +1,8 @@
 package com.belaku.homey
 
 
+
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -10,121 +10,20 @@ import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
 import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 
 
-/*
-
-
-import android.annotation.SuppressLint
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.ContactsContract
-import android.widget.RemoteViews
-import android.widget.Toast
-import java.util.Calendar
-
-
-
 class NewAppWidget : AppWidgetProvider() {
-    private lateinit var views: RemoteViews
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        // Update the widget for each widget ID
-        for (appWidgetId in appWidgetIds) {
-            appWidgetManager.updateAppWidget(appWidgetId, views)
-        }
-    }
-
-    @SuppressLint("Range")
-    override fun onReceive(context: Context, intent: Intent) {
-
-        views = RemoteViews(context.packageName, R.layout.new_app_widget)
-
-        // Handle the button click intent
-        Toast.makeText(context, "onReceive : " + intent.getIntExtra("calls", 0), Toast.LENGTH_SHORT).show();
-
-     //   if (intent.getIntExtra("calls", 0) != 0)
-
-        //    if (this::views.isInitialized)
-          //  views.setTextViewText(R.id.tx_calls, intent.getIntExtra("calls", 0).toString())
-
-        val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
-        var timeOfDay = if (currentHour >= 0 && currentHour < 12) {
-            "Morning"
-        } else if (currentHour >= 12 && currentHour < 17) {
-            "Afternoon"
-        } else if (currentHour >= 17 && currentHour < 21) {
-            "Evening"
-        } else {
-            "Night"
-        }
-
-
-        val projection = arrayOf(ContactsContract.Profile.DISPLAY_NAME)
-        var name: String? = null
-        val dataUri = Uri.withAppendedPath(
-            ContactsContract.Profile.CONTENT_URI,
-            ContactsContract.Contacts.Data.CONTENT_DIRECTORY
-        )
-        val contentResolver: ContentResolver = context.getContentResolver()
-        val c = contentResolver.query(dataUri, projection, null, null, null)
-
-        try {
-            if (c!!.moveToFirst()) {
-                name = c!!.getString(c!!.getColumnIndex(ContactsContract.Profile.DISPLAY_NAME))
-            }
-        } catch (exc: Exception) {
-            name = exc.message
-        }
-        println(name)
-        */
-/*
-        "Morning - \uD83C\uDF3B"
-        "Afternoon - ☀\uFE0F"
-        "Evening - \uD83C\uDF41"
-        "Night - \uD83D\uDCA4"
-        *//*
-
-
-
-
-
-        if (name != null) {
-            if (timeOfDay.equals("Morning"))
-                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83C\uDF3B "
-            else if (timeOfDay.equals("Afternoon"))
-                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  ☀\uFE0F "
-            else if (timeOfDay.equals("Evening"))
-                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83C\uDF41 "
-            else if (timeOfDay.equals("Night"))
-                timeOfDay = "$timeOfDay, ${name.split(" ").get(0)}  \uD83D\uDCA4 "
-        }
-
-
-        views.setTextViewText(R.id.time_text_view, timeOfDay)
-
-        super.onReceive(context, intent)
-    }
-
-
-}*/
-
-
-class NewAppWidget : AppWidgetProvider() {
-    private lateinit var remoteViews: RemoteViews
 
     override fun onUpdate(
         context: Context,
@@ -151,6 +50,8 @@ class NewAppWidget : AppWidgetProvider() {
         // TODO Auto-generated method stub
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         super.onReceive(context, intent)
+
+        appContx = context
 
      //   Toast.makeText(context, "onR", Toast.LENGTH_SHORT).show()
 
@@ -229,6 +130,68 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        fun addAppInWidget(app: App) {
+
+            val appWidgetManager = AppWidgetManager.getInstance(appContx)
+            val thisWidget: ComponentName =
+                ComponentName(appContx, NewAppWidget::class.java)
+
+            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
+
+            if (appIndex == 0) {
+                views.setImageViewBitmap(R.id.imgv_add1, app.image?.let { drawableToBitmap(it) })
+                appIndex = 1
+                views.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
+            } else if (appIndex == 1) {
+                views.setImageViewBitmap(R.id.imgv_add2, app.image?.let { drawableToBitmap(it) })
+                appIndex = 2
+                views.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
+            } else if (appIndex == 2) {
+                views.setImageViewBitmap(R.id.imgv_add3, app.image?.let { drawableToBitmap(it) })
+                appIndex = 3
+                views.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
+            } else if (appIndex == 3) {
+                views.setImageViewBitmap(R.id.imgv_add4, app.image?.let { drawableToBitmap(it) })
+                appIndex = 4
+                views.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
+            }
+
+            appWidgetManager.updateAppWidget(thisWidget, views)
+        }
+
+        fun drawableToBitmap(drawable: Drawable): Bitmap {
+            var bitmap: Bitmap? = null
+
+            if (drawable is BitmapDrawable) {
+                val bitmapDrawable = drawable
+                if (bitmapDrawable.bitmap != null) {
+                    return bitmapDrawable.bitmap
+                }
+            }
+
+            bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+                Bitmap.createBitmap(
+                    1,
+                    1,
+                    Bitmap.Config.ARGB_8888
+                ) // Single color bitmap will be created of 1x1 pixel
+            } else {
+                Bitmap.createBitmap(
+                    drawable.intrinsicWidth,
+                    drawable.intrinsicHeight,
+                    Bitmap.Config.ARGB_8888
+                )
+            }
+
+            val canvas = Canvas(bitmap)
+            drawable.setBounds(0, 0, canvas.width, canvas.height)
+            drawable.draw(canvas)
+            return bitmap
+        }
+
+        private var appIndex: Int = 0
+        private lateinit var appContx: Context
+        private lateinit var remoteViews: RemoteViews
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
     }
 }
