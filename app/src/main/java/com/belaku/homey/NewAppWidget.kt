@@ -4,11 +4,13 @@ package com.belaku.homey
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -17,9 +19,12 @@ import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
 import android.net.Uri
 import android.provider.ContactsContract
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.content.ContextCompat.startActivity
+import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 
 
 class NewAppWidget : AppWidgetProvider() {
@@ -43,6 +48,27 @@ class NewAppWidget : AppWidgetProvider() {
             R.id.imgv_add,
             getPendingSelfIntent(context, SYNC_CLICKED)
         )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add1,
+            getPendingSelfIntent(context, APP1_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add2,
+            getPendingSelfIntent(context, APP2_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add3,
+            getPendingSelfIntent(context, APP3_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add4,
+            getPendingSelfIntent(context, APP4_CLICKED)
+        )
+
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
     }
 
@@ -61,15 +87,60 @@ class NewAppWidget : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
+            val intent1: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            appContx.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+
             Log.d("ADDA", "S")
             showAppsDialog(context)
 
+
             appWidgetManager.updateAppWidget(watchWidget, remoteViews)
         }
+
+        if (APP1_CLICKED == intent.action) {
+          //  if (choosenApps.size > 0)
+           readApps()
+            Log.d("APP1_CLICKED", choosenApps.size.toString())
+         }
+    }
+
+
+    private fun appUsageStats() {
+
+
+        val usageStatsManager =
+            appContx.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
+        val beginCal = Calendar.getInstance()
+        beginCal.set(2025,5,3)
+
+
+        val endCal = Calendar.getInstance()
+            endCal.set(2025,5,4)
+
+        val queryUsageStats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_DAILY,
+            beginCal.timeInMillis,
+            endCal.timeInMillis
+        )
+        println("results for " + beginCal.time.toGMTString() + " - " + endCal.time.toGMTString())
+        println("QUS - " + queryUsageStats.size)
+        for (app in queryUsageStats) {
+            Log.d("usagestats21" , app.packageName + " | " + (app.totalTimeInForeground / 1000).toFloat())
+        }
+
+    }
+
+    private fun readApps() {
+
+        val sharedPreferences = appContx.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        val app1 = sharedPreferences.getString("app1", "")
+        choosenApps.add(App(app1.toString(), appContx.getDrawable(R.drawable.calls)))
+
     }
 
     private fun showAppsDialog(context: Context) {
 
+        appUsageStats()
         context.startActivity(Intent(context, AppChooserDialog::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
     }
@@ -193,5 +264,9 @@ class NewAppWidget : AppWidgetProvider() {
         private lateinit var appContx: Context
         private lateinit var remoteViews: RemoteViews
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
+        private const val APP1_CLICKED = "App1Clicked"
+        private const val APP2_CLICKED = "App2Clicked"
+        private const val APP3_CLICKED = "App3Clicked"
+        private const val APP4_CLICKED = "App4Clicked"
     }
 }

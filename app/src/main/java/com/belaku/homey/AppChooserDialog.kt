@@ -17,7 +17,6 @@ import java.util.Collections
 
 
 class AppChooserDialog : Activity() {
-    private var list: java.util.ArrayList<App> = ArrayList()
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,13 +29,14 @@ class AppChooserDialog : Activity() {
 
         //   list.add(App("DSA", R.drawable.calls))
 
-        val adapter = GridViewAdapter(this, list)
+        val adapter = GridViewAdapter(this, appLists)
         gridView.adapter = adapter
 
 
         gridView.onItemClickListener = OnItemClickListener { _, _, position, _ ->
-            Toast.makeText(applicationContext, list.get(position).name, Toast.LENGTH_SHORT).show()
-            NewAppWidget.addAppInWidget(list.get(position))
+            Toast.makeText(applicationContext, appLists.get(position).name, Toast.LENGTH_SHORT).show()
+            NewAppWidget.addAppInWidget(appLists.get(position))
+            choosenApps.add(appLists.get(position))
             goHome()
         }
 
@@ -48,6 +48,21 @@ class AppChooserDialog : Activity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        SaveAppsToSharedP(choosenApps)
+    }
+
+    private fun SaveAppsToSharedP(choosenApps: ArrayList<App>) {
+
+        val sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        editor.putString("app1", choosenApps.get(0).name)
+        editor.apply()
+
     }
 
     private fun goHome() {
@@ -71,8 +86,8 @@ class AppChooserDialog : Activity() {
                 var appIcon: Drawable = packageManager.getApplicationIcon(apps.get(i))
                 appNames.add(appName)
                 appIcons.add(appIcon)
-                list.add(App(apps.get(i).loadLabel(packageManager).toString(), appIcon))
-                sortApps(list)
+                appLists.add(App(apps.get(i).loadLabel(packageManager).toString(), appIcon))
+                sortApps(appLists)
             }
         }
 
@@ -88,6 +103,11 @@ class AppChooserDialog : Activity() {
             p1.name.compareTo(p2.name)
         }
 
+    }
+
+    companion object {
+        val appLists: ArrayList<App> = ArrayList()
+        val choosenApps: ArrayList<App> = ArrayList()
     }
 
 

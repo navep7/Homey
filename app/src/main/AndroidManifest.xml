@@ -10,6 +10,10 @@
         </intent>
     </queries>
 
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
                         tools:ignore="QueryAllPackagesPermission"/>
     <uses-permission android:name="android.permission.READ_CONTACTS" />
