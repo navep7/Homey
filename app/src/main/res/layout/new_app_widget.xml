@@ -31,40 +31,37 @@
 
         <ImageView
             android:id="@+id/imgv_add1"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_width="25dp"
-            android:layout_height="25dp" />
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
         <ImageView
             android:id="@+id/imgv_add2"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_width="25dp"
-            android:layout_height="25dp" />
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
 
         <ImageView
             android:id="@+id/imgv_add"
-            android:src="@android:drawable/ic_input_add"
-            android:background="@android:color/holo_red_light"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:src="@drawable/add_icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"/>
 
 
         <ImageView
             android:id="@+id/imgv_add3"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_width="25dp"
-            android:layout_height="25dp" />
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
 
 
         <ImageView
             android:id="@+id/imgv_add4"
-            android:layout_margin="@dimen/fab_margin"
-            android:layout_width="25dp"
-            android:layout_height="25dp" />
-
-
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
 
     </LinearLayout>
 

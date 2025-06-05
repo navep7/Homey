@@ -1,9 +1,9 @@
 package com.belaku.homey
 
 
-
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -12,6 +12,8 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
@@ -23,8 +25,12 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import androidx.core.content.ContextCompat.startActivity
+import android.widget.Toast
 import com.belaku.homey.AppChooserDialog.Companion.choosenApps
+import java.security.AccessController.getContext
+import java.util.Collections
+import java.util.Date
+import java.util.Locale
 
 
 class NewAppWidget : AppWidgetProvider() {
@@ -37,7 +43,7 @@ class NewAppWidget : AppWidgetProvider() {
     ) {
 
 
-      //  val remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+        //  val remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
         for (appWidgetId in appWidgetIds) {
@@ -79,7 +85,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         appContx = context
 
-     //   Toast.makeText(context, "onR", Toast.LENGTH_SHORT).show()
+        //   Toast.makeText(context, "onR", Toast.LENGTH_SHORT).show()
 
         greeting(context, remoteViews)
 
@@ -87,35 +93,37 @@ class NewAppWidget : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
-            val intent1: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            appContx.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                 val intent1: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+               appContx.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
             Log.d("ADDA", "S")
-            showAppsDialog(context)
+            //    showAppsDialog(context)
+            appUsageStats()
 
 
             appWidgetManager.updateAppWidget(watchWidget, remoteViews)
         }
 
         if (APP1_CLICKED == intent.action) {
-          //  if (choosenApps.size > 0)
-           readApps()
+            //  if (choosenApps.size > 0)
+            readApps()
             Log.d("APP1_CLICKED", choosenApps.size.toString())
-         }
+        }
     }
 
 
     private fun appUsageStats() {
 
+        var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
         val usageStatsManager =
             appContx.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
         val beginCal = Calendar.getInstance()
-        beginCal.set(2025,5,3)
+        beginCal.set(2025, 5, cDate - 3)
 
 
         val endCal = Calendar.getInstance()
-            endCal.set(2025,5,4)
+        endCal.set(2025, 5, cDate)
 
         val queryUsageStats = usageStatsManager.queryUsageStats(
             UsageStatsManager.INTERVAL_DAILY,
@@ -124,8 +132,67 @@ class NewAppWidget : AppWidgetProvider() {
         )
         println("results for " + beginCal.time.toGMTString() + " - " + endCal.time.toGMTString())
         println("QUS - " + queryUsageStats.size)
-        for (app in queryUsageStats) {
-            Log.d("usagestats21" , app.packageName + " | " + (app.totalTimeInForeground / 1000).toFloat())
+        sortAndFindFour(queryUsageStats)
+
+
+        for (i in 0 until 10) {
+            choosenApps.add(
+                App(
+                    getAppNameFromPkg(queryUsageStats.get(i).packageName),
+                    appContx.getDrawable(R.drawable.msgs)
+                )
+            )
+        }
+
+        Log.d("No. ", choosenApps.size.toString())
+        for (i in 0 until choosenApps.size) {
+            var appName = getAppNameFromPkg(queryUsageStats.get(i).packageName)
+            var appIcon = getAppIconFromPkg(queryUsageStats.get(i).packageName)
+            Log.d(
+                "UsageLog",
+                "App $i - $appName : ${
+                    queryUsageStats.get(i).totalTimeInForeground
+                }"
+            )
+
+            if (!appName.toLowerCase(Locale.ROOT).contains("launcher")) {
+                addAppInWidget(App(appName, appIcon))
+            }
+        }
+
+    }
+
+    private fun getAppIconFromPkg(packageName: String?): Drawable? {
+        try {
+            val icon: Drawable =
+                appContx.getPackageManager().getApplicationIcon(packageName.toString())
+            return icon
+        } catch (e: NameNotFoundException) {
+            e.printStackTrace()
+            return appContx.getDrawable(R.drawable.calls)
+        }
+    }
+
+    private fun getAppNameFromPkg(packageName: String?): String {
+        val pm: PackageManager = appContx.getPackageManager()
+        var ai = try {
+            pm.getApplicationInfo(packageName.toString(), 0)
+        } catch (e: NameNotFoundException) {
+            null
+        }
+        val applicationName =
+            (if (ai != null) pm.getApplicationLabel(ai) else "(unknown)") as String
+
+        return applicationName
+    }
+
+    private fun sortAndFindFour(queryUsageStats: List<UsageStats>) {
+
+        Collections.sort<UsageStats>(
+            queryUsageStats
+        ) { p1: UsageStats, p2: UsageStats ->
+            p2.totalTimeInForeground.compareTo(p1.totalTimeInForeground)
+            //   p1.name.compareTo(p2.name)
         }
 
     }
@@ -141,7 +208,12 @@ class NewAppWidget : AppWidgetProvider() {
     private fun showAppsDialog(context: Context) {
 
         appUsageStats()
-        context.startActivity(Intent(context, AppChooserDialog::class.java).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        context.startActivity(
+            Intent(
+                context,
+                AppChooserDialog::class.java
+            ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
 
     }
 
