@@ -135,29 +135,22 @@ class NewAppWidget : AppWidgetProvider() {
         sortAndFindFour(queryUsageStats)
 
 
-        for (i in 0 until 10) {
-            choosenApps.add(
-                App(
-                    getAppNameFromPkg(queryUsageStats.get(i).packageName),
-                    appContx.getDrawable(R.drawable.msgs)
-                )
-            )
-        }
-
-        Log.d("No. ", choosenApps.size.toString())
-        for (i in 0 until choosenApps.size) {
+        var appNames = HashSet<String>()
+        for (i in 0 until queryUsageStats.size) {
             var appName = getAppNameFromPkg(queryUsageStats.get(i).packageName)
             var appIcon = getAppIconFromPkg(queryUsageStats.get(i).packageName)
-            Log.d(
-                "UsageLog",
-                "App $i - $appName : ${
-                    queryUsageStats.get(i).totalTimeInForeground
-                }"
-            )
 
-            if (!appName.toLowerCase(Locale.ROOT).contains("launcher")) {
-                addAppInWidget(App(appName, appIcon))
-            }
+            if (queryUsageStats.get(i).totalTimeInForeground > 0)
+                if (!appName.contains("Launcher"))
+                    if (appNames.add(appName))
+                        if (choosenApps.size < 5) {
+                            choosenApps.add(
+                                App(
+                                    appName, appIcon
+                                )
+                            )
+                            addAppInWidget(App(appName, appIcon))
+                        }
         }
 
     }
