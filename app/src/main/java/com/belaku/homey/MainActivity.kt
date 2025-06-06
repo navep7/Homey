@@ -1,15 +1,14 @@
 package com.belaku.homey
 
 import android.Manifest
+import android.app.AlertDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.os.Bundle
-import android.provider.CallLog
-import android.util.Log
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -22,9 +21,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.google.android.material.snackbar.Snackbar
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Date
 
 
@@ -44,6 +40,17 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         checkP()
+        val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
+        alertDialog.setTitle("Permission Request")
+        alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK"
+        ) { dialog, which ->
+            val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            dialog.dismiss()
+        }
+        alertDialog.show()
+
 
   //      NewAppWidget.views.setTextViewText(R.id.appwidget_text, "Qwerty")
     //    NewAppWidget.updateW("1,2,3...")
