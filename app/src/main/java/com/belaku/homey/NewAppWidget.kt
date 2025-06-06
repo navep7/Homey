@@ -12,6 +12,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Bitmap
@@ -25,16 +26,14 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import android.widget.Toast
-import com.belaku.homey.AppChooserDialog.Companion.choosenApps
-import java.security.AccessController.getContext
+import androidx.core.content.ContextCompat.startActivity
 import java.util.Collections
-import java.util.Date
-import java.util.Locale
 
 
 class NewAppWidget : AppWidgetProvider() {
 
+
+    val choosenApps: ArrayList<App> = ArrayList()
 
     override fun onUpdate(
         context: Context,
@@ -81,6 +80,9 @@ class NewAppWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
+
         super.onReceive(context, intent)
 
         appContx = context
@@ -93,8 +95,8 @@ class NewAppWidget : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
-                 val intent1: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-               appContx.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            val intent1: Intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            appContx.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 
             Log.d("ADDA", "S")
             //    showAppsDialog(context)
@@ -105,10 +107,29 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         if (APP1_CLICKED == intent.action) {
-            //  if (choosenApps.size > 0)
-            readApps()
-            Log.d("APP1_CLICKED", choosenApps.size.toString())
+            Log.d("APP1_CLICKED", readApps()[0])
+            launchApp(readApps()[0])
         }
+
+        if (APP2_CLICKED == intent.action) {
+            Log.d("APP2_CLICKED", readApps()[1])
+            launchApp(readApps()[1])
+        }
+
+        if (APP3_CLICKED == intent.action) {
+            Log.d("APP3_CLICKED", readApps()[2])
+            launchApp(readApps()[2])
+        }
+
+        if (APP4_CLICKED == intent.action) {
+            Log.d("APP4_CLICKED", readApps()[3])
+            launchApp(readApps()[3])
+        }
+    }
+
+    private fun launchApp(pkgName: String) {
+        val launchIntent: Intent = appContx.getPackageManager().getLaunchIntentForPackage(pkgName)!!
+        appContx.startActivity(launchIntent)
     }
 
 
@@ -149,10 +170,39 @@ class NewAppWidget : AppWidgetProvider() {
                                     appName, appIcon
                                 )
                             )
-                            addAppInWidget(App(appName, appIcon))
+                            addAppInWidget(App(queryUsageStats.get(i).packageName, appIcon))
                         }
         }
+        saveApps(Apps)
 
+    }
+
+    private fun saveApps(apps: java.util.ArrayList<App>) {
+
+        val set: MutableSet<String> = HashSet()
+
+        for (i in 0 until apps.size)
+            set.add(apps.get(i).name)
+
+        sharedPreferencesEditor.putInt("Status_size", set.size)
+
+        for (i in 0 until set.size) {
+            sharedPreferencesEditor.remove("Status_$i")
+            sharedPreferencesEditor.putString("Status_$i", apps.get(i).name)
+        }
+        sharedPreferencesEditor.commit()
+
+    }
+
+    private fun readApps(): ArrayList<String> {
+        val apps = ArrayList<String>()
+
+        val size: Int = sharedPreferences.getInt("Status_size", 0)
+        for (i in 0 until size) {
+            apps.add(sharedPreferences.getString("Status_$i", null).toString())
+        }
+
+        return apps
     }
 
     private fun getAppIconFromPkg(packageName: String?): Drawable? {
@@ -190,13 +240,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-    private fun readApps() {
-
-        val sharedPreferences = appContx.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-        val app1 = sharedPreferences.getString("app1", "")
-        choosenApps.add(App(app1.toString(), appContx.getDrawable(R.drawable.calls)))
-
-    }
 
     private fun showAppsDialog(context: Context) {
 
@@ -266,7 +309,13 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        private var Apps: ArrayList<App> = ArrayList()
+        private lateinit var sharedPreferencesEditor: SharedPreferences.Editor
+        private lateinit var sharedPreferences: SharedPreferences
+
         fun addAppInWidget(app: App) {
+
+            Apps.add(app)
 
             val appWidgetManager = AppWidgetManager.getInstance(appContx)
             val thisWidget: ComponentName =
@@ -293,6 +342,10 @@ class NewAppWidget : AppWidgetProvider() {
             }
 
             appWidgetManager.updateAppWidget(thisWidget, views)
+        }
+
+        private fun saveApp(app: App) {
+
         }
 
         fun drawableToBitmap(drawable: Drawable): Bitmap {
