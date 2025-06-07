@@ -7,10 +7,10 @@
 
     <TextView
         android:id="@+id/time_text_view"
-        android:background="#59FFFFFF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:textColor="@android:color/holo_red_dark"
         android:textSize="35sp" />
 
     <android.widget.TextClock
@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:format12Hour="k:mm:ss"
         android:textSize="50sp"
-        android:background="#59FFFFFF"
         android:textColor="@android:color/holo_red_light"
         android:textStyle="bold"
         android:format24Hour="k:mm:ss"
@@ -27,10 +26,10 @@
 
     <TextView
         android:id="@+id/date_text_view"
-        android:background="#59FFFFFF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:textColor="@android:color/holo_red_dark"
         android:textSize="35sp" />
 
     <LinearLayout
