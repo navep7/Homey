@@ -1,6 +1,7 @@
 package com.belaku.homey
 
 
+
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -22,6 +23,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
@@ -36,6 +38,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
     val choosenApps: ArrayList<App> = ArrayList()
+    val favContacts: ArrayList<Contact> = ArrayList()
     lateinit var gpName: String
     lateinit var gpPh: String
 
@@ -106,6 +109,7 @@ class NewAppWidget : AppWidgetProvider() {
         todaysDate()
         greeting(context, remoteViews, timeOfDay)
         appUsageStats(timeOfDay)
+        getFavoriteContacts(context)
 
         if (SYNC_CLICKED == intent.action) {
             showAppsDialog(context)
@@ -137,6 +141,83 @@ class NewAppWidget : AppWidgetProvider() {
             launchApp(readApps()[3])
         }
     }
+
+
+
+
+
+    @SuppressLint("Range", "UseCompatLoadingForDrawables")
+    fun getFavoriteContacts(context: Context): Map<*, *> {
+
+         var contactMap : MutableMap<String, String> = HashMap()
+
+        val queryUri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
+            .appendQueryParameter(ContactsContract.Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
+            .build()
+
+        val projection = arrayOf(
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.Contacts.STARRED
+        )
+
+        val selection = ContactsContract.Contacts.STARRED + "='1'"
+
+        val cursor = context.getContentResolver().query(queryUri,
+            projection, selection, null, null)
+
+        while (cursor!!.moveToNext()) {
+            val contactID = cursor!!.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
+
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_URI, contactID.toString())
+            intent.data = uri
+            val intentUriString = intent.toUri(0)
+
+            val title = cursor.getString(
+                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+
+            contactMap[title] = intentUriString
+        }
+
+        cursor!!.close()
+
+
+
+        for (key in contactMap.keys) {
+            val value = contactMap[key]
+            println()
+
+            var cName = key
+            var cIcon = appContx.getDrawable(R.drawable.msgs)
+
+            Log.d("cLog", "cName: $cName, cPic: $cIcon")
+
+            favContacts.add(
+                Contact(
+                    cName, cIcon
+                )
+            )
+
+            try {
+                Log.d("cLogSetPic", cIcon.toString())
+                addContactInWidget(Contact(cName, cIcon))
+            } catch (ex : Exception) {
+                Log.d("cLogPic", ex.message.toString())
+            }
+
+        }
+
+
+
+
+        return contactMap
+    }
+
+
+
+
 
     private fun todaysDate() {
 
@@ -201,6 +282,7 @@ class NewAppWidget : AppWidgetProvider() {
                                     appName, appIcon
                                 )
                             )
+                            Log.d("cLogSetAppIcon", appIcon.toString())
                             addAppInWidget(App(queryUsageStats.get(i).packageName, appIcon))
                         }
         }
@@ -274,7 +356,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     private fun showAppsDialog(context: Context) {
 
-        //   appUsageStats(timeOfDay)
         context.startActivity(
             Intent(
                 context,
@@ -340,8 +421,34 @@ class NewAppWidget : AppWidgetProvider() {
 
     companion object {
         private var Apps: ArrayList<App> = ArrayList()
+        private var Contacts: ArrayList<Contact> = ArrayList()
         private lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         private lateinit var sharedPreferences: SharedPreferences
+
+
+        fun addContactInWidget(contact: Contact) {
+
+            Contacts.add(contact)
+
+            val appWidgetManager = AppWidgetManager.getInstance(appContx)
+            val thisWidget =
+                ComponentName(appContx, NewAppWidget::class.java)
+
+            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
+
+            if (conIndex == 0) {
+                views.setImageViewBitmap(R.id.imgv_contact1, contact.image?.let { drawableToBitmap(it) })
+                conIndex = 1
+            } else if (conIndex == 1) {
+                views.setImageViewBitmap(R.id.imgv_contact2, contact.image?.let { drawableToBitmap(it) })
+                conIndex = 2
+            } else if (conIndex == 2) {
+                views.setImageViewBitmap(R.id.imgv_contact3, contact.image?.let { drawableToBitmap(it) })
+                conIndex = 3
+            }
+
+            appWidgetManager.updateAppWidget(thisWidget, views)
+        }
 
         fun addAppInWidget(app: App) {
 
@@ -370,6 +477,7 @@ class NewAppWidget : AppWidgetProvider() {
                 appIndex = 4
                 views.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
             }
+
 
             appWidgetManager.updateAppWidget(thisWidget, views)
         }
@@ -409,6 +517,7 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         private var appIndex: Int = 0
+        private var conIndex: Int = 0
         private lateinit var appContx: Context
         private lateinit var remoteViews: RemoteViews
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"

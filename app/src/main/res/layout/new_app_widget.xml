@@ -51,13 +51,11 @@
             android:layout_width="50dp"
             android:layout_height="50dp" />
 
-
         <ImageView
             android:id="@+id/imgv_add"
             android:src="@drawable/add_icon"
             android:layout_width="100dp"
             android:layout_height="100dp"/>
-
 
         <ImageView
             android:id="@+id/imgv_add3"
@@ -65,13 +63,45 @@
             android:layout_width="50dp"
             android:layout_height="50dp" />
 
-
-
         <ImageView
             android:id="@+id/imgv_add4"
             android:layout_margin="5dp"
             android:layout_width="50dp"
             android:layout_height="50dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_contacts"
+        android:gravity="center"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imgv_contact1"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <ImageView
+            android:id="@+id/imgv_contact2"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
+        <ImageView
+            android:id="@+id/imgv_contact3"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+
+        <ImageView
+            android:id="@+id/imgv_contact4"
+            android:layout_margin="5dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+
 
     </LinearLayout>
 
