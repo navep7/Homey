@@ -437,12 +437,19 @@ class NewAppWidget : AppWidgetProvider() {
 
             if (conIndex == 0) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact1, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c1, contact.name.substring(0, 1))
                 conIndex = 1
             } else if (conIndex == 1) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact2, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c2, contact.name.substring(0, 1))
                 conIndex = 2
             } else if (conIndex == 2) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact3, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c3, contact.name.substring(0, 1))
+                conIndex = 3
+            } else if (conIndex == 3) {
+                remoteViews.setImageViewBitmap(R.id.imgv_contact4, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c4, contact.name.substring(0, 1))
                 conIndex = 3
             }
         }
@@ -489,7 +496,7 @@ class NewAppWidget : AppWidgetProvider() {
                 val bitmapDrawable = drawable
                 if (bitmapDrawable.bitmap != null) {
                     return bitmapDrawable.bitmap
-                } else return drawableToBitmap(appContx.getDrawable(android.R.drawable.ic_dialog_info)!!)
+                } else return drawableToBitmap(appContx.getDrawable(R.drawable.face_holder)!!)
             }
 
             bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
