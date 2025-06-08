@@ -4,14 +4,14 @@ import android.Manifest
 import android.app.AlertDialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.DialogInterface
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sinceDate: Date
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    lateinit var brTimeTick: TimeTickReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +39,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+
+        appContx = applicationContext
+
+        BRo()
 
         checkP()
         val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
@@ -71,6 +76,23 @@ class MainActivity : AppCompatActivity() {
      //   NewAppWidget.
     }
 
+    private fun BRo() {
+
+
+        brTimeTick = TimeTickReceiver()
+        IntentFilter(Intent.ACTION_TIME_TICK).also {
+            // registering the receiver
+            // it parameter which is passed in  registerReceiver() function
+            // is the intent filter that we have just created
+            registerReceiver(brTimeTick, it)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(brTimeTick)
+    }
+
     private fun checkP() {
 
         if (ContextCompat.checkSelfPermission(this,
@@ -89,27 +111,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun makeToast(s: String) {
-        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
-    }
-
-    private fun notifyW() {
-
-                try {
-                    val intent: Intent = Intent(
-                        applicationContext,
-                        NewAppWidget::class.java)
-                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                    val ids: IntArray = AppWidgetManager.getInstance(application)
-                        .getAppWidgetIds(ComponentName(getApplication(), NewAppWidget::class.java))
-                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-                    intent.putExtra("calls", 5)
-                    sendBroadcast(intent);
-                } catch (e: Exception) {
-                    // TODO: handle exception
-                }
-
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -131,5 +132,26 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
+    }
+
+    companion object {
+        private lateinit var appContx: Context
+
+        fun notifyW() {
+
+            try {
+                val intent = Intent(
+                    appContx,
+                    NewAppWidget::class.java)
+                intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+                val ids: IntArray = AppWidgetManager.getInstance(appContx)
+                    .getAppWidgetIds(ComponentName(appContx, NewAppWidget::class.java))
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+                appContx.sendBroadcast(intent);
+            } catch (e: Exception) {
+                // TODO: handle exception
+            }
+
+        }
     }
 }

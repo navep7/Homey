@@ -18,6 +18,7 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -84,6 +85,7 @@ class NewAppWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
     }
 
+
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
@@ -93,8 +95,6 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         appContx = context
-
-        //   Toast.makeText(context, "onR", Toast.LENGTH_SHORT).show()
 
         val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
@@ -183,33 +183,41 @@ class NewAppWidget : AppWidgetProvider() {
 
         cursor!!.close()
 
+        val myMap: MutableMap<String, Int> = HashMap()
+        myMap["apple"] = 1
+        myMap["banana"] = 2
+        myMap["cherry"] = 3
+
+        for ((key, value) in contactMap) {
+            println("Key: $key, Value: $value")
+        }
 
 
-        for (key in contactMap.keys) {
-            val value = contactMap[key]
-            println()
+        for ((key, value) in contactMap) {
 
-            var cName = key
-            var cIcon = appContx.getDrawable(R.drawable.msgs)
+            Log.d("cLog", "cName: $key, cPic: $value")
 
-            Log.d("cLog", "cName: $cName, cPic: $cIcon")
+            val input =
+                ContactsContract.Contacts.openContactPhotoInputStream(context.contentResolver, Uri.parse(value))
+            val bm = BitmapFactory.decodeStream(input)
+            val d: Drawable = BitmapDrawable(bm)
+
+
 
             favContacts.add(
                 Contact(
-                    cName, cIcon
+                    key, d
                 )
             )
 
             try {
-                Log.d("cLogSetPic", cIcon.toString())
-                addContactInWidget(Contact(cName, cIcon))
+                Log.d("cLogSetPic", value)
+                addContactInWidget(Contact(key, d))
             } catch (ex : Exception) {
                 Log.d("cLogPic", ex.message.toString())
             }
 
         }
-
-
 
 
         return contactMap
@@ -421,33 +429,22 @@ class NewAppWidget : AppWidgetProvider() {
 
     companion object {
         private var Apps: ArrayList<App> = ArrayList()
-        private var Contacts: ArrayList<Contact> = ArrayList()
         private lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         private lateinit var sharedPreferences: SharedPreferences
 
 
         fun addContactInWidget(contact: Contact) {
 
-            Contacts.add(contact)
-
-            val appWidgetManager = AppWidgetManager.getInstance(appContx)
-            val thisWidget =
-                ComponentName(appContx, NewAppWidget::class.java)
-
-            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
-
             if (conIndex == 0) {
-                views.setImageViewBitmap(R.id.imgv_contact1, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact1, contact.image?.let { drawableToBitmap(it) })
                 conIndex = 1
             } else if (conIndex == 1) {
-                views.setImageViewBitmap(R.id.imgv_contact2, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact2, contact.image?.let { drawableToBitmap(it) })
                 conIndex = 2
             } else if (conIndex == 2) {
-                views.setImageViewBitmap(R.id.imgv_contact3, contact.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact3, contact.image?.let { drawableToBitmap(it) })
                 conIndex = 3
             }
-
-            appWidgetManager.updateAppWidget(thisWidget, views)
         }
 
         fun addAppInWidget(app: App) {
@@ -455,8 +452,7 @@ class NewAppWidget : AppWidgetProvider() {
             Apps.add(app)
 
             val appWidgetManager = AppWidgetManager.getInstance(appContx)
-            val thisWidget: ComponentName =
-                ComponentName(appContx, NewAppWidget::class.java)
+            val thisWidget = ComponentName(appContx, NewAppWidget::class.java)
 
             val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
 
@@ -493,7 +489,7 @@ class NewAppWidget : AppWidgetProvider() {
                 val bitmapDrawable = drawable
                 if (bitmapDrawable.bitmap != null) {
                     return bitmapDrawable.bitmap
-                }
+                } else return drawableToBitmap(appContx.getDrawable(android.R.drawable.ic_dialog_info)!!)
             }
 
             bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {

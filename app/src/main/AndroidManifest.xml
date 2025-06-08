@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:scheme="http" />
         </intent>
     </queries>
@@ -13,9 +13,9 @@
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
-
-    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
-                        tools:ignore="QueryAllPackagesPermission"/>
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
@@ -29,7 +29,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Homey"
-        tools:targetApi="31">
+        tools:targetApi="31" >
+        <receiver
+            android:name=".TimeTickReceiver"
+            android:enabled="true"
+            android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_TICK"/>
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".AppChooserDialog"
@@ -37,7 +45,7 @@
 
         <receiver
             android:name=".NewAppWidget"
-            android:exported="false">
+            android:exported="false" >
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -50,7 +58,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Homey">
+            android:theme="@style/Theme.Homey" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
