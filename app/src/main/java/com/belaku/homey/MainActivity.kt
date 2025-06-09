@@ -45,16 +45,7 @@ class MainActivity : AppCompatActivity() {
         BRo()
 
         checkP()
-        val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
-        alertDialog.setTitle("Permission Request")
-        alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK"
-        ) { dialog, which ->
-            val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            dialog.dismiss()
-        }
-        alertDialog.show()
+
 
 
   //      NewAppWidget.views.setTextViewText(R.id.appwidget_text, "Qwerty")
@@ -107,7 +98,33 @@ class MainActivity : AppCompatActivity() {
             )
 
 
+        } else  {
+            cGranted = true
+            UsageStatsPermissionDialog()
         }
+    }
+
+    private fun UsageStatsPermissionDialog() {
+        val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
+        alertDialog.setTitle("Permission Request")
+        alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK"
+        ) { dialog, which ->
+            val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+            applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            dialog.dismiss()
+        }
+        alertDialog.show()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        cGranted = true
+        UsageStatsPermissionDialog()
     }
 
 
@@ -135,6 +152,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        var cGranted: Boolean = false
         private lateinit var appContx: Context
 
         fun notifyW() {

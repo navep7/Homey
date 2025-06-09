@@ -107,9 +107,11 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
         todaysDate()
-        greeting(context, remoteViews, timeOfDay)
         appUsageStats(timeOfDay)
-        getFavoriteContacts(context)
+        if(MainActivity.cGranted) {
+            greeting(context, remoteViews, timeOfDay)
+            getFavoriteContacts(context)
+        }
 
         if (SYNC_CLICKED == intent.action) {
             showAppsDialog(context)
