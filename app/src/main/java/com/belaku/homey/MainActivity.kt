@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.READ_CONTACTS),
+                arrayOf(Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE),
                 MY_PERMISSIONS_REQUEST_READ_CONTACTS
             )
 
