@@ -4,5 +4,6 @@ import android.graphics.drawable.Drawable
 
 class Contact(
     var name: String,
-    var image: Drawable?
+    var number: String,
+    var image: String
 )

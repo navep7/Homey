@@ -30,7 +30,6 @@ import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
@@ -47,9 +46,8 @@ class NewAppWidget : AppWidgetProvider() {
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
     val choosenApps: ArrayList<App> = ArrayList()
-    val favContacts: ArrayList<Contact> = ArrayList()
+    var favContacts: ArrayList<Contact> = ArrayList()
     lateinit var gpName: String
-    lateinit var gpPh: String
 
     override fun onUpdate(
         context: Context,
@@ -123,7 +121,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         appContx = context
 
-        MainActivity.makeToast("onReceive")
+        makeToast("onReceive")
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
@@ -175,19 +173,15 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         if (C1_CLICKED == intent.action) {
-            getFavoriteContacts(appContx)
-            makeToast("C1_CLICKED - " +  favContacts.get(0).name)
-            launchApp(readApps()[0])
+            dialPhoneNumber(favContacts.get(0).number)
         }
 
         if (C2_CLICKED == intent.action) {
-            Log.d("C2_CLICKED", favContacts.get(1).name)
-            launchApp(readApps()[1])
+            dialPhoneNumber(favContacts.get(1).number)
         }
 
         if (C3_CLICKED == intent.action) {
-            Log.d("C3_CLICKED", favContacts.get(2).name)
-            launchApp(readApps()[2])
+            dialPhoneNumber(favContacts.get(2).number)
         }
 
         if (C4_CLICKED == intent.action) {
@@ -196,16 +190,22 @@ class NewAppWidget : AppWidgetProvider() {
         }
     }
 
+    fun dialPhoneNumber(phoneNumber: String) {
+        makeToast("tel:" + phoneNumber)
+        val intent = Intent(Intent.ACTION_CALL)
+        intent.data = Uri.parse("tel:" + phoneNumber)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        appContx.startActivity(intent)
 
-
+    }
 
 
     @SuppressLint("Range", "UseCompatLoadingForDrawables")
-    fun getFavoriteContacts(context: Context): Map<*, *> {
+    fun getFavoriteContacts(context: Context) {
 
         //makeToast("MC - getFavoriteContacts")
 
-         val contactMap : MutableMap<String, String> = HashMap()
+        favContacts = ArrayList()
 
         val queryUri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
             .appendQueryParameter(ContactsContract.Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
@@ -215,6 +215,7 @@ class NewAppWidget : AppWidgetProvider() {
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.DISPLAY_NAME,
             ContactsContract.Contacts.STARRED,
+            ContactsContract.Contacts.HAS_PHONE_NUMBER
         )
 
         val selection = ContactsContract.Contacts.STARRED + "='1'"
@@ -224,46 +225,61 @@ class NewAppWidget : AppWidgetProvider() {
 
         while (cursor!!.moveToNext()) {
             val contactID = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
+            var phoneNumber: String = "7"
+
+            if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+
+                val phones: Cursor? = appContx.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactID,
+                    null,
+                    null
+                )
+                while (phones!!.moveToNext()) {
+                    phoneNumber =
+                        phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    phoneNumber = phoneNumber.filter { !it.isWhitespace() }
+                }
+
+
+
+
+            }
+            else makeToast("N")
 
             val intent = Intent(Intent.ACTION_VIEW)
             val uri = Uri.withAppendedPath(
                 ContactsContract.Contacts.CONTENT_URI, contactID.toString())
             intent.data = uri
-            val intentUriString = intent.toUri(0)
+            val cPhUri = intent.toUri(0)
 
-            val title = cursor.getString(
+            val cNme = cursor.getString(
                 cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
 
-            contactMap[title] = intentUriString
+            var c = Contact(cNme, phoneNumber, cPhUri)
+
+            favContacts.add(c)
         }
 
         cursor.close()
 
-        for ((key, value) in contactMap) {
-            println("Key: $key, Value: $value")
-        }
 
 
-        for ((key, value) in contactMap) {
 
-            Log.d("cLog", "cName: $key, cPic: $value")
+        for (i in 0 until favContacts.size) {
+
+            Log.d("cLog", "cName: ${favContacts.get(i).name}, cPic: ${favContacts.get(i).image}, cNum: ${favContacts.get(i).number} ")
 
             val input =
-                ContactsContract.Contacts.openContactPhotoInputStream(context.contentResolver, Uri.parse(value))
+                ContactsContract.Contacts.openContactPhotoInputStream(context.contentResolver, Uri.parse(favContacts.get(i).image))
             val bm = BitmapFactory.decodeStream(input)
             val d: Drawable = BitmapDrawable(bm)
 
 
 
-            favContacts.add(
-                Contact(
-                    key, d
-                )
-            )
-
             try {
-                Log.d("cLogSetPic", value)
-                addContactInWidget(Contact(key, d))
+                addContactInWidget(favContacts.get(i).name, favContacts.get(i).number, d)
             } catch (ex : Exception) {
                 Log.d("cLogPic", ex.message.toString())
             }
@@ -271,7 +287,6 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
-        return contactMap
     }
 
 
@@ -485,23 +500,24 @@ class NewAppWidget : AppWidgetProvider() {
         private lateinit var sharedPreferences: SharedPreferences
 
 
-        fun addContactInWidget(contact: Contact) {
+        fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
+            makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact1, contact.image?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c1, contact.name.substring(0, 1))
+                remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c1, strN.substring(0, 1))
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact2, contact.image?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c2, contact.name.substring(0, 1))
+                remoteViews.setImageViewBitmap(R.id.imgv_contact2, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c2, strN.substring(0, 1))
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact3, contact.image?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c3, contact.name.substring(0, 1))
+                remoteViews.setImageViewBitmap(R.id.imgv_contact3, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c3, strN.substring(0, 1))
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact4, contact.image?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c4, contact.name.substring(0, 1))
+                remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setTextViewText(R.id.tx_c4, strN.substring(0, 1))
                 conIndex = 3
             }
         }
