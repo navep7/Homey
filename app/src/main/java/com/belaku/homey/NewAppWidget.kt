@@ -2,6 +2,7 @@ package com.belaku.homey
 
 
 
+import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -29,16 +30,22 @@ import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
+import com.belaku.homey.MainActivity.Companion.makeToast
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
 import java.util.Locale
+import kotlin.properties.Delegates
 
 
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var currentHour by Delegates.notNull<Int>()
+    private var currentMin by Delegates.notNull<Int>()
     val choosenApps: ArrayList<App> = ArrayList()
     val favContacts: ArrayList<Contact> = ArrayList()
     lateinit var gpName: String
@@ -83,6 +90,25 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, APP4_CLICKED)
         )
 
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact1,
+            getPendingSelfIntent(context, C1_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact2,
+            getPendingSelfIntent(context, C2_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact3,
+            getPendingSelfIntent(context, C3_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact4,
+            getPendingSelfIntent(context, C4_CLICKED)
+        )
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
     }
 
@@ -97,9 +123,10 @@ class NewAppWidget : AppWidgetProvider() {
 
         appContx = context
 
-        MainActivity.makeToast("")
+        MainActivity.makeToast("onReceive")
 
-        val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
+        currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
+        currentMin = Calendar.getInstance()[Calendar.MINUTE]
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
             "Morning"
         } else if (currentHour >= 12 && currentHour < 17) {
@@ -111,7 +138,8 @@ class NewAppWidget : AppWidgetProvider() {
         }
         todaysDate()
         appUsageStats(timeOfDay)
-        if(MainActivity.cGranted) {
+        if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
+            == PackageManager.PERMISSION_GRANTED) {
             greeting(context, remoteViews, timeOfDay)
             getFavoriteContacts(context)
         }
@@ -145,6 +173,27 @@ class NewAppWidget : AppWidgetProvider() {
             Log.d("APP4_CLICKED", readApps()[3])
             launchApp(readApps()[3])
         }
+
+        if (C1_CLICKED == intent.action) {
+            getFavoriteContacts(appContx)
+            makeToast("C1_CLICKED - " +  favContacts.get(0).name)
+            launchApp(readApps()[0])
+        }
+
+        if (C2_CLICKED == intent.action) {
+            Log.d("C2_CLICKED", favContacts.get(1).name)
+            launchApp(readApps()[1])
+        }
+
+        if (C3_CLICKED == intent.action) {
+            Log.d("C3_CLICKED", favContacts.get(2).name)
+            launchApp(readApps()[2])
+        }
+
+        if (C4_CLICKED == intent.action) {
+            Log.d("C4_CLICKED", favContacts.get(3).name)
+            launchApp(readApps()[3])
+        }
     }
 
 
@@ -154,7 +203,9 @@ class NewAppWidget : AppWidgetProvider() {
     @SuppressLint("Range", "UseCompatLoadingForDrawables")
     fun getFavoriteContacts(context: Context): Map<*, *> {
 
-         var contactMap : MutableMap<String, String> = HashMap()
+        //makeToast("MC - getFavoriteContacts")
+
+         val contactMap : MutableMap<String, String> = HashMap()
 
         val queryUri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
             .appendQueryParameter(ContactsContract.Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
@@ -163,16 +214,16 @@ class NewAppWidget : AppWidgetProvider() {
         val projection = arrayOf(
             ContactsContract.Contacts._ID,
             ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.Contacts.STARRED
+            ContactsContract.Contacts.STARRED,
         )
 
         val selection = ContactsContract.Contacts.STARRED + "='1'"
 
-        val cursor = context.getContentResolver().query(queryUri,
+        val cursor = context.contentResolver.query(queryUri,
             projection, selection, null, null)
 
         while (cursor!!.moveToNext()) {
-            val contactID = cursor!!.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
+            val contactID = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
 
             val intent = Intent(Intent.ACTION_VIEW)
             val uri = Uri.withAppendedPath(
@@ -186,12 +237,7 @@ class NewAppWidget : AppWidgetProvider() {
             contactMap[title] = intentUriString
         }
 
-        cursor!!.close()
-
-        val myMap: MutableMap<String, Int> = HashMap()
-        myMap["apple"] = 1
-        myMap["banana"] = 2
-        myMap["cherry"] = 3
+        cursor.close()
 
         for ((key, value) in contactMap) {
             println("Key: $key, Value: $value")
@@ -238,7 +284,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
 
-        remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
+        remoteViews.setTextViewText(R.id.date_text_view, formattedDate + " - " + currentHour + " : " + currentMin)
     }
 
     private fun launchApp(pkgName: String) {
@@ -330,6 +376,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         return apps
     }
+
 
     private fun getAppIconFromPkg(packageName: String?): Drawable? {
         try {
@@ -532,5 +579,10 @@ class NewAppWidget : AppWidgetProvider() {
         private const val APP2_CLICKED = "App2Clicked"
         private const val APP3_CLICKED = "App3Clicked"
         private const val APP4_CLICKED = "App4Clicked"
+
+        private const val C1_CLICKED = "C1Clicked"
+        private const val C2_CLICKED = "C2Clicked"
+        private const val C3_CLICKED = "C3Clicked"
+        private const val C4_CLICKED = "C4Clicked"
     }
 }
