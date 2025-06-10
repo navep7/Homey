@@ -10,8 +10,10 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -153,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         var cGranted: Boolean = false
-        private lateinit var appContx: Context
+        lateinit var appContx: Context
 
         fun notifyW() {
 
@@ -170,6 +172,11 @@ class MainActivity : AppCompatActivity() {
                 // TODO: handle exception
             }
 
+        }
+
+        fun makeToast(s: String) {
+            Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
+            Log.d("makeToastinG", s)
         }
     }
 }

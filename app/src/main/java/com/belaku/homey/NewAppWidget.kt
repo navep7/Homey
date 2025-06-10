@@ -29,6 +29,7 @@ import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import com.belaku.homey.MainActivity.Companion.appContx
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -95,6 +96,8 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         appContx = context
+
+        MainActivity.makeToast("")
 
         val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
@@ -523,7 +526,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         private var appIndex: Int = 0
         private var conIndex: Int = 0
-        private lateinit var appContx: Context
         private lateinit var remoteViews: RemoteViews
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
