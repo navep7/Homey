@@ -516,19 +516,19 @@ class NewAppWidget : AppWidgetProvider() {
             makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c1, strN.substring(0, 1))
+                remoteViews.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact2, drawable?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c2, strN.substring(0, 1))
+                remoteViews.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact3, drawable?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c3, strN.substring(0, 1))
+                remoteViews.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it) })
-                remoteViews.setTextViewText(R.id.tx_c4, strN.substring(0, 1))
+                remoteViews.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
         }
