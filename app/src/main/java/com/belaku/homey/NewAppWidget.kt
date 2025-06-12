@@ -88,25 +88,7 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, APP4_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact1,
-            getPendingSelfIntent(context, C1_CLICKED)
-        )
 
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact2,
-            getPendingSelfIntent(context, C2_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact3,
-            getPendingSelfIntent(context, C3_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact4,
-            getPendingSelfIntent(context, C4_CLICKED)
-        )
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
     }
 
@@ -172,22 +154,7 @@ class NewAppWidget : AppWidgetProvider() {
             launchApp(readApps()[3])
         }
 
-        if (C1_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(0).number)
-        }
 
-        if (C2_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(1).number)
-        }
-
-        if (C3_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(2).number)
-        }
-
-        if (C4_CLICKED == intent.action) {
-            Log.d("C4_CLICKED", favContacts.get(3).name)
-            launchApp(readApps()[3])
-        }
     }
 
     fun dialPhoneNumber(phoneNumber: String) {
@@ -276,21 +243,35 @@ class NewAppWidget : AppWidgetProvider() {
             val bm = BitmapFactory.decodeStream(input)
             val d: Drawable = BitmapDrawable(bm)
 
-
-
-            try {
-                addContactInWidget(favContacts.get(i).name, favContacts.get(i).number, d)
-            } catch (ex : Exception) {
-                Log.d("cLogPic", ex.message.toString())
-            }
-
         }
+
+        addContactsInWidget(favContacts)
 
 
     }
 
+    private fun addContactsInWidget(favContacts: java.util.ArrayList<Contact>) {
+
+        makeToast("addContactsInWidget" + favContacts.get(0).name + " ... " + favContacts.get(favContacts.size - 1).name)
+
+        for (i in 0 until favContacts.size) {
+            val contactEntryLayout =
+                RemoteViews(appContx.getPackageName(), R.layout.c_entry)
+
+            contactEntryLayout.setTextViewText(R.id.tx_c, favContacts.get(i).name)
+
+            val input =
+                ContactsContract.Contacts.openContactPhotoInputStream(appContx.contentResolver, Uri.parse(favContacts.get(i).image))
+            val bm = BitmapFactory.decodeStream(input)
+            val d: Drawable = BitmapDrawable(bm)
+            contactEntryLayout.setImageViewBitmap(R.id.img_c, drawableToBitmap(d))
 
 
+            remoteViews.addView(R.id.ll_contacts, contactEntryLayout)
+
+        }
+
+    }
 
 
     private fun todaysDate() {
@@ -299,7 +280,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
 
-        remoteViews.setTextViewText(R.id.date_text_view, formattedDate + " - " + currentHour + " : " + currentMin)
+        remoteViews.setTextViewText(R.id.date_text_view, formattedDate )
     }
 
     private fun launchApp(pkgName: String) {
@@ -500,7 +481,7 @@ class NewAppWidget : AppWidgetProvider() {
         private lateinit var sharedPreferences: SharedPreferences
 
 
-        fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
+    /*    fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
             makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
@@ -518,9 +499,9 @@ class NewAppWidget : AppWidgetProvider() {
             } else if (conIndex == 3) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it) })
                 remoteViews.setTextViewText(R.id.tx_c4, strN.substring(0, 1))
-                conIndex = 3
+                conIndex = 4
             }
-        }
+        }*/
 
         fun addAppInWidget(app: App) {
 
