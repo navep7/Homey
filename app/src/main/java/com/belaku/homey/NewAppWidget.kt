@@ -27,6 +27,7 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
 import android.provider.ContactsContract
+import android.provider.ContactsContract.Contacts
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -88,6 +89,26 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, APP4_CLICKED)
         )
 
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact1,
+            getPendingSelfIntent(context, C1_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact2,
+            getPendingSelfIntent(context, C2_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact3,
+            getPendingSelfIntent(context, C3_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact4,
+            getPendingSelfIntent(context, C4_CLICKED)
+        )
+
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
     }
@@ -124,6 +145,8 @@ class NewAppWidget : AppWidgetProvider() {
             getFavoriteContacts(context)
         }
 
+        makeToast("IAtoS - " + intent.action.toString())
+
         if (SYNC_CLICKED == intent.action) {
             showAppsDialog(context)
         }
@@ -152,6 +175,19 @@ class NewAppWidget : AppWidgetProvider() {
         if (APP4_CLICKED == intent.action) {
             Log.d("APP4_CLICKED", readApps()[3])
             launchApp(readApps()[3])
+        }
+
+        if (C1_CLICKED == intent.action) {
+            dialPhoneNumber(favContacts.get(0).number)
+        }
+        if (C2_CLICKED == intent.action) {
+            dialPhoneNumber(favContacts.get(1).number)
+        }
+        if (C3_CLICKED == intent.action) {
+            dialPhoneNumber(favContacts.get(2).number)
+        }
+        if (C4_CLICKED == intent.action) {
+            dialPhoneNumber(favContacts.get(3).number)
         }
 
 
@@ -243,9 +279,10 @@ class NewAppWidget : AppWidgetProvider() {
             val bm = BitmapFactory.decodeStream(input)
             val d: Drawable = BitmapDrawable(bm)
 
+            addContactInWidget(favContacts.get(i).name, favContacts.get(i).number, d)
         }
 
-        addContactsInWidget(favContacts)
+    //    addContactsInWidget(favContacts)
 
 
     }
@@ -255,20 +292,13 @@ class NewAppWidget : AppWidgetProvider() {
         makeToast("addContactsInWidget" + favContacts.get(0).name + " ... " + favContacts.get(favContacts.size - 1).name)
 
         for (i in 0 until favContacts.size) {
-            val contactEntryLayout =
-                RemoteViews(appContx.getPackageName(), R.layout.c_entry)
-
-            contactEntryLayout.setTextViewText(R.id.tx_c, favContacts.get(i).name)
-
-            val input =
-                ContactsContract.Contacts.openContactPhotoInputStream(appContx.contentResolver, Uri.parse(favContacts.get(i).image))
-            val bm = BitmapFactory.decodeStream(input)
-            val d: Drawable = BitmapDrawable(bm)
-            contactEntryLayout.setImageViewBitmap(R.id.img_c, drawableToBitmap(d))
+            val appWidgetManager = AppWidgetManager.getInstance(appContx)
+            val thisWidget = ComponentName(appContx, NewAppWidget::class.java)
+            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
 
 
-            remoteViews.addView(R.id.ll_contacts, contactEntryLayout)
 
+            appWidgetManager.updateAppWidget(thisWidget, views)
         }
 
     }
@@ -481,7 +511,7 @@ class NewAppWidget : AppWidgetProvider() {
         private lateinit var sharedPreferences: SharedPreferences
 
 
-    /*    fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
+        fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
             makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
@@ -501,7 +531,7 @@ class NewAppWidget : AppWidgetProvider() {
                 remoteViews.setTextViewText(R.id.tx_c4, strN.substring(0, 1))
                 conIndex = 4
             }
-        }*/
+        }
 
         fun addAppInWidget(app: App) {
 
