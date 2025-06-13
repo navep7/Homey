@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@drawable/gradient_glass"
     android:layout_width="match_parent"
@@ -8,6 +8,8 @@
 
     <TextView
         android:id="@+id/time_text_view"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -16,6 +18,8 @@
 
     <android.widget.TextClock
         android:id="@+id/clock"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/time_text_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -27,6 +31,8 @@
 
     <TextView
         android:id="@+id/date_text_view"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -35,6 +41,7 @@
 
     <LinearLayout
         android:id="@+id/ll_apps"
+        android:layout_below="@+id/date_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
@@ -74,6 +81,7 @@
 
     <LinearLayout
         android:id="@+id/ll_contacts"
+        android:layout_below="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -176,4 +184,4 @@
     </LinearLayout>
 
 
-</LinearLayout>
+</RelativeLayout>
