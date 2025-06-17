@@ -17,6 +17,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -26,14 +27,16 @@ import android.graphics.drawable.Drawable
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
+import android.os.Build
 import android.provider.ContactsContract
-import android.provider.ContactsContract.Contacts
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
+import java.security.AccessController.getContext
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -114,6 +117,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
@@ -123,6 +127,8 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         appContx = context
+
+        Colorify()
 
         makeToast("onReceive")
 
@@ -192,6 +198,51 @@ class NewAppWidget : AppWidgetProvider() {
 
 
     }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun Colorify() {
+
+        val nightModeFlags: Int =
+            appContx.getResources().getConfiguration().uiMode and
+                    Configuration.UI_MODE_NIGHT_MASK
+        when (nightModeFlags) {
+            Configuration.UI_MODE_NIGHT_YES -> NightMode()
+            Configuration.UI_MODE_NIGHT_NO -> LightMode()
+            Configuration.UI_MODE_NIGHT_UNDEFINED -> NightMode()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun LightMode() {
+        makeToast("Light")
+        remoteViews.setInt(R.id.rl_widget_layout, "setBackgroundColor", appContx.getColor(R.color.dark_bg))
+        remoteViews.setTextColor(R.id.time_text_view, appContx.getColor(R.color.light_blue_200))
+        remoteViews.setTextColor(R.id.date_text_view, appContx.getColor(R.color.light_blue_200))
+
+        remoteViews.setTextColor(R.id.tx_c1, appContx.getColor(R.color.light_blue_200))
+        remoteViews.setTextColor(R.id.tx_c2, appContx.getColor(R.color.light_blue_200))
+        remoteViews.setTextColor(R.id.tx_c3, appContx.getColor(R.color.light_blue_200))
+        remoteViews.setTextColor(R.id.tx_c4, appContx.getColor(R.color.light_blue_200))
+
+        remoteViews.setTextColor(R.id.clock, appContx.getColor(R.color.white))
+    }
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    private fun NightMode() {
+        makeToast("Dark")
+        remoteViews.setInt(R.id.rl_widget_layout, "setBackgroundColor", appContx.getColor(R.color.light_bg))
+        remoteViews.setTextColor(R.id.time_text_view, appContx.getColor(R.color.light_blue_900))
+        remoteViews.setTextColor(R.id.date_text_view, appContx.getColor(R.color.light_blue_900))
+
+        remoteViews.setTextColor(R.id.tx_c1, appContx.getColor(R.color.light_blue_900))
+        remoteViews.setTextColor(R.id.tx_c2, appContx.getColor(R.color.light_blue_900))
+        remoteViews.setTextColor(R.id.tx_c3, appContx.getColor(R.color.light_blue_900))
+        remoteViews.setTextColor(R.id.tx_c4, appContx.getColor(R.color.light_blue_900))
+
+        remoteViews.setTextColor(R.id.clock, appContx.getColor(R.color.black))
+
+    }
+
 
     fun dialPhoneNumber(phoneNumber: String) {
         makeToast("tel:" + phoneNumber)
@@ -516,7 +567,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
-            makeToast("mC - " + "addContactInWidget")
+       //     makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
                 remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it) })
                 remoteViews.setTextViewText(R.id.tx_c1, strN)
