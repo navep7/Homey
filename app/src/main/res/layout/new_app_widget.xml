@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rl_widget_layout"
     android:background="@drawable/gradient_glass"
+    android:theme="@style/Theme.Material3.DynamicColors.DayNight"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="?attr/colorPrimary"
         android:textSize="35sp" />
 
     <android.widget.TextClock
@@ -26,7 +26,7 @@
         android:layout_gravity="center"
         android:format12Hour="k:mm:ss"
         android:format24Hour="k:mm:ss"
-        android:textColor="@android:color/holo_red_light"
+        android:textColor="?attr/colorPrimaryContainer"
         android:textSize="50sp"
         android:textStyle="bold" />
 
@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="?attr/colorPrimary"
         android:textSize="35sp" />
 
     <LinearLayout
@@ -97,6 +97,7 @@
 
             <TextView
                 android:id="@+id/tx_c1"
+                android:textColor="?attr/colorOnPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -120,6 +121,7 @@
 
             <TextView
                 android:id="@+id/tx_c2"
+                android:textColor="?attr/colorOnPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -143,6 +145,7 @@
 
             <TextView
                 android:id="@+id/tx_c3"
+                android:textColor="?attr/colorOnPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -166,6 +169,7 @@
 
             <TextView
                 android:id="@+id/tx_c4"
+                android:textColor="?attr/colorOnPrimary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"

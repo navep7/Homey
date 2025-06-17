@@ -30,8 +30,10 @@ import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
+import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
@@ -215,32 +217,11 @@ class NewAppWidget : AppWidgetProvider() {
     @RequiresApi(Build.VERSION_CODES.S)
     private fun LightMode() {
         makeToast("Light")
-        remoteViews.setInt(R.id.rl_widget_layout, "setBackgroundColor", appContx.getColor(R.color.dark_bg))
-        remoteViews.setTextColor(R.id.time_text_view, appContx.getColor(R.color.light_blue_200))
-        remoteViews.setTextColor(R.id.date_text_view, appContx.getColor(R.color.light_blue_200))
-
-        remoteViews.setTextColor(R.id.tx_c1, appContx.getColor(R.color.light_blue_200))
-        remoteViews.setTextColor(R.id.tx_c2, appContx.getColor(R.color.light_blue_200))
-        remoteViews.setTextColor(R.id.tx_c3, appContx.getColor(R.color.light_blue_200))
-        remoteViews.setTextColor(R.id.tx_c4, appContx.getColor(R.color.light_blue_200))
-
-        remoteViews.setTextColor(R.id.clock, appContx.getColor(R.color.white))
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
     private fun NightMode() {
         makeToast("Dark")
-        remoteViews.setInt(R.id.rl_widget_layout, "setBackgroundColor", appContx.getColor(R.color.light_bg))
-        remoteViews.setTextColor(R.id.time_text_view, appContx.getColor(R.color.light_blue_900))
-        remoteViews.setTextColor(R.id.date_text_view, appContx.getColor(R.color.light_blue_900))
-
-        remoteViews.setTextColor(R.id.tx_c1, appContx.getColor(R.color.light_blue_900))
-        remoteViews.setTextColor(R.id.tx_c2, appContx.getColor(R.color.light_blue_900))
-        remoteViews.setTextColor(R.id.tx_c3, appContx.getColor(R.color.light_blue_900))
-        remoteViews.setTextColor(R.id.tx_c4, appContx.getColor(R.color.light_blue_900))
-
-        remoteViews.setTextColor(R.id.clock, appContx.getColor(R.color.black))
-
     }
 
 

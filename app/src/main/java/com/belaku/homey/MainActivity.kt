@@ -26,6 +26,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.belaku.homey.databinding.ActivityMainBinding
+import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
 import java.util.Date
 
@@ -47,6 +48,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         appContx = applicationContext
+
+        DynamicColors.applyToActivitiesIfAvailable(application)
 
         BRo()
 
@@ -197,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun makeToast(s: String) {
-            Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
             Log.d("makeToastinG", s)
         }
     }

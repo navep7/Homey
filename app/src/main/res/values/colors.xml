@@ -2,13 +2,4 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="light_blue_50">#FFE1F5FE</color>
-    <color name="light_blue_200">#FF81D4FA</color>
-    <color name="light_blue_600">#FF039BE5</color>
-    <color name="light_blue_900">#FF01579B</color>
-    <color name="holo_green_dark">#ff669900</color>
-    <color name="holo_green_light">#ff99cc00</color>
-    <color name="cardview_dark_background">#FF424242</color>
-    <color name="dark_bg">#50000000</color>
-    <color name="light_bg">#50FFFFFF</color>
 </resources>
