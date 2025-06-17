@@ -344,7 +344,7 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         val queryUsageStats = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_DAILY,
+            UsageStatsManager.INTERVAL_BEST,
             beginCal.timeInMillis,
             endCal.timeInMillis
         )
@@ -355,8 +355,11 @@ class NewAppWidget : AppWidgetProvider() {
 
         var appNames = HashSet<String>()
         for (i in 0 until queryUsageStats.size) {
+
             var appName = getAppNameFromPkg(queryUsageStats.get(i).packageName)
             var appIcon = getAppIconFromPkg(queryUsageStats.get(i).packageName)
+
+            Log.d("queryUsageStats", "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground)
 
             if (queryUsageStats.get(i).totalTimeInForeground > 0)
                 if (!appName.contains("Launcher"))

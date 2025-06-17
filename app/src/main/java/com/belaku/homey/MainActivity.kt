@@ -2,6 +2,9 @@ package com.belaku.homey
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.AppOpsManager
+import android.app.AppOpsManager.MODE_ALLOWED
+import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -9,6 +12,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Process
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
@@ -116,7 +120,25 @@ class MainActivity : AppCompatActivity() {
             applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             dialog.dismiss()
         }
-        alertDialog.show()
+
+        if(!getGrantStatus()) {
+            alertDialog.show()
+        }
+
+    }
+
+    private fun getGrantStatus(): Boolean {
+        val appOps = applicationContext.getSystemService(APP_OPS_SERVICE) as AppOpsManager
+        val mode = appOps.checkOpNoThrow(
+            OPSTR_GET_USAGE_STATS,
+            Process.myUid(),
+            applicationContext.packageName
+        )
+        return if (mode == AppOpsManager.MODE_DEFAULT) {
+            applicationContext.checkCallingOrSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED
+        } else {
+            mode == MODE_ALLOWED
+        }
     }
 
     override fun onRequestPermissionsResult(
