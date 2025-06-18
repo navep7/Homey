@@ -30,15 +30,12 @@ import android.net.Uri
 import android.os.Build
 import android.provider.ContactsContract
 import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
-import androidx.annotation.AttrRes
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
-import java.security.AccessController.getContext
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -69,10 +66,10 @@ class NewAppWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
-        remoteViews.setOnClickPendingIntent(
+      /*  remoteViews.setOnClickPendingIntent(
             R.id.imgv_add,
             getPendingSelfIntent(context, SYNC_CLICKED)
-        )
+        )*/
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
@@ -353,6 +350,8 @@ class NewAppWidget : AppWidgetProvider() {
 
     private fun appUsageStats(timeOfDay: String) {
 
+        choosenApps.clear()
+
         var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
         val usageStatsManager =
@@ -382,7 +381,7 @@ class NewAppWidget : AppWidgetProvider() {
         )
         println("results for " + beginCal.time.toGMTString() + " - " + endCal.time.toGMTString())
         println("QUS - " + queryUsageStats.size)
-        sortAndFindFour(queryUsageStats)
+        sortApps(queryUsageStats)
 
 
         var appNames = HashSet<String>()
@@ -463,7 +462,7 @@ class NewAppWidget : AppWidgetProvider() {
         return applicationName
     }
 
-    private fun sortAndFindFour(queryUsageStats: List<UsageStats>) {
+    private fun sortApps(queryUsageStats: List<UsageStats>) {
 
         Collections.sort<UsageStats>(
             queryUsageStats
@@ -570,6 +569,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addAppInWidget(app: App) {
 
+            makeToast("addAppInWidget!")
             Apps.add(app)
 
             val appWidgetManager = AppWidgetManager.getInstance(appContx)
@@ -593,15 +593,16 @@ class NewAppWidget : AppWidgetProvider() {
                 views.setImageViewBitmap(R.id.imgv_add4, app.image?.let { drawableToBitmap(it) })
                 appIndex = 4
                 views.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
+            } else if (appIndex == 4) {
+                views.setImageViewBitmap(R.id.imgv_add5, app.image?.let { drawableToBitmap(it) })
+                appIndex = 4
+                views.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
             }
 
 
             appWidgetManager.updateAppWidget(thisWidget, views)
         }
 
-        private fun saveApp(app: App) {
-
-        }
 
         fun drawableToBitmap(drawable: Drawable): Bitmap {
             var bitmap: Bitmap? = null
