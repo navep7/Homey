@@ -56,10 +56,6 @@ class MainActivity : AppCompatActivity() {
         checkP()
 
 
-
-  //      NewAppWidget.views.setTextViewText(R.id.appwidget_text, "Qwerty")
-    //    NewAppWidget.updateW("1,2,3...")
-
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -68,12 +64,8 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
-
-       //     notifyW()
-         //   NewAppWidget.updateW("1,2,3...")
         }
 
-     //   NewAppWidget.
     }
 
     private fun BRo() {

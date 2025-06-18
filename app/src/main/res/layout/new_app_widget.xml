@@ -50,32 +50,32 @@
 
         <ImageView
             android:id="@+id/imgv_add1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add2"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add3"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add4"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add5"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:layout_margin="5dp" />
 
     </LinearLayout>
@@ -109,8 +109,8 @@
             <ImageView
                 android:id="@+id/imgv_contact1"
                 android:scaleType="fitXY"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="55dp"
+                android:layout_height="55dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -133,8 +133,8 @@
             <ImageView
                 android:id="@+id/imgv_contact2"
                 android:scaleType="fitXY"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="55dp"
+                android:layout_height="55dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -157,8 +157,8 @@
             <ImageView
                 android:id="@+id/imgv_contact3"
                 android:scaleType="fitXY"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="55dp"
+                android:layout_height="55dp" />
         </LinearLayout>
 
         <LinearLayout
@@ -181,8 +181,9 @@
             <ImageView
                 android:id="@+id/imgv_contact4"
                 android:scaleType="fitXY"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="55dp"
+                android:layout_height="55dp" />
+
         </LinearLayout>
 
 

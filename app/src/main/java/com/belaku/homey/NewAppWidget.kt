@@ -22,6 +22,10 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.icu.text.SimpleDateFormat
@@ -66,10 +70,16 @@ class NewAppWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
-      /*  remoteViews.setOnClickPendingIntent(
-            R.id.imgv_add,
-            getPendingSelfIntent(context, SYNC_CLICKED)
-        )*/
+        appContx = context
+
+        todaysDate()
+        appUsageStats("Evening")
+        if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
+            == PackageManager.PERMISSION_GRANTED) {
+            greeting(context, remoteViews, "Evening")
+            getFavoriteContacts(context)
+        }
+
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
@@ -127,8 +137,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         appContx = context
 
-        Colorify()
-
         makeToast("onReceive")
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
@@ -142,6 +150,7 @@ class NewAppWidget : AppWidgetProvider() {
         } else {
             "Night"
         }
+
         todaysDate()
         appUsageStats(timeOfDay)
         if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
@@ -196,29 +205,6 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun Colorify() {
-
-        val nightModeFlags: Int =
-            appContx.getResources().getConfiguration().uiMode and
-                    Configuration.UI_MODE_NIGHT_MASK
-        when (nightModeFlags) {
-            Configuration.UI_MODE_NIGHT_YES -> NightMode()
-            Configuration.UI_MODE_NIGHT_NO -> LightMode()
-            Configuration.UI_MODE_NIGHT_UNDEFINED -> NightMode()
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun LightMode() {
-        makeToast("Light")
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun NightMode() {
-        makeToast("Dark")
     }
 
 
@@ -549,22 +535,35 @@ class NewAppWidget : AppWidgetProvider() {
 
        //     makeToast("mC - " + "addContactInWidget")
             if (conIndex == 0) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact2, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact2, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact3, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact3, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
+        }
+
+        private fun Bitmap.getCircledBitmap(): Bitmap {
+            val output = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(output)
+            val paint = Paint()
+            val rect = Rect(0, 0, this.width, this.height)
+            paint.isAntiAlias = true
+            canvas.drawARGB(0, 0, 0, 0)
+            canvas.drawCircle(this.width / 2f, this.height / 2f, this.width / 2f, paint)
+            paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+            canvas.drawBitmap(this, rect, rect, paint)
+            return output
         }
 
         fun addAppInWidget(app: App) {
