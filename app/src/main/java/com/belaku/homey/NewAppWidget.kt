@@ -393,7 +393,7 @@ class NewAppWidget : AppWidgetProvider() {
 
             Log.d("queryUsageStats", "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground)
 
-            if (queryUsageStats.get(i).totalTimeInForeground > 0)
+        //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
                 if (!appName.contains("Launcher"))
                     if (appNames.add(appName))
                         if (choosenApps.size < 5) {

@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="?attr/colorSecondaryContainer"
         android:textSize="35sp" />
 
     <android.widget.TextClock
@@ -37,7 +37,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="?attr/colorTertiaryContainer"
         android:textSize="35sp" />
 
     <LinearLayout
@@ -97,7 +97,7 @@
 
             <TextView
                 android:id="@+id/tx_c1"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="?attr/colorPrimaryContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -121,7 +121,7 @@
 
             <TextView
                 android:id="@+id/tx_c2"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="?attr/colorSecondaryContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -145,7 +145,7 @@
 
             <TextView
                 android:id="@+id/tx_c3"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="?attr/colorTertiaryContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
@@ -169,7 +169,7 @@
 
             <TextView
                 android:id="@+id/tx_c4"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="?attr/colorTertiary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="25sp"
