@@ -17,7 +17,6 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
-import android.content.res.Configuration
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -70,16 +69,10 @@ class NewAppWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
-        appContx = context
-
-        todaysDate()
-        appUsageStats("Evening")
-        if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
-            == PackageManager.PERMISSION_GRANTED) {
-            greeting(context, remoteViews, "Evening")
-            getFavoriteContacts(context)
-        }
-
+        remoteViews.setOnClickPendingIntent(
+            R.id.rl_widget_layout,
+            getPendingSelfIntent(context, SYNC_CLICKED)
+        )
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
@@ -136,11 +129,13 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         appContx = context
+        appIndex = 0
+        conIndex = 0
 
-        makeToast("onReceive")
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
+
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
             "Morning"
         } else if (currentHour >= 12 && currentHour < 17) {
@@ -150,6 +145,10 @@ class NewAppWidget : AppWidgetProvider() {
         } else {
             "Night"
         }
+
+        makeToast("onReceive")
+
+    //    remoteViews.setTextViewText(R.id.date_text_view, currentHour.toString() + ":" + currentMin.toString())
 
         todaysDate()
         appUsageStats(timeOfDay)
@@ -161,9 +160,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         makeToast("IAtoS - " + intent.action.toString())
 
-        if (SYNC_CLICKED == intent.action) {
-            showAppsDialog(context)
-        }
+        if (SYNC_CLICKED == intent.action)
+            refresh(context)
 
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val watchWidget = ComponentName(context, NewAppWidget::class.java)
@@ -207,6 +205,19 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
+    private fun refresh(context: Context) {
+        makeToast("refresh")
+        val intent = Intent(
+            context,
+            NewAppWidget::class.java
+        )
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+        val appWidgetIds = AppWidgetManager.getInstance(context)
+            .getAppWidgetIds(ComponentName(context, NewAppWidget::class.java))
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
+        context.sendBroadcast(intent)
+    }
+
 
     fun dialPhoneNumber(phoneNumber: String) {
         makeToast("tel:" + phoneNumber)
@@ -221,7 +232,7 @@ class NewAppWidget : AppWidgetProvider() {
     @SuppressLint("Range", "UseCompatLoadingForDrawables")
     fun getFavoriteContacts(context: Context) {
 
-        //makeToast("MC - getFavoriteContacts")
+        makeToast("MC - getFavoriteContacts")
 
         favContacts = ArrayList()
 
@@ -534,20 +545,24 @@ class NewAppWidget : AppWidgetProvider() {
         fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
        //     makeToast("mC - " + "addContactInWidget")
+            var nullD: Drawable
+            if (drawable == null)
+                nullD = appContx.getDrawable(R.drawable.face_holder)!!
+            else nullD = drawable
             if (conIndex == 0) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact1, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact1, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact2, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact2, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact3, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact3, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact4, drawable?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(R.id.imgv_contact4, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
@@ -574,32 +589,31 @@ class NewAppWidget : AppWidgetProvider() {
             val appWidgetManager = AppWidgetManager.getInstance(appContx)
             val thisWidget = ComponentName(appContx, NewAppWidget::class.java)
 
-            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
 
             if (appIndex == 0) {
-                views.setImageViewBitmap(R.id.imgv_add1, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_add1, app.image?.let { drawableToBitmap(it) })
                 appIndex = 1
-                views.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
             } else if (appIndex == 1) {
-                views.setImageViewBitmap(R.id.imgv_add2, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_add2, app.image?.let { drawableToBitmap(it) })
                 appIndex = 2
-                views.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
             } else if (appIndex == 2) {
-                views.setImageViewBitmap(R.id.imgv_add3, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_add3, app.image?.let { drawableToBitmap(it) })
                 appIndex = 3
-                views.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
             } else if (appIndex == 3) {
-                views.setImageViewBitmap(R.id.imgv_add4, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_add4, app.image?.let { drawableToBitmap(it) })
                 appIndex = 4
-                views.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
             } else if (appIndex == 4) {
-                views.setImageViewBitmap(R.id.imgv_add5, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(R.id.imgv_add5, app.image?.let { drawableToBitmap(it) })
                 appIndex = 4
-                views.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
+                remoteViews.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
             }
 
 
-            appWidgetManager.updateAppWidget(thisWidget, views)
+            appWidgetManager.updateAppWidget(thisWidget, remoteViews)
         }
 
 
