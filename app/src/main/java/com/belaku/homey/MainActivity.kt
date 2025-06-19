@@ -5,12 +5,15 @@ import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
@@ -25,9 +28,18 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.android.volley.AuthFailureError
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
+import java.net.URL
 import java.util.Date
 
 
@@ -64,8 +76,89 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
+            fetchWallpaper()
         }
 
+    }
+
+    fun fetchWallpaper() {
+        makeToast("fetchWallpaper")
+        val url = "https://api.pexels.com/v1/curated/?page="+1.toString()+"&per_page=80";
+        val request: StringRequest = object : StringRequest(
+
+            com.android.volley.Request.Method.GET, url,
+            object : Response.Listener<String?> {
+                private lateinit var imageBitmap: Bitmap
+
+                override fun onResponse(response: String?) {
+
+
+                    try {
+                        val jsonObject = JSONObject(response)
+
+                        val jsonArray = jsonObject.getJSONArray("photos")
+
+                        val length = jsonArray.length()
+
+                        makeToast("Wlength7 - " + length)
+                        for (i in 0 until length) {
+                            val `object` = jsonArray.getJSONObject(i)
+
+                            val id = `object`.getInt("id")
+
+                            val objectImages = `object`.getJSONObject("src")
+
+                            val orignalUrl = objectImages.getString("original")
+
+                            makeToast(orignalUrl)
+
+
+                            try {
+                                val url = URL(orignalUrl)
+                                val thread = Thread {
+                                    try {
+                                        // Your code goes here
+                                        imageBitmap = BitmapFactory.decodeStream(
+                                            url.openConnection().getInputStream())
+                                        wallBitmaps.toMutableList().add(imageBitmap)
+
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        makeToast("EXCE1 - " + e.toString())
+
+                                    }
+                                }
+
+                                thread.start()
+
+
+                            } catch (e: IOException) {
+                                println(e)
+                                makeToast("EXCE2 - " + e.toString())
+                            }
+                        }
+
+                        makeToast("Wlength7 - allLoaded" + length)
+
+                    } catch (e: JSONException) {
+                    }
+                }
+            }, object : Response.ErrorListener {
+                override fun onErrorResponse(error: VolleyError?) {
+
+                }
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: MutableMap<String, String> = HashMap()
+                params["Authorization"] = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
+
+                return params
+            }
+        }
+
+        val requestQueue = Volley.newRequestQueue(appContx)
+        requestQueue.add(request)
     }
 
     private fun BRo() {
@@ -171,6 +264,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
+        var wallBitmaps: List<Bitmap> = ArrayList<Bitmap>().toMutableList()
         var cGranted: Boolean = false
         lateinit var appContx: Context
 

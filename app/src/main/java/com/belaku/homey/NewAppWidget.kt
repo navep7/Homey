@@ -6,6 +6,7 @@ import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.WallpaperManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
@@ -43,12 +44,14 @@ import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
 import java.util.Locale
+import java.util.Random
 import kotlin.properties.Delegates
 
 
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var pgNo: Int = 1
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
     val choosenApps: ArrayList<App> = ArrayList()
@@ -69,6 +72,10 @@ class NewAppWidget : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
+        remoteViews.setOnClickPendingIntent(
+            R.id.refresh,
+            getPendingSelfIntent(context, WALL_CHANGE)
+        )
         remoteViews.setOnClickPendingIntent(
             R.id.rl_widget_layout,
             getPendingSelfIntent(context, SYNC_CLICKED)
@@ -119,7 +126,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.S)
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
@@ -163,6 +170,9 @@ class NewAppWidget : AppWidgetProvider() {
         if (SYNC_CLICKED == intent.action)
             refresh(context)
 
+        if (WALL_CHANGE == intent.action)
+            changeWall(context)
+
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
@@ -204,6 +214,35 @@ class NewAppWidget : AppWidgetProvider() {
 
 
     }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun changeWall(context: Context) {
+        //Pexels API - 563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80
+        // https://api.pexels.com/v1/search?query=nature&per_page=1"
+
+
+    //    var cliet : OkHttpClient = OkHttpClient()
+        val ApiKey = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
+        val PEXELS_URL = "https://api.pexels.com/v1/search?query=nature&per_page=1";
+
+    //    setWallpaper()
+
+
+
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+//        wallpaperManager.setBitmap(wD?.let { drawableToBitmap(it) })
+    }
+
+    private fun setWallpaper() {
+        val wallpaperManager = WallpaperManager.getInstance(appContx)
+        val rn: Random = Random()
+        val answer: Int = rn.nextInt(MainActivity.wallBitmaps.size - 1) + 1
+        wallpaperManager.setBitmap(MainActivity.wallBitmaps.get(answer))
+
+    }
+
 
     private fun refresh(context: Context) {
         makeToast("refresh")
@@ -435,6 +474,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
+
     private fun getAppIconFromPkg(packageName: String?): Drawable? {
         try {
             val icon: Drawable =
@@ -650,6 +690,8 @@ class NewAppWidget : AppWidgetProvider() {
         private var appIndex: Int = 0
         private var conIndex: Int = 0
         private lateinit var remoteViews: RemoteViews
+
+        private const val WALL_CHANGE = "wallChange"
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
         private const val APP2_CLICKED = "App2Clicked"
