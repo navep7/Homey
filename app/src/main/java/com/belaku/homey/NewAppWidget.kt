@@ -38,8 +38,17 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.android.volley.AuthFailureError
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
+import org.json.JSONException
+import org.json.JSONObject
+import java.io.IOException
+import java.net.URL
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -51,6 +60,9 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var imgUrls: List<String> = ArrayList()
+    private lateinit var oB: String
+    private lateinit var wBs: List<Bitmap>
     private var pgNo: Int = 1
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
@@ -159,6 +171,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         todaysDate()
         appUsageStats(timeOfDay)
+
         if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED) {
             greeting(context, remoteViews, timeOfDay)
@@ -170,8 +183,10 @@ class NewAppWidget : AppWidgetProvider() {
         if (SYNC_CLICKED == intent.action)
             refresh(context)
 
-        if (WALL_CHANGE == intent.action)
+        if (WALL_CHANGE == intent.action) {
+            remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
             changeWall(context)
+        }
 
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val watchWidget = ComponentName(context, NewAppWidget::class.java)
@@ -180,23 +195,27 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         if (APP1_CLICKED == intent.action) {
-            Log.d("APP1_CLICKED", readApps()[0])
-            launchApp(readApps()[0])
+            var app = readApps()[0]
+            Log.d("APP1_CLICKED", app)
+            launchApp(app)
         }
 
         if (APP2_CLICKED == intent.action) {
-            Log.d("APP2_CLICKED", readApps()[1])
-            launchApp(readApps()[1])
+            var app = readApps()[1]
+            Log.d("APP2_CLICKED", app)
+            launchApp(app)
         }
 
         if (APP3_CLICKED == intent.action) {
-            Log.d("APP3_CLICKED", readApps()[2])
-            launchApp(readApps()[2])
+            var app = readApps()[2]
+            Log.d("APP3_CLICKED", app)
+            launchApp(app)
         }
 
         if (APP4_CLICKED == intent.action) {
-            Log.d("APP4_CLICKED", readApps()[3])
-            launchApp(readApps()[3])
+            var app = readApps()[3]
+            Log.d("APP4_CLICKED", app)
+            launchApp(app)
         }
 
         if (C1_CLICKED == intent.action) {
@@ -226,7 +245,12 @@ class NewAppWidget : AppWidgetProvider() {
         val ApiKey = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
         val PEXELS_URL = "https://api.pexels.com/v1/search?query=nature&per_page=1";
 
-    //    setWallpaper()
+        fetchWallpaper()
+
+
+
+
+
 
 
 
@@ -235,12 +259,116 @@ class NewAppWidget : AppWidgetProvider() {
 //        wallpaperManager.setBitmap(wD?.let { drawableToBitmap(it) })
     }
 
-    private fun setWallpaper() {
-        val wallpaperManager = WallpaperManager.getInstance(appContx)
-        val rn: Random = Random()
-        val answer: Int = rn.nextInt(MainActivity.wallBitmaps.size - 1) + 1
-        wallpaperManager.setBitmap(MainActivity.wallBitmaps.get(answer))
+    lateinit var imageBitmap: Bitmap
 
+    private fun UrlToBitmap(urlS: String) {
+        makeToast("UrlToBitmap!")
+
+        try {
+            val url = URL(urlS)
+            val thread = Thread {
+                try {
+                    // Your code goes here
+                    imageBitmap = BitmapFactory.decodeStream(
+                        url.openConnection().getInputStream())
+
+                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    makeToast("EXCE1 - " + e.toString())
+                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+
+                }
+            }
+
+            thread.start()
+
+            setWallpaper(imageBitmap)
+
+
+        } catch (e: IOException) {
+            println(e)
+            makeToast("EXCE2 - " + e.toString())
+            remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+        }
+    }
+
+    fun fetchWallpaper() {
+        makeToast("fetchWallpaper")
+        val url = "https://api.pexels.com/v1/curated/?page="+1.toString()+"&per_page=80";
+        val request: StringRequest = object : StringRequest(
+
+            com.android.volley.Request.Method.GET, url,
+            object : Response.Listener<String?> {
+
+
+                override fun onResponse(response: String?) {
+
+
+                    try {
+                        val jsonObject = JSONObject(response)
+
+                        val jsonArray = jsonObject.getJSONArray("photos")
+
+                        val length = jsonArray.length()
+
+                        makeToast("Wlength7 - " + length)
+                        var rn: Int = 0
+                        for (i in 0 until length) {
+                            val `object` = jsonArray.getJSONObject(i)
+
+                            val id = `object`.getInt("id")
+
+                            val objectImages = `object`.getJSONObject("src")
+
+                            var originalUrl: String
+
+
+                            if (i == 0) {
+                                rn = Random().nextInt(50) - 1
+                            }
+                            if (i == rn) {
+                                originalUrl = objectImages.getString("original")
+                                makeToast("Rnum - $i : " + rn + " " + originalUrl)
+                                UrlToBitmap(originalUrl)
+                            }
+                        //    imgUrls.toMutableList().add(originalUrl)
+
+                        }
+
+
+
+
+                    } catch (e: JSONException) {
+                        makeToast("EXE7 - " + e.message)
+                    }
+                }
+            }, object : Response.ErrorListener {
+                override fun onErrorResponse(error: VolleyError?) {
+
+                }
+            }) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val params: MutableMap<String, String> = HashMap()
+                params["Authorization"] = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
+
+                return params
+            }
+        }
+
+        val requestQueue = Volley.newRequestQueue(appContx)
+        requestQueue.add(request)
+
+    }
+
+    private fun setWallpaper(wB: Bitmap) {
+        makeToast("setWallpaper - ")
+        remoteViews.setImageViewBitmap(R.id.imgv_add3, wB)
+        val wallpaperManager = WallpaperManager.getInstance(appContx)
+        wallpaperManager.setBitmap(wB)
     }
 
 
