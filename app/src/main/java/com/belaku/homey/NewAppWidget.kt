@@ -32,6 +32,8 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Build
+import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
@@ -48,6 +50,7 @@ import com.belaku.homey.MainActivity.Companion.makeToast
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
+import java.io.InputStream
 import java.net.URL
 import java.util.Collections
 import java.util.Date
@@ -332,7 +335,9 @@ class NewAppWidget : AppWidgetProvider() {
                             if (i == rn) {
                                 originalUrl = objectImages.getString("original")
                                 makeToast("Rnum - $i : " + rn + " " + originalUrl)
-                                UrlToBitmap(originalUrl)
+
+                            UrlToWall(originalUrl)
+                            //    UrlToBitmap(originalUrl)
                             }
                         //    imgUrls.toMutableList().add(originalUrl)
 
@@ -362,6 +367,26 @@ class NewAppWidget : AppWidgetProvider() {
         val requestQueue = Volley.newRequestQueue(appContx)
         requestQueue.add(request)
 
+    }
+
+    private fun UrlToWall(originalUrl: String) {
+
+        makeToast("UrlToWall")
+        val policy = ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+
+        val wpm = WallpaperManager.getInstance(appContx)
+        var ins: InputStream? = null
+        try {
+            ins =
+                URL(originalUrl).openStream()
+            wpm.setStream(ins)
+        } catch (e: IOException) {
+            makeToast("UrlToWallEx - " + e.message)
+            remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+        }
+        remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+        refresh(appContx)
     }
 
     private fun setWallpaper(wB: Bitmap) {
