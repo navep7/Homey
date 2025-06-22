@@ -1,7 +1,6 @@
 package com.belaku.homey
 
 
-
 import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
@@ -63,7 +62,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-    private var imgUrls: List<String> = ArrayList()
+    private var imgUrls: ArrayList<String> = ArrayList()
     private lateinit var oB: String
     private lateinit var wBs: List<Bitmap>
     private var pgNo: Int = 1
@@ -170,13 +169,14 @@ class NewAppWidget : AppWidgetProvider() {
 
         makeToast("onReceive")
 
-    //    remoteViews.setTextViewText(R.id.date_text_view, currentHour.toString() + ":" + currentMin.toString())
+        //    remoteViews.setTextViewText(R.id.date_text_view, currentHour.toString() + ":" + currentMin.toString())
 
         todaysDate()
         appUsageStats(timeOfDay)
 
-        if(ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
-            == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
             greeting(context, remoteViews, timeOfDay)
             getFavoriteContacts(context)
         }
@@ -187,8 +187,8 @@ class NewAppWidget : AppWidgetProvider() {
             refresh(context)
 
         if (WALL_CHANGE == intent.action) {
-            remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
-            changeWall(context)
+         //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
+            fetchWallpaper()
         }
 
         val appWidgetManager = AppWidgetManager.getInstance(context)
@@ -233,140 +233,88 @@ class NewAppWidget : AppWidgetProvider() {
         if (C4_CLICKED == intent.action) {
             dialPhoneNumber(favContacts.get(3).number)
         }
-
-
-    }
-
-    @SuppressLint("MissingPermission")
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun changeWall(context: Context) {
-        //Pexels API - 563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80
-        // https://api.pexels.com/v1/search?query=nature&per_page=1"
-
-
-    //    var cliet : OkHttpClient = OkHttpClient()
-        val ApiKey = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
-        val PEXELS_URL = "https://api.pexels.com/v1/search?query=nature&per_page=1";
-
-        fetchWallpaper()
-
-
-
-
-
-
-
-
-
-        val wallpaperManager = WallpaperManager.getInstance(context)
-//        wallpaperManager.setBitmap(wD?.let { drawableToBitmap(it) })
-    }
-
-    lateinit var imageBitmap: Bitmap
-
-    private fun UrlToBitmap(urlS: String) {
-        makeToast("UrlToBitmap!")
-
-        try {
-            val url = URL(urlS)
-            val thread = Thread {
-                try {
-                    // Your code goes here
-                    imageBitmap = BitmapFactory.decodeStream(
-                        url.openConnection().getInputStream())
-
-                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
-
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    makeToast("EXCE1 - " + e.toString())
-                    remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
-
-                }
-            }
-
-            thread.start()
-
-            setWallpaper(imageBitmap)
-
-
-        } catch (e: IOException) {
-            println(e)
-            makeToast("EXCE2 - " + e.toString())
-            remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
-        }
     }
 
     fun fetchWallpaper() {
-        makeToast("fetchWallpaper")
-        val url = "https://api.pexels.com/v1/curated/?page="+1.toString()+"&per_page=80";
-        val request: StringRequest = object : StringRequest(
+        readWalls()
+        makeToast("fetchWallpaper - " + imgUrls.size)
+     //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
-            com.android.volley.Request.Method.GET, url,
-            object : Response.Listener<String?> {
+        val url = "https://api.pexels.com/v1/search?query=mobile_wallpaper&per_page=50"
 
+        if (imgUrls.size == 0) {
+            makeToast("Vrequest")
+            val request: StringRequest = object : StringRequest(
 
-                override fun onResponse(response: String?) {
-
-
-                    try {
-                        val jsonObject = JSONObject(response)
-
-                        val jsonArray = jsonObject.getJSONArray("photos")
-
-                        val length = jsonArray.length()
-
-                        makeToast("Wlength7 - " + length)
-                        var rn: Int = 0
-                        for (i in 0 until length) {
-                            val `object` = jsonArray.getJSONObject(i)
-
-                            val id = `object`.getInt("id")
-
-                            val objectImages = `object`.getJSONObject("src")
-
-                            var originalUrl: String
+                com.android.volley.Request.Method.GET, url,
+                object : Response.Listener<String?> {
 
 
-                            if (i == 0) {
-                                rn = Random().nextInt(50) - 1
+                    override fun onResponse(response: String?) {
+
+
+                        try {
+                            val jsonObject = JSONObject(response)
+
+                            val jsonArray = jsonObject.getJSONArray("photos")
+
+                            val length = jsonArray.length()
+
+                            makeToast("Wlength7 - " + length)
+                            var rn: Int = 0
+
+                            for (i in 0 until length) {
+                                val `object` = jsonArray.getJSONObject(i)
+                                val objectImages = `object`.getJSONObject("src")
+                                imgUrls.add(objectImages.getString("original"))
                             }
-                            if (i == rn) {
-                                originalUrl = objectImages.getString("original")
-                                makeToast("Rnum - $i : " + rn + " " + originalUrl)
+                            saveWalls(imgUrls)
 
-                            UrlToWall(originalUrl)
-                            //    UrlToBitmap(originalUrl)
-                            }
-                        //    imgUrls.toMutableList().add(originalUrl)
 
+                        } catch (e: JSONException) {
+                            makeToast("EXE7 - " + e.message)
                         }
-
-
-
-
-                    } catch (e: JSONException) {
-                        makeToast("EXE7 - " + e.message)
                     }
-                }
-            }, object : Response.ErrorListener {
-                override fun onErrorResponse(error: VolleyError?) {
+                }, object : Response.ErrorListener {
+                    override fun onErrorResponse(error: VolleyError?) {
 
-                }
-            }) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val params: MutableMap<String, String> = HashMap()
-                params["Authorization"] = "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
+                    }
+                }) {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String> {
+                    val params: MutableMap<String, String> = HashMap()
+                    params["Authorization"] =
+                        "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
 
-                return params
+                    return params
+                }
+
+
             }
+
+            val requestQueue = Volley.newRequestQueue(appContx)
+            requestQueue.add(request)
+
+
+                val rn = Random().nextInt(50) - 1
+                val originalUrl = imgUrls.get(rn)
+                makeToast("Rnum : " + rn + " " + originalUrl)
+                UrlToWall(originalUrl)
+
+        } else {
+               val rn = Random().nextInt(50) - 1
+                val originalUrl = imgUrls.get(rn)
+                makeToast("Rnum : " + rn + " " + originalUrl)
+                UrlToWall(originalUrl)
         }
+    }
 
-        val requestQueue = Volley.newRequestQueue(appContx)
-        requestQueue.add(request)
+    private fun readWalls() {
+        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
+    }
 
+    private fun saveWalls(imgUrls: java.util.ArrayList<String>) {
+        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
     }
 
     private fun UrlToWall(originalUrl: String) {
@@ -441,8 +389,10 @@ class NewAppWidget : AppWidgetProvider() {
 
         val selection = ContactsContract.Contacts.STARRED + "='1'"
 
-        val cursor = context.contentResolver.query(queryUri,
-            projection, selection, null, null)
+        val cursor = context.contentResolver.query(
+            queryUri,
+            projection, selection, null, null
+        )
 
         while (cursor!!.moveToNext()) {
             val contactID = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
@@ -464,19 +414,18 @@ class NewAppWidget : AppWidgetProvider() {
                 }
 
 
-
-
-            }
-            else makeToast("N")
+            } else makeToast("N")
 
             val intent = Intent(Intent.ACTION_VIEW)
             val uri = Uri.withAppendedPath(
-                ContactsContract.Contacts.CONTENT_URI, contactID.toString())
+                ContactsContract.Contacts.CONTENT_URI, contactID.toString()
+            )
             intent.data = uri
             val cPhUri = intent.toUri(0)
 
             val cNme = cursor.getString(
-                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
+                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+            )
 
             var c = Contact(cNme, phoneNumber, cPhUri)
 
@@ -490,24 +439,36 @@ class NewAppWidget : AppWidgetProvider() {
 
         for (i in 0 until favContacts.size) {
 
-            Log.d("cLog", "cName: ${favContacts.get(i).name}, cPic: ${favContacts.get(i).image}, cNum: ${favContacts.get(i).number} ")
+            Log.d(
+                "cLog",
+                "cName: ${favContacts.get(i).name}, cPic: ${favContacts.get(i).image}, cNum: ${
+                    favContacts.get(i).number
+                } "
+            )
 
             val input =
-                ContactsContract.Contacts.openContactPhotoInputStream(context.contentResolver, Uri.parse(favContacts.get(i).image))
+                ContactsContract.Contacts.openContactPhotoInputStream(
+                    context.contentResolver,
+                    Uri.parse(favContacts.get(i).image)
+                )
             val bm = BitmapFactory.decodeStream(input)
             val d: Drawable = BitmapDrawable(bm)
 
             addContactInWidget(favContacts.get(i).name, favContacts.get(i).number, d)
         }
 
-    //    addContactsInWidget(favContacts)
+        //    addContactsInWidget(favContacts)
 
 
     }
 
     private fun addContactsInWidget(favContacts: java.util.ArrayList<Contact>) {
 
-        makeToast("addContactsInWidget" + favContacts.get(0).name + " ... " + favContacts.get(favContacts.size - 1).name)
+        makeToast(
+            "addContactsInWidget" + favContacts.get(0).name + " ... " + favContacts.get(
+                favContacts.size - 1
+            ).name
+        )
 
         for (i in 0 until favContacts.size) {
             val appWidgetManager = AppWidgetManager.getInstance(appContx)
@@ -528,7 +489,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
 
-        remoteViews.setTextViewText(R.id.date_text_view, formattedDate )
+        remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
     }
 
     private fun launchApp(pkgName: String) {
@@ -579,20 +540,23 @@ class NewAppWidget : AppWidgetProvider() {
             var appName = getAppNameFromPkg(queryUsageStats.get(i).packageName)
             var appIcon = getAppIconFromPkg(queryUsageStats.get(i).packageName)
 
-            Log.d("queryUsageStats", "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground)
+            Log.d(
+                "queryUsageStats",
+                "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground
+            )
 
-        //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
-                if (!appName.contains("Launcher"))
-                    if (appNames.add(appName))
-                        if (choosenApps.size < 5) {
-                            choosenApps.add(
-                                App(
-                                    appName, appIcon
-                                )
+            //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
+            if (!appName.contains("Launcher"))
+                if (appNames.add(appName))
+                    if (choosenApps.size < 5) {
+                        choosenApps.add(
+                            App(
+                                appName, appIcon
                             )
-                            Log.d("cLogSetAppIcon", appIcon.toString())
-                            addAppInWidget(App(queryUsageStats.get(i).packageName, appIcon))
-                        }
+                        )
+                        Log.d("cLogSetAppIcon", appIcon.toString())
+                        addAppInWidget(App(queryUsageStats.get(i).packageName, appIcon))
+                    }
         }
         saveApps(Apps)
 
@@ -625,7 +589,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         return apps
     }
-
 
 
     private fun getAppIconFromPkg(packageName: String?): Drawable? {
@@ -737,25 +700,33 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
 
-       //     makeToast("mC - " + "addContactInWidget")
+            //     makeToast("mC - " + "addContactInWidget")
             var nullD: Drawable
             if (drawable == null)
                 nullD = appContx.getDrawable(R.drawable.face_holder)!!
             else nullD = drawable
             if (conIndex == 0) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact1, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_contact1,
+                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact2, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_contact2,
+                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact3, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_contact3,
+                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews.setImageViewBitmap(R.id.imgv_contact4, nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_contact4,
+                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
@@ -784,23 +755,33 @@ class NewAppWidget : AppWidgetProvider() {
 
 
             if (appIndex == 0) {
-                remoteViews.setImageViewBitmap(R.id.imgv_add1, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_add1,
+                    app.image?.let { drawableToBitmap(it) })
                 appIndex = 1
                 remoteViews.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
             } else if (appIndex == 1) {
-                remoteViews.setImageViewBitmap(R.id.imgv_add2, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_add2,
+                    app.image?.let { drawableToBitmap(it) })
                 appIndex = 2
                 remoteViews.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
             } else if (appIndex == 2) {
-                remoteViews.setImageViewBitmap(R.id.imgv_add3, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_add3,
+                    app.image?.let { drawableToBitmap(it) })
                 appIndex = 3
                 remoteViews.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
             } else if (appIndex == 3) {
-                remoteViews.setImageViewBitmap(R.id.imgv_add4, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_add4,
+                    app.image?.let { drawableToBitmap(it) })
                 appIndex = 4
                 remoteViews.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
             } else if (appIndex == 4) {
-                remoteViews.setImageViewBitmap(R.id.imgv_add5, app.image?.let { drawableToBitmap(it) })
+                remoteViews.setImageViewBitmap(
+                    R.id.imgv_add5,
+                    app.image?.let { drawableToBitmap(it) })
                 appIndex = 4
                 remoteViews.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
             }
