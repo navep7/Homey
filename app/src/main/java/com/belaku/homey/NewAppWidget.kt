@@ -4,6 +4,7 @@ package com.belaku.homey
 import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
+import android.app.Application
 import android.app.PendingIntent
 import android.app.WallpaperManager
 import android.app.usage.UsageStats
@@ -29,6 +30,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.StrictMode
@@ -46,6 +48,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
+import com.google.android.material.color.DynamicColors
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -168,6 +171,8 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         makeToast("onReceive")
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
         //    remoteViews.setTextViewText(R.id.date_text_view, currentHour.toString() + ":" + currentMin.toString())
 
@@ -186,13 +191,24 @@ class NewAppWidget : AppWidgetProvider() {
         if (SYNC_CLICKED == intent.action)
             refresh(context)
 
+        var mp: MediaPlayer = MediaPlayer.create(context, R.raw.click)
         if (WALL_CHANGE == intent.action) {
          //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
+            try {
+                if (mp.isPlaying) {
+                    mp.stop()
+                    mp.release()
+                    mp = MediaPlayer.create(context, R.raw.click)
+                }
+                mp.start()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             fetchWallpaper()
         }
 
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val watchWidget = ComponentName(context, NewAppWidget::class.java)
+
+
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
 
@@ -240,7 +256,7 @@ class NewAppWidget : AppWidgetProvider() {
         makeToast("fetchWallpaper - " + imgUrls.size)
      //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
-        val url = "https://api.pexels.com/v1/search?query=mobile_wallpaper&per_page=50"
+        val url = "https://api.pexels.com/v1/search?query=blur&per_page=50"
 
         if (imgUrls.size == 0) {
             makeToast("Vrequest")
@@ -296,13 +312,8 @@ class NewAppWidget : AppWidgetProvider() {
             requestQueue.add(request)
 
 
-                val rn = Random().nextInt(50) - 1
-                val originalUrl = imgUrls.get(rn)
-                makeToast("Rnum : " + rn + " " + originalUrl)
-                UrlToWall(originalUrl)
-
         } else {
-               val rn = Random().nextInt(50) - 1
+               val rn = Random().nextInt(imgUrls.size) - 0
                 val originalUrl = imgUrls.get(rn)
                 makeToast("Rnum : " + rn + " " + originalUrl)
                 UrlToWall(originalUrl)
@@ -333,7 +344,6 @@ class NewAppWidget : AppWidgetProvider() {
             makeToast("UrlToWallEx - " + e.message)
             remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
         }
-        remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
         refresh(appContx)
     }
 
