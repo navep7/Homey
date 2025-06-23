@@ -5,7 +5,7 @@ import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
-import android.app.WallpaperManager
+import android.app.admin.DevicePolicyManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -20,7 +20,9 @@ import android.provider.Settings
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
+import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -45,6 +47,7 @@ import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
+    private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
     private lateinit var sinceDate: Date
     private lateinit var appBarConfiguration: AppBarConfiguration
@@ -76,9 +79,30 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
-            wallBitmaps = fetchWallpaper()
+            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+            var compName = ComponentName(this, DeviceAdmin::class.java)
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+            startActivityForResult(intent, RESULT_ENABLE)
         }
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode) {
+            RESULT_ENABLE -> {
+                if (resultCode == RESULT_OK) {
+
+                } else {
+                    Toast.makeText(
+                        applicationContext, "Failed!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+        }
     }
 
 

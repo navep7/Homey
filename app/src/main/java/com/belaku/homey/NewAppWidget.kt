@@ -4,9 +4,9 @@ package com.belaku.homey
 import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
-import android.app.Application
 import android.app.PendingIntent
 import android.app.WallpaperManager
+import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
@@ -40,6 +40,7 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
@@ -48,7 +49,6 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
-import com.google.android.material.color.DynamicColors
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -90,9 +90,15 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         remoteViews.setOnClickPendingIntent(
-            R.id.refresh,
+            R.id.imgbtn_refresh,
             getPendingSelfIntent(context, WALL_CHANGE)
         )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgbtn_lock,
+            getPendingSelfIntent(context, LOCK_PHONE)
+        )
+
         remoteViews.setOnClickPendingIntent(
             R.id.rl_widget_layout,
             getPendingSelfIntent(context, SYNC_CLICKED)
@@ -193,7 +199,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         var mp: MediaPlayer = MediaPlayer.create(context, R.raw.click)
         if (WALL_CHANGE == intent.action) {
-         //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
+            //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
             try {
                 if (mp.isPlaying) {
                     mp.stop()
@@ -207,8 +213,16 @@ class NewAppWidget : AppWidgetProvider() {
             fetchWallpaper()
         }
 
+        if (LOCK_PHONE == intent.action) {
 
+            var deviceManger =
+                context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            var compName = ComponentName(context, DeviceAdmin::class.java)
+            val active: Boolean = deviceManger.isAdminActive(compName)
 
+            if (active)
+                deviceManger.lockNow()
+        }
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews)
 
@@ -254,7 +268,7 @@ class NewAppWidget : AppWidgetProvider() {
     fun fetchWallpaper() {
         readWalls()
         makeToast("fetchWallpaper - " + imgUrls.size)
-     //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
+        //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
         val url = "https://api.pexels.com/v1/search?query=blur&per_page=50"
 
@@ -313,10 +327,10 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         } else {
-               val rn = Random().nextInt(imgUrls.size) - 0
-                val originalUrl = imgUrls.get(rn)
-                makeToast("Rnum : " + rn + " " + originalUrl)
-                UrlToWall(originalUrl)
+            val rn = Random().nextInt(imgUrls.size) - 0
+            val originalUrl = imgUrls.get(rn)
+            makeToast("Rnum : " + rn + " " + originalUrl)
+            UrlToWall(originalUrl)
         }
     }
 
@@ -342,7 +356,7 @@ class NewAppWidget : AppWidgetProvider() {
             wpm.setStream(ins)
         } catch (e: IOException) {
             makeToast("UrlToWallEx - " + e.message)
-            remoteViews.setViewVisibility(R.id.refresh, View.VISIBLE)
+            remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
         }
         refresh(appContx)
     }
@@ -835,6 +849,7 @@ class NewAppWidget : AppWidgetProvider() {
         private var conIndex: Int = 0
         private lateinit var remoteViews: RemoteViews
 
+        private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
