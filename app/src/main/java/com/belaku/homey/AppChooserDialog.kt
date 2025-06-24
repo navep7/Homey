@@ -35,7 +35,7 @@ class AppChooserDialog : Activity() {
 
         gridView.onItemClickListener = OnItemClickListener { _, _, position, _ ->
             Toast.makeText(applicationContext, appLists.get(position).name, Toast.LENGTH_SHORT).show()
-            NewAppWidget.addAppInWidget(appLists.get(position))
+            NewAppWidget.addAppInWidget(applicationContext, appLists.get(position))
             choosenApps.add(appLists.get(position))
             goHome()
         }

@@ -1,5 +1,9 @@
 package com.belaku.homey
 
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import android.Manifest
 import android.accounts.AccountManager
@@ -47,8 +51,9 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.runBlocking
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -65,8 +70,24 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private lateinit var inputStream: InputStream
+    private val pexelUrl: String =
+        "https://api.pexels.com/v1/search?query=iphone_wallpaper&per_page=25"
+
+    private lateinit var newAppWidget: ComponentName
+    private lateinit var appWidgetManager: AppWidgetManager
     private lateinit var wallType: String
-    var wallTypes: List<String> = mutableListOf("Beautiful", "Trending", "festival", "Sunset", "Beach", "Rain", "Diwali", "Street", "Cityscapes")
+    var wallTypes: List<String> = mutableListOf(
+        "Beautiful",
+        "Trending",
+        "festival",
+        "Sunset",
+        "Beach",
+        "Rain",
+        "Diwali",
+        "Street",
+        "Cityscapes"
+    )
     private var imgUrls: ArrayList<String> = ArrayList()
     private lateinit var oB: String
     private lateinit var wBs: List<Bitmap>
@@ -84,12 +105,10 @@ class NewAppWidget : AppWidgetProvider() {
     ) {
 
 
-        //  val remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
-        val watchWidget = ComponentName(context, NewAppWidget::class.java)
+        val remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+        newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
-        for (appWidgetId in appWidgetIds) {
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
-        }
+
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
@@ -146,21 +165,20 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, C4_CLICKED)
         )
 
-
-        appWidgetManager.updateAppWidget(watchWidget, remoteViews)
+        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
     }
 
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
-        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
-        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-        sharedPreferencesEditor = sharedPreferences.edit()
+        //   remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         super.onReceive(context, intent)
 
-        appContx = context
+        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
+
         appIndex = 0
         conIndex = 0
 
@@ -179,13 +197,12 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         makeToast("onReceive")
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        val watchWidget = ComponentName(context, NewAppWidget::class.java)
+        appWidgetManager = AppWidgetManager.getInstance(context)
 
-        todaysDate()
-        appUsageStats(timeOfDay)
+        todaysDate(context)
+        appUsageStats(context, timeOfDay)
 
-        if (ContextCompat.checkSelfPermission(appContx, Manifest.permission.READ_CONTACTS)
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
         ) {
             greeting(context, remoteViews, timeOfDay)
@@ -196,7 +213,6 @@ class NewAppWidget : AppWidgetProvider() {
         if (WALL_CHANGE == intent.action) {
             clickSound(context)
             fetchWallpaper(context)
-
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -210,45 +226,46 @@ class NewAppWidget : AppWidgetProvider() {
                 deviceManger.lockNow()
         }
 
-        appWidgetManager.updateAppWidget(watchWidget, remoteViews)
-
 
         if (APP1_CLICKED == intent.action) {
             var app = readApps()[0]
             Log.d("APP1_CLICKED", app)
-            launchApp(app)
+            launchApp(context, app)
         }
 
         if (APP2_CLICKED == intent.action) {
             var app = readApps()[1]
             Log.d("APP2_CLICKED", app)
-            launchApp(app)
+            launchApp(context, app)
         }
 
         if (APP3_CLICKED == intent.action) {
             var app = readApps()[2]
             Log.d("APP3_CLICKED", app)
-            launchApp(app)
+            launchApp(context, app)
         }
 
         if (APP4_CLICKED == intent.action) {
             var app = readApps()[3]
             Log.d("APP4_CLICKED", app)
-            launchApp(app)
+            launchApp(context, app)
         }
 
         if (C1_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(0).number)
+            dialPhoneNumber(context, favContacts.get(0).number)
         }
         if (C2_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(1).number)
+            dialPhoneNumber(context, favContacts.get(1).number)
         }
         if (C3_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(2).number)
+            dialPhoneNumber(context, favContacts.get(2).number)
         }
         if (C4_CLICKED == intent.action) {
-            dialPhoneNumber(favContacts.get(3).number)
+            dialPhoneNumber(context, favContacts.get(3).number)
         }
+
+        newAppWidget = ComponentName(context, NewAppWidget::class.java)
+        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
     }
 
     private fun clickSound(context: Context) {
@@ -267,15 +284,16 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     fun fetchWallpaper(context: Context) {
+
         readWalls()
 
-        val url = "https://api.pexels.com/v1/search?query=iphone_wallpaper&per_page=25"
+        makeToast("fetchWallpaper - " + imgUrls.size)
 
         if (imgUrls.size == 0) {
             makeToast("Vrequest")
             val request: StringRequest = object : StringRequest(
 
-                com.android.volley.Request.Method.GET, url,
+                com.android.volley.Request.Method.GET, pexelUrl,
                 Response.Listener<String?> { response ->
                     try {
                         val jsonObject = JSONObject(response)
@@ -297,7 +315,7 @@ class NewAppWidget : AppWidgetProvider() {
                         val rn1 = Random().nextInt(imgUrls.size) - 0
                         val originalUrl = imgUrls.get(rn1)
                         makeToast("Rnum : " + rn1 + " " + originalUrl)
-                        UrlToWall(context, originalUrl)
+                        setWallpaperFromUrl(context, originalUrl)
 
                     } catch (e: JSONException) {
                         makeToast("EXE7 - " + e.message)
@@ -305,6 +323,9 @@ class NewAppWidget : AppWidgetProvider() {
                 }, object : Response.ErrorListener {
                     override fun onErrorResponse(error: VolleyError?) {
                         makeToast("onErrorResponse - " + error.toString())
+                        remoteViews.setTextViewText(R.id.tx_desc, "onError")
+                        remoteViews.setViewVisibility(R.id.progressBar, View.INVISIBLE)
+                        remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
                     }
                 }) {
                 @Throws(AuthFailureError::class)
@@ -319,16 +340,16 @@ class NewAppWidget : AppWidgetProvider() {
 
             }
 
-            val requestQueue = Volley.newRequestQueue(appContx)
+            val requestQueue = Volley.newRequestQueue(context)
             requestQueue.add(request)
 
 
         } else {
-            refresh(context)
+
             val rn = Random().nextInt(imgUrls.size) - 0
             val originalUrl = imgUrls.get(rn)
             makeToast("Rnum : " + rn + " " + originalUrl)
-            UrlToWall(context, originalUrl)
+            setWallpaperFromUrl(context, originalUrl)
         }
     }
 
@@ -340,47 +361,19 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
     }
 
-    private fun UrlToWall(context: Context, originalUrl: String) {
-
-        makeToast("UrlToWall")
-        val policy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        val wpm = WallpaperManager.getInstance(appContx)
-        var ins: InputStream? = null
-        try {
-            ins =
-                URL(originalUrl).openStream()
-            wpm.setStream(ins)
-        } catch (e: IOException) {
-            makeToast("UrlToWallEx - " + e.message)
-            remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
+    fun setWallpaperFromUrl(context: Context, imageUrl: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val inputStream = URL(imageUrl).openStream()
+            WallpaperManager.getInstance(context).setStream(inputStream)
         }
-        refresh(context)
     }
 
-
-
-    private fun refresh(context: Context) {
-        makeToast("refresh")
-        val intent = Intent(
-            context,
-            NewAppWidget::class.java
-        )
-        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-        val appWidgetIds = AppWidgetManager.getInstance(context)
-            .getAppWidgetIds(ComponentName(context, NewAppWidget::class.java))
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds)
-        context.sendBroadcast(intent)
-    }
-
-
-    fun dialPhoneNumber(phoneNumber: String) {
+    fun dialPhoneNumber(context: Context, phoneNumber: String) {
         makeToast("tel:" + phoneNumber)
         val intent = Intent(Intent.ACTION_CALL)
         intent.data = Uri.parse("tel:" + phoneNumber)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        appContx.startActivity(intent)
+        context.startActivity(intent)
 
     }
 
@@ -416,7 +409,7 @@ class NewAppWidget : AppWidgetProvider() {
 
             if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
 
-                val phones: Cursor? = appContx.getContentResolver().query(
+                val phones: Cursor? = context.getContentResolver().query(
                     ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                     null,
                     ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactID,
@@ -470,58 +463,35 @@ class NewAppWidget : AppWidgetProvider() {
             val bm = BitmapFactory.decodeStream(input)
             val d: Drawable = BitmapDrawable(bm)
 
-            addContactInWidget(favContacts.get(i).name, favContacts.get(i).number, d)
-        }
-
-        //    addContactsInWidget(favContacts)
-
-
-    }
-
-    private fun addContactsInWidget(favContacts: java.util.ArrayList<Contact>) {
-
-        makeToast(
-            "addContactsInWidget" + favContacts.get(0).name + " ... " + favContacts.get(
-                favContacts.size - 1
-            ).name
-        )
-
-        for (i in 0 until favContacts.size) {
-            val appWidgetManager = AppWidgetManager.getInstance(appContx)
-            val thisWidget = ComponentName(appContx, NewAppWidget::class.java)
-            val views = RemoteViews(appContx.packageName, R.layout.new_app_widget)
-
-
-
-            appWidgetManager.updateAppWidget(thisWidget, views)
+            addContactInWidget(context, favContacts.get(i).name, favContacts.get(i).number, d)
         }
 
     }
 
 
-    private fun todaysDate() {
+    private fun todaysDate(context: Context) {
 
         val c: Date = Calendar.getInstance().time
         val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
-
+        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
     }
 
-    private fun launchApp(pkgName: String) {
-        val launchIntent: Intent = appContx.getPackageManager().getLaunchIntentForPackage(pkgName)!!
-        appContx.startActivity(launchIntent)
+    private fun launchApp(context: Context, pkgName: String) {
+        val launchIntent: Intent = context.getPackageManager().getLaunchIntentForPackage(pkgName)!!
+        context.startActivity(launchIntent)
     }
 
 
-    private fun appUsageStats(timeOfDay: String) {
+    private fun appUsageStats(context: Context, timeOfDay: String) {
 
         choosenApps.clear()
 
         var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 
         val usageStatsManager =
-            appContx.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
 
 
         val beginCal = Calendar.getInstance()
@@ -553,8 +523,8 @@ class NewAppWidget : AppWidgetProvider() {
         var appNames = HashSet<String>()
         for (i in 0 until queryUsageStats.size) {
 
-            var appName = getAppNameFromPkg(queryUsageStats.get(i).packageName)
-            var appIcon = getAppIconFromPkg(queryUsageStats.get(i).packageName)
+            var appName = getAppNameFromPkg(context, queryUsageStats.get(i).packageName)
+            var appIcon = getAppIconFromPkg(context, queryUsageStats.get(i).packageName)
 
             Log.d(
                 "queryUsageStats",
@@ -571,7 +541,7 @@ class NewAppWidget : AppWidgetProvider() {
                             )
                         )
                         Log.d("cLogSetAppIcon", appIcon.toString())
-                        addAppInWidget(App(queryUsageStats.get(i).packageName, appIcon))
+                        addAppInWidget(context, App(queryUsageStats.get(i).packageName, appIcon))
                     }
         }
         saveApps(Apps)
@@ -607,19 +577,19 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-    private fun getAppIconFromPkg(packageName: String?): Drawable? {
+    private fun getAppIconFromPkg(context: Context, packageName: String?): Drawable? {
         try {
             val icon: Drawable =
-                appContx.getPackageManager().getApplicationIcon(packageName.toString())
+                context.getPackageManager().getApplicationIcon(packageName.toString())
             return icon
         } catch (e: NameNotFoundException) {
             e.printStackTrace()
-            return appContx.getDrawable(R.drawable.calls)
+            return context.getDrawable(R.drawable.calls)
         }
     }
 
-    private fun getAppNameFromPkg(packageName: String?): String {
-        val pm: PackageManager = appContx.getPackageManager()
+    private fun getAppNameFromPkg(context: Context, packageName: String?): String {
+        val pm: PackageManager = context.getPackageManager()
         var ai = try {
             pm.getApplicationInfo(packageName.toString(), 0)
         } catch (e: NameNotFoundException) {
@@ -714,35 +684,35 @@ class NewAppWidget : AppWidgetProvider() {
         lateinit var sharedPreferences: SharedPreferences
 
 
-        fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {
+        fun addContactInWidget(context: Context, strN: String, strNu: String, drawable: Drawable) {
 
             //     makeToast("mC - " + "addContactInWidget")
             var nullD: Drawable
             if (drawable == null)
-                nullD = appContx.getDrawable(R.drawable.face_holder)!!
+                nullD = context.getDrawable(R.drawable.face_holder)!!
             else nullD = drawable
             if (conIndex == 0) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_contact1,
-                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_contact2,
-                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_contact3,
-                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_contact4,
-                    nullD?.let { drawableToBitmap(it).getCircledBitmap() })
+                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
                 remoteViews.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
@@ -761,60 +731,60 @@ class NewAppWidget : AppWidgetProvider() {
             return output
         }
 
-        fun addAppInWidget(app: App) {
+        fun addAppInWidget(context: Context, app: App) {
 
             makeToast("addAppInWidget!")
             Apps.add(app)
 
-            val appWidgetManager = AppWidgetManager.getInstance(appContx)
-            val thisWidget = ComponentName(appContx, NewAppWidget::class.java)
 
 
             if (appIndex == 0) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_add1,
-                    app.image?.let { drawableToBitmap(it) })
+                    app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 1
                 remoteViews.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
             } else if (appIndex == 1) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_add2,
-                    app.image?.let { drawableToBitmap(it) })
+                    app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 2
                 remoteViews.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
             } else if (appIndex == 2) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_add3,
-                    app.image?.let { drawableToBitmap(it) })
+                    app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 3
                 remoteViews.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
             } else if (appIndex == 3) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_add4,
-                    app.image?.let { drawableToBitmap(it) })
+                    app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 4
                 remoteViews.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
             } else if (appIndex == 4) {
                 remoteViews.setImageViewBitmap(
                     R.id.imgv_add5,
-                    app.image?.let { drawableToBitmap(it) })
+                    app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 4
                 remoteViews.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
             }
 
 
-            appWidgetManager.updateAppWidget(thisWidget, remoteViews)
         }
 
 
-        fun drawableToBitmap(drawable: Drawable): Bitmap {
+        fun drawableToBitmap(context: Context, drawable: Drawable): Bitmap {
             var bitmap: Bitmap? = null
 
             if (drawable is BitmapDrawable) {
                 val bitmapDrawable = drawable
                 if (bitmapDrawable.bitmap != null) {
                     return bitmapDrawable.bitmap
-                } else return drawableToBitmap(appContx.getDrawable(R.drawable.face_holder)!!)
+                } else return drawableToBitmap(
+                    context,
+                    context.getDrawable(R.drawable.face_holder)!!
+                )
             }
 
             bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
