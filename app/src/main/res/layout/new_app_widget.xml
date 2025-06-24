@@ -52,30 +52,35 @@
 
         <ImageView
             android:id="@+id/imgv_add1"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add2"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add3"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add4"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:layout_margin="5dp" />
 
         <ImageView
             android:id="@+id/imgv_add5"
+            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
             android:layout_margin="5dp" />
@@ -99,6 +104,7 @@
 
             <ImageView
                 android:id="@+id/imgv_contact1"
+                android:background="?android:attr/selectableItemBackground"
                 android:scaleType="fitXY"
                 android:layout_width="55dp"
                 android:layout_height="55dp" />
@@ -127,6 +133,7 @@
 
             <ImageView
                 android:id="@+id/imgv_contact2"
+                android:background="?android:attr/selectableItemBackground"
                 android:scaleType="fitXY"
                 android:layout_width="55dp"
                 android:layout_height="55dp" />
@@ -155,6 +162,7 @@
 
             <ImageView
                 android:id="@+id/imgv_contact3"
+                android:background="?android:attr/selectableItemBackground"
                 android:scaleType="fitXY"
                 android:layout_width="55dp"
                 android:layout_height="55dp" />
@@ -183,6 +191,7 @@
 
             <ImageView
                 android:id="@+id/imgv_contact4"
+                android:background="?android:attr/selectableItemBackground"
                 android:scaleType="fitXY"
                 android:layout_width="55dp"
                 android:layout_height="55dp" />
@@ -208,33 +217,22 @@
     </LinearLayout>
 
 
-    <TextView
-        android:id="@+id/tx_prompt"
-        android:layout_above="@+id/imgbtn_refresh"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="50dp"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:text="Wallpaper >"
-        android:textStyle="bold"
-        android:textColor="?attr/colorPrimaryContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
     <ImageButton
         android:id="@+id/imgbtn_refresh"
-        android:background="@android:color/transparent"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/reload"
+        android:src="@android:drawable/ic_menu_set_as"
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="50dp"
         android:scaleType="fitXY"
         android:layout_width="60dp"
         android:layout_height="60dp"/>
 
+
     <ImageButton
         android:id="@+id/imgbtn_lock"
-        android:background="@android:color/transparent"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:src="@android:drawable/ic_lock_lock"
@@ -246,7 +244,7 @@
 
     <ImageButton
         android:id="@+id/imgbtn_note"
-        android:background="@android:color/transparent"
+        android:background="?android:attr/selectableItemBackground"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:src="@android:drawable/ic_menu_edit"

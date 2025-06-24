@@ -2,8 +2,6 @@ package com.belaku.homey
 
 
 import android.Manifest
-import android.R.attr.height
-import android.R.attr.width
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -39,7 +37,6 @@ import android.os.Handler
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.provider.ContactsContract
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -68,8 +65,6 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-    private var screenWidth: Int = 0
-    private var screenHeight: Int = 0
     private lateinit var wallType: String
     var wallTypes: List<String> = mutableListOf("Beautiful", "Trending", "festival", "Sunset", "Beach", "Rain", "Diwali", "Street", "Cityscapes")
     private var imgUrls: ArrayList<String> = ArrayList()
@@ -95,11 +90,6 @@ class NewAppWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.tx_prompt,
-            getPendingSelfIntent(context, WALLTYPE_CLICKED)
-        )
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
@@ -202,24 +192,11 @@ class NewAppWidget : AppWidgetProvider() {
             getFavoriteContacts(context)
         }
 
-        makeToast("IAtoS - " + intent.action.toString())
-
-
-
-        if (WALLTYPE_CLICKED == intent.action) {
-            imgUrls.clear()
-            wallType = wallTypes[Random().nextInt(wallTypes.size)]
-            sharedPreferencesEditor.putString("wallType", wallType).apply()
-            clickSound(context)
-            remoteViews.setTextViewText(R.id.tx_prompt, sharedPreferences.getString("wallType", "abc") + " >")
-        }
-
 
         if (WALL_CHANGE == intent.action) {
-            //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
             clickSound(context)
-            fetchWallpaper()
-            remoteViews.setTextViewText(R.id.tx_prompt, sharedPreferences.getString("wallType", "abc") + " >")
+            fetchWallpaper(context)
+
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -289,50 +266,41 @@ class NewAppWidget : AppWidgetProvider() {
         }
     }
 
-    fun fetchWallpaper() {
+    fun fetchWallpaper(context: Context) {
         readWalls()
-        wallType = sharedPreferences.getString("wallType", "abc").toString()
-        makeToast("fetchWallpaper - " + wallType + " : " + imgUrls.size)
-        //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
-        val url = "https://api.pexels.com/v1/search?query=$wallType&per_page=50"
+        val url = "https://api.pexels.com/v1/search?query=iphone_wallpaper&per_page=25"
 
         if (imgUrls.size == 0) {
             makeToast("Vrequest")
             val request: StringRequest = object : StringRequest(
 
                 com.android.volley.Request.Method.GET, url,
-                object : Response.Listener<String?> {
+                Response.Listener<String?> { response ->
+                    try {
+                        val jsonObject = JSONObject(response)
+
+                        val jsonArray = jsonObject.getJSONArray("photos")
+
+                        val length = jsonArray.length()
+
+                        makeToast("Wlength7 - " + length)
 
 
-                    override fun onResponse(response: String?) {
-
-
-                        try {
-                            val jsonObject = JSONObject(response)
-
-                            val jsonArray = jsonObject.getJSONArray("photos")
-
-                            val length = jsonArray.length()
-
-                            makeToast("Wlength7 - " + length)
-
-
-                            for (i in 0 until length) {
-                                val `object` = jsonArray.getJSONObject(i)
-                                val objectImages = `object`.getJSONObject("src")
-                                imgUrls.add(objectImages.getString("original"))
-                            }
-                            saveWalls(imgUrls)
-
-                            val rn1 = Random().nextInt(imgUrls.size) - 0
-                            val originalUrl = imgUrls.get(rn1)
-                            makeToast("Rnum : " + rn1 + " " + originalUrl)
-                            UrlToWall(originalUrl)
-
-                        } catch (e: JSONException) {
-                            makeToast("EXE7 - " + e.message)
+                        for (i in 0 until length) {
+                            val `object` = jsonArray.getJSONObject(i)
+                            val objectImages = `object`.getJSONObject("src")
+                            imgUrls.add(objectImages.getString("original"))
                         }
+                        saveWalls(imgUrls)
+
+                        val rn1 = Random().nextInt(imgUrls.size) - 0
+                        val originalUrl = imgUrls.get(rn1)
+                        makeToast("Rnum : " + rn1 + " " + originalUrl)
+                        UrlToWall(context, originalUrl)
+
+                    } catch (e: JSONException) {
+                        makeToast("EXE7 - " + e.message)
                     }
                 }, object : Response.ErrorListener {
                     override fun onErrorResponse(error: VolleyError?) {
@@ -356,10 +324,11 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         } else {
+            refresh(context)
             val rn = Random().nextInt(imgUrls.size) - 0
             val originalUrl = imgUrls.get(rn)
             makeToast("Rnum : " + rn + " " + originalUrl)
-            UrlToWall(originalUrl)
+            UrlToWall(context, originalUrl)
         }
     }
 
@@ -371,14 +340,13 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
     }
 
-    private fun UrlToWall(originalUrl: String) {
+    private fun UrlToWall(context: Context, originalUrl: String) {
 
         makeToast("UrlToWall")
         val policy = ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
         val wpm = WallpaperManager.getInstance(appContx)
-        wpm.suggestDesiredDimensions(sharedPreferences.getInt("sWidth", 0), sharedPreferences.getInt("sHeight", 0))
         var ins: InputStream? = null
         try {
             ins =
@@ -388,7 +356,7 @@ class NewAppWidget : AppWidgetProvider() {
             makeToast("UrlToWallEx - " + e.message)
             remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
         }
-        refresh(appContx)
+        refresh(context)
     }
 
 
