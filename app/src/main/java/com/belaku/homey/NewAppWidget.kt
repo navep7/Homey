@@ -2,6 +2,8 @@ package com.belaku.homey
 
 
 import android.Manifest
+import android.R.attr.height
+import android.R.attr.width
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -39,7 +41,6 @@ import android.os.StrictMode.ThreadPolicy
 import android.provider.ContactsContract
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.Display
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
@@ -67,6 +68,8 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var screenWidth: Int = 0
+    private var screenHeight: Int = 0
     private lateinit var wallType: String
     var wallTypes: List<String> = mutableListOf("Beautiful", "Trending", "festival", "Sunset", "Beach", "Rain", "Diwali", "Street", "Cityscapes")
     private var imgUrls: ArrayList<String> = ArrayList()
@@ -189,8 +192,6 @@ class NewAppWidget : AppWidgetProvider() {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         val watchWidget = ComponentName(context, NewAppWidget::class.java)
 
-        //    remoteViews.setTextViewText(R.id.date_text_view, currentHour.toString() + ":" + currentMin.toString())
-
         todaysDate()
         appUsageStats(timeOfDay)
 
@@ -291,7 +292,7 @@ class NewAppWidget : AppWidgetProvider() {
     fun fetchWallpaper() {
         readWalls()
         wallType = sharedPreferences.getString("wallType", "abc").toString()
-        makeToast("fetchWallpaper - " + wallType)
+        makeToast("fetchWallpaper - " + wallType + " : " + imgUrls.size)
         //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
         val url = "https://api.pexels.com/v1/search?query=$wallType&per_page=50"
@@ -377,6 +378,7 @@ class NewAppWidget : AppWidgetProvider() {
         StrictMode.setThreadPolicy(policy)
 
         val wpm = WallpaperManager.getInstance(appContx)
+        wpm.suggestDesiredDimensions(sharedPreferences.getInt("sWidth", 0), sharedPreferences.getInt("sHeight", 0))
         var ins: InputStream? = null
         try {
             ins =
@@ -740,8 +742,8 @@ class NewAppWidget : AppWidgetProvider() {
 
     companion object {
         private var Apps: ArrayList<App> = ArrayList()
-        private lateinit var sharedPreferencesEditor: SharedPreferences.Editor
-        private lateinit var sharedPreferences: SharedPreferences
+        lateinit var sharedPreferencesEditor: SharedPreferences.Editor
+        lateinit var sharedPreferences: SharedPreferences
 
 
         fun addContactInWidget(strN: String, strNu: String, drawable: Drawable) {

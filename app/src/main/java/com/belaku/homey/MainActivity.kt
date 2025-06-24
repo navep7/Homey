@@ -1,6 +1,8 @@
 package com.belaku.homey
 
 import android.Manifest
+import android.R.attr.height
+import android.R.attr.width
 import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
@@ -17,10 +19,10 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +37,8 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
+import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
@@ -63,10 +67,13 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         appContx = applicationContext
+        sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
         BRo()
+        GetDisplayDimens()
 
         checkP()
 
@@ -85,6 +92,14 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
             startActivityForResult(intent, RESULT_ENABLE)
         }
+
+    }
+
+    private fun GetDisplayDimens() {
+        var displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        sharedPreferencesEditor.putInt("sWidth", displayMetrics.widthPixels).apply()
+        sharedPreferencesEditor.putInt("sHeight", displayMetrics.heightPixels).apply()
 
     }
 
