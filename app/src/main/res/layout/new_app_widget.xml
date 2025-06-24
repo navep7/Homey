@@ -207,13 +207,27 @@
 
     </LinearLayout>
 
+
+    <TextView
+        android:id="@+id/tx_prompt"
+        android:layout_above="@+id/imgbtn_refresh"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:text="Wallpaper >"
+        android:textStyle="bold"
+        android:textColor="?attr/colorPrimaryContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
     <ImageButton
         android:id="@+id/imgbtn_refresh"
         android:background="@android:color/transparent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:src="@drawable/reload"
-        android:layout_margin="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="50dp"
         android:scaleType="fitXY"
         android:layout_width="60dp"
         android:layout_height="60dp"/>

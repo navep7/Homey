@@ -33,14 +33,16 @@ import android.icu.util.Calendar
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.provider.ContactsContract
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Display
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
@@ -65,6 +67,8 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private lateinit var wallType: String
+    var wallTypes: List<String> = mutableListOf("Beautiful", "Trending", "festival", "Sunset", "Beach", "Rain", "Diwali", "Street", "Cityscapes")
     private var imgUrls: ArrayList<String> = ArrayList()
     private lateinit var oB: String
     private lateinit var wBs: List<Bitmap>
@@ -88,6 +92,11 @@ class NewAppWidget : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.tx_prompt,
+            getPendingSelfIntent(context, WALLTYPE_CLICKED)
+        )
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
@@ -194,23 +203,22 @@ class NewAppWidget : AppWidgetProvider() {
 
         makeToast("IAtoS - " + intent.action.toString())
 
-        if (SYNC_CLICKED == intent.action)
-            refresh(context)
 
-        var mp: MediaPlayer = MediaPlayer.create(context, R.raw.click)
+
+        if (WALLTYPE_CLICKED == intent.action) {
+            imgUrls.clear()
+            wallType = wallTypes[Random().nextInt(wallTypes.size)]
+            sharedPreferencesEditor.putString("wallType", wallType).apply()
+            clickSound(context)
+            remoteViews.setTextViewText(R.id.tx_prompt, sharedPreferences.getString("wallType", "abc") + " >")
+        }
+
+
         if (WALL_CHANGE == intent.action) {
             //   remoteViews.setViewVisibility(R.id.refresh, View.INVISIBLE)
-            try {
-                if (mp.isPlaying) {
-                    mp.stop()
-                    mp.release()
-                    mp = MediaPlayer.create(context, R.raw.click)
-                }
-                mp.start()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            clickSound(context)
             fetchWallpaper()
+            remoteViews.setTextViewText(R.id.tx_prompt, sharedPreferences.getString("wallType", "abc") + " >")
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -265,12 +273,28 @@ class NewAppWidget : AppWidgetProvider() {
         }
     }
 
+    private fun clickSound(context: Context) {
+        var mp: MediaPlayer = MediaPlayer.create(context, R.raw.click)
+        try {
+            if (mp.isPlaying) {
+                mp.stop()
+                mp.release()
+                mp = MediaPlayer.create(context, R.raw.click)
+            }
+            mp.start()
+            Handler().postDelayed(Runnable { mp.release() }, 3000)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun fetchWallpaper() {
         readWalls()
-        makeToast("fetchWallpaper - " + imgUrls.size)
+        wallType = sharedPreferences.getString("wallType", "abc").toString()
+        makeToast("fetchWallpaper - " + wallType)
         //   val url = "https://api.pexels.com/v1/curated/?page=" + 1.toString() + "&per_page=80";
 
-        val url = "https://api.pexels.com/v1/search?query=blur&per_page=50"
+        val url = "https://api.pexels.com/v1/search?query=$wallType&per_page=50"
 
         if (imgUrls.size == 0) {
             makeToast("Vrequest")
@@ -291,7 +315,7 @@ class NewAppWidget : AppWidgetProvider() {
                             val length = jsonArray.length()
 
                             makeToast("Wlength7 - " + length)
-                            var rn: Int = 0
+
 
                             for (i in 0 until length) {
                                 val `object` = jsonArray.getJSONObject(i)
@@ -300,6 +324,10 @@ class NewAppWidget : AppWidgetProvider() {
                             }
                             saveWalls(imgUrls)
 
+                            val rn1 = Random().nextInt(imgUrls.size) - 0
+                            val originalUrl = imgUrls.get(rn1)
+                            makeToast("Rnum : " + rn1 + " " + originalUrl)
+                            UrlToWall(originalUrl)
 
                         } catch (e: JSONException) {
                             makeToast("EXE7 - " + e.message)
@@ -307,7 +335,7 @@ class NewAppWidget : AppWidgetProvider() {
                     }
                 }, object : Response.ErrorListener {
                     override fun onErrorResponse(error: VolleyError?) {
-
+                        makeToast("onErrorResponse - " + error.toString())
                     }
                 }) {
                 @Throws(AuthFailureError::class)
@@ -361,12 +389,6 @@ class NewAppWidget : AppWidgetProvider() {
         refresh(appContx)
     }
 
-    private fun setWallpaper(wB: Bitmap) {
-        makeToast("setWallpaper - ")
-        remoteViews.setImageViewBitmap(R.id.imgv_add3, wB)
-        val wallpaperManager = WallpaperManager.getInstance(appContx)
-        wallpaperManager.setBitmap(wB)
-    }
 
 
     private fun refresh(context: Context) {
@@ -851,6 +873,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
+        private const val WALLTYPE_CLICKED = "wallType"
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
         private const val APP2_CLICKED = "App2Clicked"

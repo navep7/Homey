@@ -60,6 +60,19 @@
                 android:name="android.app.device_admin"
                 android:resource="@xml/policies" />
             <intent-filter android:priority="1000">
+                <action android:name="com.belaku.homey.NewAppWidget.WALL_CHANGE"/>
+                <action android:name="com.belaku.homey.NewAppWidget.LOCK_PHONE"/>
+                <action android:name="com.belaku.homey.NewAppWidget.WALLTYPE_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.APP1_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.APP2_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.APP3_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.APP4_CLICKED"/>
+
+                <action android:name="com.belaku.homey.NewAppWidget.C1_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.C2_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.C3_CLICKED"/>
+                <action android:name="com.belaku.homey.NewAppWidget.C4_CLICKED"/>
+
                 <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
                 <action android:name="android.intent.action.DEVICE_ADMIN_ENABLED" />
