@@ -1,10 +1,5 @@
 package com.belaku.homey
 
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
 import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
@@ -38,8 +33,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import android.os.Handler
-import android.os.StrictMode
-import android.os.StrictMode.ThreadPolicy
+import android.os.Looper
 import android.provider.ContactsContract
 import android.util.Log
 import android.view.View
@@ -52,12 +46,15 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.makeToast
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.runBlocking
+import com.squareup.picasso.Picasso
+import com.squareup.picasso.Picasso.LoadedFrom
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
-import java.io.InputStream
 import java.net.URL
 import java.util.Collections
 import java.util.Date
@@ -70,7 +67,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-    private lateinit var inputStream: InputStream
+    private lateinit var mp: MediaPlayer
     private val pexelUrl: String =
         "https://api.pexels.com/v1/search?query=iphone_wallpaper&per_page=25"
 
@@ -97,6 +94,8 @@ class NewAppWidget : AppWidgetProvider() {
     val choosenApps: ArrayList<App> = ArrayList()
     var favContacts: ArrayList<Contact> = ArrayList()
     lateinit var gpName: String
+
+
 
     override fun onUpdate(
         context: Context,
@@ -211,6 +210,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         if (WALL_CHANGE == intent.action) {
+            makeToast("WALL_CHANGE!")
             clickSound(context)
             fetchWallpaper(context)
         }
@@ -269,25 +269,19 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     private fun clickSound(context: Context) {
-        var mp: MediaPlayer = MediaPlayer.create(context, R.raw.click)
-        try {
-            if (mp.isPlaying) {
-                mp.stop()
-                mp.release()
-                mp = MediaPlayer.create(context, R.raw.click)
-            }
-            mp.start()
-            Handler().postDelayed(Runnable { mp.release() }, 3000)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+
+        makeToast("clickSound!")
+        mp = MediaPlayer.create(context, R.raw.click)
+        mp.start()
+        Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
+
     }
 
     fun fetchWallpaper(context: Context) {
 
-        readWalls()
+        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
 
-        makeToast("fetchWallpaper - " + imgUrls.size)
+        makeToast("fetchWallpaper! - " + imgUrls.size)
 
         if (imgUrls.size == 0) {
             makeToast("Vrequest")
@@ -310,11 +304,11 @@ class NewAppWidget : AppWidgetProvider() {
                             val objectImages = `object`.getJSONObject("src")
                             imgUrls.add(objectImages.getString("original"))
                         }
-                        saveWalls(imgUrls)
+                        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
 
                         val rn1 = Random().nextInt(imgUrls.size) - 0
                         val originalUrl = imgUrls.get(rn1)
-                        makeToast("Rnum : " + rn1 + " " + originalUrl)
+                        makeToast("Rnum1 : " + rn1 + " " + originalUrl)
                         setWallpaperFromUrl(context, originalUrl)
 
                     } catch (e: JSONException) {
@@ -326,6 +320,7 @@ class NewAppWidget : AppWidgetProvider() {
                         remoteViews.setTextViewText(R.id.tx_desc, "onError")
                         remoteViews.setViewVisibility(R.id.progressBar, View.INVISIBLE)
                         remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
+                        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
                     }
                 }) {
                 @Throws(AuthFailureError::class)
@@ -348,21 +343,18 @@ class NewAppWidget : AppWidgetProvider() {
 
             val rn = Random().nextInt(imgUrls.size) - 0
             val originalUrl = imgUrls.get(rn)
-            makeToast("Rnum : " + rn + " " + originalUrl)
+            makeToast("Rnum2 : " + rn + " " + originalUrl)
             setWallpaperFromUrl(context, originalUrl)
         }
     }
 
-    private fun readWalls() {
-        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
-    }
 
-    private fun saveWalls(imgUrls: java.util.ArrayList<String>) {
-        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
-    }
-
+    @OptIn(DelicateCoroutinesApi::class)
     fun setWallpaperFromUrl(context: Context, imageUrl: String) {
-        GlobalScope.launch(Dispatchers.IO) {
+        makeToast("setWallpaperFromUrl!")
+
+
+        CoroutineScope(Dispatchers.IO).launch {
             val inputStream = URL(imageUrl).openStream()
             WallpaperManager.getInstance(context).setStream(inputStream)
         }
@@ -825,4 +817,7 @@ class NewAppWidget : AppWidgetProvider() {
         private const val C3_CLICKED = "C3Clicked"
         private const val C4_CLICKED = "C4Clicked"
     }
+
+
+
 }
