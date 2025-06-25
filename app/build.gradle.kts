@@ -14,6 +14,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        renderscriptTargetApi = 18
+        renderscriptSupportModeEnabled = true
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,8 +42,9 @@ android {
 }
 
 dependencies {
-    implementation(libs.gson)
-    implementation(libs.picasso)
+
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.0"
+blur_tutorial = "1.0.1"
 gson = "2.13.1"
 kotlin = "1.9.0"
 coreKtx = "1.16.0"
@@ -18,6 +19,7 @@ volley = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+blur_tutorial = { module = "com.cleveroad.blur_tutorial:blur_tutorial", version.ref = "blur_tutorial" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

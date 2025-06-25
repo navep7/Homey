@@ -35,6 +35,10 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
+import android.renderscript.Allocation
+import android.renderscript.Element
+import android.renderscript.RenderScript
+import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -46,15 +50,12 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.makeToast
-import com.squareup.picasso.Picasso
-import com.squareup.picasso.Picasso.LoadedFrom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.IOException
 import java.net.URL
 import java.util.Collections
 import java.util.Date
@@ -69,7 +70,7 @@ class NewAppWidget : AppWidgetProvider() {
 
     private lateinit var mp: MediaPlayer
     private val pexelUrl: String =
-        "https://api.pexels.com/v1/search?query=iphone_wallpaper&per_page=25"
+        "https://api.pexels.com/v1/search?query=vibrant&per_page=10"
 
     private lateinit var newAppWidget: ComponentName
     private lateinit var appWidgetManager: AppWidgetManager
@@ -96,15 +97,13 @@ class NewAppWidget : AppWidgetProvider() {
     lateinit var gpName: String
 
 
-
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
 
-
-        val remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
 
@@ -171,7 +170,6 @@ class NewAppWidget : AppWidgetProvider() {
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
-        //   remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         super.onReceive(context, intent)
 
@@ -181,6 +179,7 @@ class NewAppWidget : AppWidgetProvider() {
         appIndex = 0
         conIndex = 0
 
+        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
@@ -268,6 +267,7 @@ class NewAppWidget : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
     }
 
+
     private fun clickSound(context: Context) {
 
         makeToast("clickSound!")
@@ -306,10 +306,13 @@ class NewAppWidget : AppWidgetProvider() {
                         }
                         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
 
-                        val rn1 = Random().nextInt(imgUrls.size) - 0
-                        val originalUrl = imgUrls.get(rn1)
-                        makeToast("Rnum1 : " + rn1 + " " + originalUrl)
-                        setWallpaperFromUrl(context, originalUrl)
+                        if (imgUrls.size > 0) {
+                            val rn1 = Random().nextInt(imgUrls.size) - 0
+                            val originalUrl = imgUrls.get(rn1)
+                            makeToast("Rnum1 : " + rn1 + " " + originalUrl)
+                            setWallpaperFromUrl(context, originalUrl)
+                            remoteViews.setTextViewText(R.id.tx_desc, "!")
+                        }
 
                     } catch (e: JSONException) {
                         makeToast("EXE7 - " + e.message)
@@ -355,8 +358,13 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         CoroutineScope(Dispatchers.IO).launch {
-            val inputStream = URL(imageUrl).openStream()
-            WallpaperManager.getInstance(context).setStream(inputStream)
+            try {
+                val inputStream = URL(imageUrl).openStream()
+                WallpaperManager.getInstance(context).setStream(inputStream)
+            } catch (ex: Exception) {
+                makeToast(ex.message.toString() + " - EX!")
+            //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+            }
         }
     }
 
@@ -466,7 +474,6 @@ class NewAppWidget : AppWidgetProvider() {
         val c: Date = Calendar.getInstance().time
         val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
-        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
     }
 
@@ -801,7 +808,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private var appIndex: Int = 0
         private var conIndex: Int = 0
-        private lateinit var remoteViews: RemoteViews
+        lateinit var remoteViews: RemoteViews
 
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
@@ -817,7 +824,6 @@ class NewAppWidget : AppWidgetProvider() {
         private const val C3_CLICKED = "C3Clicked"
         private const val C4_CLICKED = "C4Clicked"
     }
-
 
 
 }

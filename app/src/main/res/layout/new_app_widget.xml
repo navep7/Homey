@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/rl_widget_layout"
-    android:background="@drawable/gradient_glass"
     android:theme="@style/Theme.Material3.DynamicColors.DayNight"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_glass"
     android:orientation="vertical">
 
 
@@ -122,7 +122,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="?attr/colorTertiaryContainer"/>
 
         </RelativeLayout>
 
@@ -151,7 +151,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="?attr/colorTertiaryContainer" />
 
         </RelativeLayout>
 
@@ -180,7 +180,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="?attr/colorTertiaryContainer" />
 
         </RelativeLayout>
 
@@ -209,7 +209,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="?attr/colorTertiaryContainer" />
 
         </RelativeLayout>
 
