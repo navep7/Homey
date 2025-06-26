@@ -174,6 +174,8 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
+        var bs = sharedPreferences.getStringSet("walls", null)
+        makeToast("bsc - " + bs)
         appIndex = 0
         conIndex = 0
 
@@ -209,9 +211,11 @@ class NewAppWidget : AppWidgetProvider() {
         if (WALL_CHANGE == intent.action) {
             makeToast("WALL_CHANGE!")
             clickSound(context)
-            sharedPreferences.getStringSet("walls", null)?.let {
-                makeToast("Rrrrd - " + it.size)
-                setWallpaperFromUrl(context, it.toMutableList().get(Random().nextInt(it.size))) }
+            if (bs != null) {
+                makeToast("Rrrrd - " + bs.size)
+                setWallpaperFromUrl(context, bs.toMutableList().get(Random().nextInt(bs.size)))
+            }
+
         }
 
         if (LOCK_PHONE == intent.action) {
