@@ -23,6 +23,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +38,7 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import com.belaku.homey.databinding.ActivityMainBinding
@@ -47,10 +49,15 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.URL
 import java.util.Date
+import java.util.Random
 
 
 class MainActivity : AppCompatActivity() {
 
+
+    private val pexelUrl: String =
+        "https://api.pexels.com/v1/search?query=vibrant&per_page=10"
+    private var imgUrls: ArrayList<String> = ArrayList()
     private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
     private lateinit var sinceDate: Date
@@ -72,6 +79,9 @@ class MainActivity : AppCompatActivity() {
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
+        sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
+
         BRo()
         GetDisplayDimens()
 
@@ -86,6 +96,9 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
+
+            fetchWallpaper(applicationContext)
+
             val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
             var compName = ComponentName(this, DeviceAdmin::class.java)
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
@@ -173,6 +186,64 @@ class MainActivity : AppCompatActivity() {
             alertDialog.show()
         }
 
+    }
+
+    fun fetchWallpaper(context: Context) {
+
+        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
+
+        makeToast("fetchWallpaper! - " + imgUrls.size)
+
+        if (imgUrls.size == 0) {
+            makeToast("Vrequest")
+            val request: StringRequest = object : StringRequest(
+
+                com.android.volley.Request.Method.GET, pexelUrl,
+                Response.Listener<String?> { response ->
+                    try {
+                        val jsonObject = JSONObject(response)
+
+                        val jsonArray = jsonObject.getJSONArray("photos")
+
+                        val length = jsonArray.length()
+
+                        makeToast("Wlength7 - " + length)
+
+
+                        for (i in 0 until length) {
+                            val `object` = jsonArray.getJSONObject(i)
+                            val objectImages = `object`.getJSONObject("src")
+                            imgUrls.add(objectImages.getString("original"))
+                        }
+                        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+
+
+
+                    } catch (e: JSONException) {
+                        makeToast("EXE7 - " + e.message)
+                    }
+                }, object : Response.ErrorListener {
+                    override fun onErrorResponse(error: VolleyError?) {
+                        makeToast("onErrorResponse - " + error.toString())
+                    }
+                }) {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String> {
+                    val params: MutableMap<String, String> = HashMap()
+                    params["Authorization"] =
+                        "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
+
+                    return params
+                }
+
+
+            }
+
+            val requestQueue = Volley.newRequestQueue(context)
+            requestQueue.add(request)
+
+
+        }
     }
 
     private fun getGrantStatus(): Boolean {

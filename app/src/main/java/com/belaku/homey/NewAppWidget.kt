@@ -69,8 +69,6 @@ class NewAppWidget : AppWidgetProvider() {
 
 
     private lateinit var mp: MediaPlayer
-    private val pexelUrl: String =
-        "https://api.pexels.com/v1/search?query=vibrant&per_page=10"
 
     private lateinit var newAppWidget: ComponentName
     private lateinit var appWidgetManager: AppWidgetManager
@@ -86,7 +84,7 @@ class NewAppWidget : AppWidgetProvider() {
         "Street",
         "Cityscapes"
     )
-    private var imgUrls: ArrayList<String> = ArrayList()
+
     private lateinit var oB: String
     private lateinit var wBs: List<Bitmap>
     private var pgNo: Int = 1
@@ -211,7 +209,9 @@ class NewAppWidget : AppWidgetProvider() {
         if (WALL_CHANGE == intent.action) {
             makeToast("WALL_CHANGE!")
             clickSound(context)
-            fetchWallpaper(context)
+            sharedPreferences.getStringSet("walls", null)?.let {
+                makeToast("Rrrrd - " + it.size)
+                setWallpaperFromUrl(context, it.toMutableList().get(Random().nextInt(it.size))) }
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -277,79 +277,7 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-    fun fetchWallpaper(context: Context) {
 
-        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
-
-        makeToast("fetchWallpaper! - " + imgUrls.size)
-
-        if (imgUrls.size == 0) {
-            makeToast("Vrequest")
-            val request: StringRequest = object : StringRequest(
-
-                com.android.volley.Request.Method.GET, pexelUrl,
-                Response.Listener<String?> { response ->
-                    try {
-                        val jsonObject = JSONObject(response)
-
-                        val jsonArray = jsonObject.getJSONArray("photos")
-
-                        val length = jsonArray.length()
-
-                        makeToast("Wlength7 - " + length)
-
-
-                        for (i in 0 until length) {
-                            val `object` = jsonArray.getJSONObject(i)
-                            val objectImages = `object`.getJSONObject("src")
-                            imgUrls.add(objectImages.getString("original"))
-                        }
-                        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
-
-                        if (imgUrls.size > 0) {
-                            val rn1 = Random().nextInt(imgUrls.size) - 0
-                            val originalUrl = imgUrls.get(rn1)
-                            makeToast("Rnum1 : " + rn1 + " " + originalUrl)
-                            setWallpaperFromUrl(context, originalUrl)
-                            remoteViews.setTextViewText(R.id.tx_desc, "!")
-                        }
-
-                    } catch (e: JSONException) {
-                        makeToast("EXE7 - " + e.message)
-                    }
-                }, object : Response.ErrorListener {
-                    override fun onErrorResponse(error: VolleyError?) {
-                        makeToast("onErrorResponse - " + error.toString())
-                        remoteViews.setTextViewText(R.id.tx_desc, "onError")
-                        remoteViews.setViewVisibility(R.id.progressBar, View.INVISIBLE)
-                        remoteViews.setViewVisibility(R.id.imgbtn_refresh, View.VISIBLE)
-                        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
-                    }
-                }) {
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String> {
-                    val params: MutableMap<String, String> = HashMap()
-                    params["Authorization"] =
-                        "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
-
-                    return params
-                }
-
-
-            }
-
-            val requestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(request)
-
-
-        } else {
-
-            val rn = Random().nextInt(imgUrls.size) - 0
-            val originalUrl = imgUrls.get(rn)
-            makeToast("Rnum2 : " + rn + " " + originalUrl)
-            setWallpaperFromUrl(context, originalUrl)
-        }
-    }
 
 
     @OptIn(DelicateCoroutinesApi::class)
