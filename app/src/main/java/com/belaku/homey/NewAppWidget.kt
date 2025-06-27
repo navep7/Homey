@@ -108,6 +108,8 @@ class NewAppWidget : AppWidgetProvider() {
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
         appWM = appWidgetManager
 
+
+
         remoteViews.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
             getPendingSelfIntent(context, WALL_CHANGE)
@@ -163,6 +165,9 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, C4_CLICKED)
         )
 
+        for (appWidgetId in appWidgetIds) {
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+        }
         appWM.updateAppWidget(newAppWidget, remoteViews)
     }
 
