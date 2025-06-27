@@ -58,6 +58,7 @@ class MainActivity : AppCompatActivity() {
     private val pexelUrl: String =
         "https://api.pexels.com/v1/search?query=vibrant&per_page=10"
     private var imgUrls: ArrayList<String> = ArrayList()
+    private var imgDescs: ArrayList<String> = ArrayList()
     private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
     private lateinit var sinceDate: Date
@@ -82,10 +83,11 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
-        BRo()
+        fetchWallpaper(applicationContext)
         GetDisplayDimens()
-
         checkP()
+
+
 
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
@@ -96,8 +98,6 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
-
-            fetchWallpaper(applicationContext)
 
             val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
             var compName = ComponentName(this, DeviceAdmin::class.java)
@@ -134,17 +134,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun BRo() {
-
-
-        brTimeTick = TimeTickReceiver()
-        IntentFilter(Intent.ACTION_TIME_TICK).also {
-            // registering the receiver
-            // it parameter which is passed in  registerReceiver() function
-            // is the intent filter that we have just created
-            registerReceiver(brTimeTick, it)
-        }
-    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -190,7 +179,13 @@ class MainActivity : AppCompatActivity() {
 
     fun fetchWallpaper(context: Context) {
 
+        imgUrls.clear()
+        imgDescs.clear()
+
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
+        sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
+
+        makeToast("CmpR GET - " + imgUrls.toString() + " - " + imgDescs.toString())
 
         makeToast("fetchWallpaper! - " + imgUrls.size)
 
@@ -211,12 +206,15 @@ class MainActivity : AppCompatActivity() {
 
 
                         for (i in 0 until length) {
-                            val `object` = jsonArray.getJSONObject(i)
-                            val objectImages = `object`.getJSONObject("src")
+                            val jsonObject = jsonArray.getJSONObject(i)
+                            val objectImages = jsonObject.getJSONObject("src")
                             imgUrls.add(objectImages.getString("original"))
+                            imgDescs.add(jsonObject.getString("alt"))
                         }
                         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+                        sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
 
+                        makeToast("CmpR PUT - " + imgUrls.toString() + " - " + imgDescs.toString())
 
 
                     } catch (e: JSONException) {

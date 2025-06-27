@@ -68,10 +68,13 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var walls: HashSet<String> = HashSet()
+    private var wallDescs: HashSet<String> = HashSet()
+
     private lateinit var mp: MediaPlayer
 
     private lateinit var newAppWidget: ComponentName
-    private lateinit var appWidgetManager: AppWidgetManager
+    private lateinit var appWM: AppWidgetManager
     private lateinit var wallType: String
     var wallTypes: List<String> = mutableListOf(
         "Beautiful",
@@ -103,8 +106,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
-
-
+        appWM = appWidgetManager
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
@@ -123,7 +125,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
-            getPendingSelfIntent(context, APP1_CLICKED)
+            getPendingSelfActivityIntent(context, APP1_CLICKED)
         )
 
         remoteViews.setOnClickPendingIntent(
@@ -161,7 +163,7 @@ class NewAppWidget : AppWidgetProvider() {
             getPendingSelfIntent(context, C4_CLICKED)
         )
 
-        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
+        appWM.updateAppWidget(newAppWidget, remoteViews)
     }
 
 
@@ -174,8 +176,9 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
-        var bs = sharedPreferences.getStringSet("walls", null)
-        makeToast("bsc - " + bs)
+        walls = sharedPreferences.getStringSet("walls", walls) as HashSet<String>
+        wallDescs = sharedPreferences.getStringSet("wallDescs", wallDescs) as HashSet<String>
+
         appIndex = 0
         conIndex = 0
 
@@ -183,6 +186,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
+
+        remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour +  ":" + currentMin)
 
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
             "Morning"
@@ -195,10 +200,11 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         makeToast("onReceive")
-        appWidgetManager = AppWidgetManager.getInstance(context)
+        appWM = AppWidgetManager.getInstance(context)
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)
+        setWalls(context)
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
@@ -208,15 +214,8 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
-        if (WALL_CHANGE == intent.action) {
-            makeToast("WALL_CHANGE!")
-            clickSound(context)
-            if (bs != null) {
-                makeToast("Rrrrd - " + bs.size)
-                setWallpaperFromUrl(context, bs.toMutableList().get(Random().nextInt(bs.size)))
-            }
-
-        }
+        if (WALL_CHANGE == intent.action)
+            setWalls(context)
 
         if (LOCK_PHONE == intent.action) {
 
@@ -234,6 +233,7 @@ class NewAppWidget : AppWidgetProvider() {
             var app = readApps()[0]
             Log.d("APP1_CLICKED", app)
             launchApp(context, app)
+            appWM.updateAppWidget(R.id.imgv_add1, remoteViews)
         }
 
         if (APP2_CLICKED == intent.action) {
@@ -268,7 +268,23 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
-        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
+        appWM.updateAppWidget(newAppWidget, remoteViews)
+
+    }
+
+    private fun setWalls(context: Context) {
+
+            var randomNumber = 0
+            makeToast("WALL_CHANGE!")
+            clickSound(context)
+            if (walls.size > 0 && wallDescs.size > 0) {
+                randomNumber = Random().nextInt(walls.size)
+                makeToast( "" + walls.size + " Rrrrd - " + wallDescs.size)
+                setWallpaperFromUrl(context, walls.toMutableList().get(randomNumber))
+                remoteViews.setTextViewText(R.id.tx_desc, wallDescs.toMutableList().get(randomNumber))
+            }
+
+
     }
 
 
@@ -608,6 +624,14 @@ class NewAppWidget : AppWidgetProvider() {
         intent.setAction(action)
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
+
+    protected fun getPendingSelfActivityIntent(context: Context?, action: String?): PendingIntent {
+        val intent = Intent(context, javaClass)
+        intent.setAction(action)
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+    }
+
+
 
     companion object {
         private var Apps: ArrayList<App> = ArrayList()

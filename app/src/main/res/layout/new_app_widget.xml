@@ -15,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorSecondaryContainer"
+        android:textColor="?attr/colorPrimaryInverse"
         android:textSize="35sp" />
 
     <android.widget.TextClock
@@ -38,7 +38,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorSecondaryContainer"
+        android:textColor="?attr/colorPrimaryInverse"
         android:textSize="35sp" />
 
     <LinearLayout
@@ -122,7 +122,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="?attr/colorTertiaryContainer"/>
+                android:textColor="?attr/colorPrimaryInverse"/>
 
         </RelativeLayout>
 
@@ -151,7 +151,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="?attr/colorTertiaryContainer" />
+                android:textColor="?attr/colorPrimaryInverse" />
 
         </RelativeLayout>
 
@@ -180,7 +180,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="?attr/colorTertiaryContainer" />
+                android:textColor="?attr/colorPrimaryInverse" />
 
         </RelativeLayout>
 
@@ -209,7 +209,7 @@
                 android:maxWidth="55sp"
                 android:ellipsize="end"
                 android:textStyle="bold"
-                android:textColor="?attr/colorTertiaryContainer" />
+                android:textColor="?attr/colorPrimaryInverse" />
 
         </RelativeLayout>
 
@@ -219,6 +219,10 @@
 
     <TextView
         android:id="@+id/tx_desc"
+        android:text="Desc.."
+        android:textStyle="bold|italic"
+        android:textSize="21sp"
+        android:textColor="@android:color/holo_red_dark"
         android:layout_below="@id/ll_contacts"
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/fab_margin"
@@ -276,6 +280,16 @@
         android:layout_height="60dp"/>
 
 
+    <TextView
+        android:id="@+id/tx_timwstamp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:text="HH:MM:SS"
+        android:layout_margin="@dimen/fab_margin"
+        android:textStyle="bold"
+        android:textColor="?attr/colorSurfaceInverse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 
 </RelativeLayout>
