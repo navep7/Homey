@@ -35,27 +35,16 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
-import android.renderscript.Allocation
-import android.renderscript.Element
-import android.renderscript.RenderScript
-import android.renderscript.ScriptIntrinsicBlur
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import com.android.volley.AuthFailureError
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.belaku.homey.MainActivity.Companion.makeToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.json.JSONException
-import org.json.JSONObject
 import java.net.URL
 import java.util.Collections
 import java.util.Date
@@ -88,9 +77,6 @@ class NewAppWidget : AppWidgetProvider() {
         "Cityscapes"
     )
 
-    private lateinit var oB: String
-    private lateinit var wBs: List<Bitmap>
-    private var pgNo: Int = 1
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
     val choosenApps: ArrayList<App> = ArrayList()
@@ -104,71 +90,65 @@ class NewAppWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
 
-        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
-        newAppWidget = ComponentName(context, NewAppWidget::class.java)
+
         appWM = appWidgetManager
 
+        for (appWidgId in appWidgetIds) {
+            remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+            newAppWidget = ComponentName(context, NewAppWidget::class.java)
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_add1,
+                getPendingSelfIntent(context, APP1_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_add2,
+                getPendingSelfIntent(context, APP2_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_add3,
+                getPendingSelfIntent(context, APP3_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_add4,
+                getPendingSelfIntent(context, APP4_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_add5,
+                getPendingSelfIntent(context, APP5_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_contact1,
+                getPendingSelfIntent(context, C1_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_contact2,
+                getPendingSelfIntent(context, C2_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_contact3,
+                getPendingSelfIntent(context, C3_CLICKED)
+            )
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgv_contact4,
+                getPendingSelfIntent(context, C4_CLICKED)
+            )
 
 
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgbtn_refresh,
-            getPendingSelfIntent(context, WALL_CHANGE)
-        )
 
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgbtn_lock,
-            getPendingSelfIntent(context, LOCK_PHONE)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.rl_widget_layout,
-            getPendingSelfIntent(context, SYNC_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_add1,
-            getPendingSelfActivityIntent(context, APP1_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_add2,
-            getPendingSelfIntent(context, APP2_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_add3,
-            getPendingSelfIntent(context, APP3_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_add4,
-            getPendingSelfIntent(context, APP4_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact1,
-            getPendingSelfIntent(context, C1_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact2,
-            getPendingSelfIntent(context, C2_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact3,
-            getPendingSelfIntent(context, C3_CLICKED)
-        )
-
-        remoteViews.setOnClickPendingIntent(
-            R.id.imgv_contact4,
-            getPendingSelfIntent(context, C4_CLICKED)
-        )
-
-        for (appWidgetId in appWidgetIds) {
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            appWidgetManager.updateAppWidget(appWidgId, remoteViews)
         }
-        appWM.updateAppWidget(newAppWidget, remoteViews)
+
+        appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
+
     }
 
 
@@ -192,7 +172,7 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-        remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour +  ":" + currentMin)
+        remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
 
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
             "Morning"
@@ -209,7 +189,12 @@ class NewAppWidget : AppWidgetProvider() {
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)
-        setWalls(context)
+
+
+        makeToast("CHKI " + intent.action)
+
+        if (intent.action!!.contains("."))
+            setWalls(context)
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
@@ -219,26 +204,25 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
-        if (WALL_CHANGE == intent.action)
-            setWalls(context)
+        /* if (WALL_CHANGE == intent.action)
+             setWalls(context)
 
-        if (LOCK_PHONE == intent.action) {
+         if (LOCK_PHONE == intent.action) {
 
-            var deviceManger =
-                context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            var compName = ComponentName(context, DeviceAdmin::class.java)
-            val active: Boolean = deviceManger.isAdminActive(compName)
+             val deviceManger =
+                 context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+             val compName = ComponentName(context, DeviceAdmin::class.java)
+             val active: Boolean = deviceManger.isAdminActive(compName)
 
-            if (active)
-                deviceManger.lockNow()
-        }
+             if (active)
+                 deviceManger.lockNow()
+         }*/
 
 
         if (APP1_CLICKED == intent.action) {
             var app = readApps()[0]
             Log.d("APP1_CLICKED", app)
             launchApp(context, app)
-            appWM.updateAppWidget(R.id.imgv_add1, remoteViews)
         }
 
         if (APP2_CLICKED == intent.action) {
@@ -256,6 +240,12 @@ class NewAppWidget : AppWidgetProvider() {
         if (APP4_CLICKED == intent.action) {
             var app = readApps()[3]
             Log.d("APP4_CLICKED", app)
+            launchApp(context, app)
+        }
+
+        if (APP5_CLICKED == intent.action) {
+            var app = readApps()[4]
+            Log.d("APP5_CLICKED", app)
             launchApp(context, app)
         }
 
@@ -279,15 +269,15 @@ class NewAppWidget : AppWidgetProvider() {
 
     private fun setWalls(context: Context) {
 
-            var randomNumber = 0
-            makeToast("WALL_CHANGE!")
-            clickSound(context)
-            if (walls.size > 0 && wallDescs.size > 0) {
-                randomNumber = Random().nextInt(walls.size)
-                makeToast( "" + walls.size + " Rrrrd - " + wallDescs.size)
-                setWallpaperFromUrl(context, walls.toMutableList().get(randomNumber))
-                remoteViews.setTextViewText(R.id.tx_desc, wallDescs.toMutableList().get(randomNumber))
-            }
+        var randomNumber = 0
+        makeToast("WALL_CHANGE!")
+        clickSound(context)
+        if (walls.size > 0 && wallDescs.size > 0) {
+            randomNumber = Random().nextInt(walls.size)
+            makeToast("" + walls.size + " Rrrrd - " + wallDescs.size)
+            setWallpaperFromUrl(context, walls.toMutableList().get(randomNumber))
+            remoteViews.setTextViewText(R.id.tx_desc, wallDescs.toMutableList().get(randomNumber))
+        }
 
 
     }
@@ -303,8 +293,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-
-
     @OptIn(DelicateCoroutinesApi::class)
     fun setWallpaperFromUrl(context: Context, imageUrl: String) {
         makeToast("setWallpaperFromUrl!")
@@ -316,7 +304,7 @@ class NewAppWidget : AppWidgetProvider() {
                 WallpaperManager.getInstance(context).setStream(inputStream)
             } catch (ex: Exception) {
                 makeToast(ex.message.toString() + " - EX!")
-            //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
             }
         }
     }
@@ -485,16 +473,20 @@ class NewAppWidget : AppWidgetProvider() {
 
             //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
             if (!appName.contains("Launcher"))
-                if (appNames.add(appName))
-                    if (choosenApps.size < 5) {
-                        choosenApps.add(
-                            App(
-                                appName, appIcon
+                if (context.packageManager.getLaunchIntentForPackage(queryUsageStats[i].packageName) != null)
+                    if (appNames.add(appName))
+                        if (choosenApps.size < 5) {
+                            choosenApps.add(
+                                App(
+                                    appName, appIcon
+                                )
                             )
-                        )
-                        Log.d("cLogSetAppIcon", appIcon.toString())
-                        addAppInWidget(context, App(queryUsageStats.get(i).packageName, appIcon))
-                    }
+                            Log.d("cLogSetAppIcon", appIcon.toString())
+                            addAppInWidget(
+                                context,
+                                App(queryUsageStats.get(i).packageName, appIcon)
+                            )
+                        }
         }
         saveApps(Apps)
 
@@ -629,14 +621,6 @@ class NewAppWidget : AppWidgetProvider() {
         intent.setAction(action)
         return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
     }
-
-    protected fun getPendingSelfActivityIntent(context: Context?, action: String?): PendingIntent {
-        val intent = Intent(context, javaClass)
-        intent.setAction(action)
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-    }
-
-
 
     companion object {
         private var Apps: ArrayList<App> = ArrayList()
@@ -779,6 +763,7 @@ class NewAppWidget : AppWidgetProvider() {
         private const val APP2_CLICKED = "App2Clicked"
         private const val APP3_CLICKED = "App3Clicked"
         private const val APP4_CLICKED = "App4Clicked"
+        private const val APP5_CLICKED = "App5Clicked"
 
         private const val C1_CLICKED = "C1Clicked"
         private const val C2_CLICKED = "C2Clicked"
