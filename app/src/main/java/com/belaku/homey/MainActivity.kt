@@ -1,10 +1,12 @@
 package com.belaku.homey
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
+import android.app.WallpaperManager
 import android.app.admin.DevicePolicyManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
@@ -22,6 +24,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.RemoteViews
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
@@ -36,18 +39,27 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
+import java.net.URL
+import java.util.Random
 
 
 class MainActivity : AppCompatActivity() {
 
 
+    private lateinit var rvAdapter: RvAdapter
+    private lateinit var rv: RecyclerView
     private var queryType: String = "iphone"
     private lateinit var editTextPrompt: EditText
     private var pexelUrl: String =
@@ -77,12 +89,15 @@ class MainActivity : AppCompatActivity() {
         sharedPreferencesEditor = sharedPreferences.edit()
 
         queryType = sharedPreferences.getString("walltype", "material design").toString()
+
+        findViewByIds()
+        setRV(imgUrls, imgDescs)
+        listeners()
+        makeToast("fetchWallpaper1")
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
-        findViewByIds()
 
-        listeners()
 
 
 
@@ -93,13 +108,42 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action", null)
                 .setAnchorView(R.id.fab).show()
 
-            val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+            setWalls(applicationContext)
+
+           /* val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
             var compName = ComponentName(this, DeviceAdmin::class.java)
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-            startActivityForResult(intent, RESULT_ENABLE)
+            startActivityForResult(intent, RESULT_ENABLE)*/
         }
 
+    }
+
+    private fun setWalls(context: Context) {
+
+        var newAppWidget = ComponentName(context, NewAppWidget::class.java)
+        var randomNumber = 0
+
+        var serviceIntent = Intent(context, WallService::class.java)
+        serviceIntent.putStringArrayListExtra("URLs", imgUrls)
+        serviceIntent.putStringArrayListExtra("DESCs", imgDescs)
+        startService(serviceIntent)
+    }
+
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun setWallpaperFromUrl(context: Context, imageUrl: String) {
+
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val inputStream = URL(imageUrl).openStream()
+                WallpaperManager.getInstance(context).setStream(inputStream)
+            } catch (ex: Exception) {
+                makeToast(ex.message.toString() + " - EX!")
+                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+            }
+        }
     }
 
     private fun listeners() {
@@ -205,7 +249,8 @@ class MainActivity : AppCompatActivity() {
 
         if (imgUrls.size == 0) {
             pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
-            val request: StringRequest = object : StringRequest(
+            val request: StringRequest = @SuppressLint("NotifyDataSetChanged")
+            object : StringRequest(
 
                 com.android.volley.Request.Method.GET, pexelUrl,
                 Response.Listener<String?> { response ->
@@ -223,14 +268,19 @@ class MainActivity : AppCompatActivity() {
                             imgUrls.add(objectImages.getString("original"))
                             imgDescs.add(jsonObject.getString("alt"))
                         }
+
+                        rvAdapter.notifyItemRangeChanged(0, length)
+
                         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
                         sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
 
-                        setRV(imgUrls, imgDescs)
+
 
                     } catch (e: JSONException) {
                         makeToast("EXE7 - " + e.message)
                     }
+
+
                 }, object : Response.ErrorListener {
                     override fun onErrorResponse(error: VolleyError?) {
                         makeToast("onErrorResponse - " + error.toString())
@@ -254,9 +304,9 @@ class MainActivity : AppCompatActivity() {
     private fun setRV(imgUrls: java.util.ArrayList<String>, imgDescs: ArrayList<String>) {
 
         makeToast("setRV - " + imgUrls.size + " : " + imgDescs.size)
-        var rv:RecyclerView = findViewById(R.id.rv_images)
+        rv = findViewById(R.id.rv_images)
         rv.layoutManager = StaggeredGridLayoutManager(2, 1)
-        var rvAdapter = RvAdapter(applicationContext, imgUrls, imgDescs)
+        rvAdapter = RvAdapter(applicationContext, imgUrls, imgDescs)
         rv.adapter = rvAdapter
     }
 

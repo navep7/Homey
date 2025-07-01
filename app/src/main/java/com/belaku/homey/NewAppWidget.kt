@@ -172,7 +172,10 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-        remoteViews.setTextViewText(R.id.tx_walltype, sharedPreferences.getString("walltype", "unKnown"))
+        remoteViews.setTextViewText(
+            R.id.tx_walltype,
+            sharedPreferences.getString("walltype", "unKnown")
+        )
         remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
@@ -229,22 +232,23 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
 
-   //     makeToast("onReceive!")
+        //     makeToast("onReceive!")
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)
 
 
-    //    makeToast("CHKI " + intent.action)
+        //    makeToast("CHKI " + intent.action)
 
-        if (intent.action!!.contains("."))
-            setWalls(context)
+        /*if (intent.action!!.contains("."))
+            setWalls(context)*/
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
         ) {
             greeting(context, remoteViews, timeOfDay)
-            getFavoriteContacts(context)
+            if (favContacts.size == 0)
+                getFavoriteContacts(context)
         }
 
 
@@ -298,20 +302,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-    private fun setWalls(context: Context) {
-
-        var randomNumber = 0
-  //      makeToast("WALL_CHANGE!")
-        clickSound(context)
-        if (walls.size > 0 && wallDescs.size > 0) {
-            randomNumber = Random().nextInt(walls.size)
-            setWallpaperFromUrl(context, walls.toMutableList().get(randomNumber))
-            remoteViews.setTextViewText(R.id.tx_desc, wallDescs.toMutableList().get(randomNumber))
-        }
-
-
-    }
-
 
     private fun clickSound(context: Context) {
 
@@ -321,21 +311,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-
-    @OptIn(DelicateCoroutinesApi::class)
-    fun setWallpaperFromUrl(context: Context, imageUrl: String) {
-
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val inputStream = URL(imageUrl).openStream()
-                WallpaperManager.getInstance(context).setStream(inputStream)
-            } catch (ex: Exception) {
-                makeToast(ex.message.toString() + " - EX!")
-                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
-            }
-        }
-    }
 
     fun dialPhoneNumber(context: Context, phoneNumber: String) {
         val intent = Intent(Intent.ACTION_CALL)

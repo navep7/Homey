@@ -50,7 +50,6 @@ class RvAdapter internal constructor(
     // stores and recycles views as they are scrolled off screen
     inner class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
-        var ryTextView: TextView = itemView.findViewById(R.id.rv_tx)
         var rvImgv: ImageView = itemView.findViewById(R.id.rv_imgv)
 
         init {
