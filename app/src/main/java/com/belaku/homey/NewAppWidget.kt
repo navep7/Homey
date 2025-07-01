@@ -63,7 +63,6 @@ class NewAppWidget : AppWidgetProvider() {
     private lateinit var mp: MediaPlayer
 
     private lateinit var newAppWidget: ComponentName
-    private lateinit var appWM: AppWidgetManager
     private lateinit var wallType: String
     var wallTypes: List<String> = mutableListOf(
         "Beautiful",
@@ -90,8 +89,6 @@ class NewAppWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
 
-
-        appWM = appWidgetManager
 
         for (appWidgId in appWidgetIds) {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
@@ -173,6 +170,50 @@ class NewAppWidget : AppWidgetProvider() {
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
         remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add1,
+            getPendingSelfIntent(context, APP1_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add2,
+            getPendingSelfIntent(context, APP2_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add3,
+            getPendingSelfIntent(context, APP3_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add4,
+            getPendingSelfIntent(context, APP4_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_add5,
+            getPendingSelfIntent(context, APP5_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact1,
+            getPendingSelfIntent(context, C1_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact2,
+            getPendingSelfIntent(context, C2_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact3,
+            getPendingSelfIntent(context, C3_CLICKED)
+        )
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgv_contact4,
+            getPendingSelfIntent(context, C4_CLICKED)
+        )
 
         var timeOfDay = if (currentHour >= 6 && currentHour < 12) {
             "Morning"
@@ -185,7 +226,6 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         makeToast("onReceive")
-        appWM = AppWidgetManager.getInstance(context)
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)
@@ -203,20 +243,6 @@ class NewAppWidget : AppWidgetProvider() {
             getFavoriteContacts(context)
         }
 
-
-        /* if (WALL_CHANGE == intent.action)
-             setWalls(context)
-
-         if (LOCK_PHONE == intent.action) {
-
-             val deviceManger =
-                 context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-             val compName = ComponentName(context, DeviceAdmin::class.java)
-             val active: Boolean = deviceManger.isAdminActive(compName)
-
-             if (active)
-                 deviceManger.lockNow()
-         }*/
 
 
         if (APP1_CLICKED == intent.action) {
@@ -263,7 +289,7 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
-        appWM.updateAppWidget(newAppWidget, remoteViews)
+        AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
 
     }
 
