@@ -229,13 +229,13 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
 
-        makeToast("onReceive!")
+   //     makeToast("onReceive!")
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)
 
 
-        makeToast("CHKI " + intent.action)
+    //    makeToast("CHKI " + intent.action)
 
         if (intent.action!!.contains("."))
             setWalls(context)
@@ -301,11 +301,10 @@ class NewAppWidget : AppWidgetProvider() {
     private fun setWalls(context: Context) {
 
         var randomNumber = 0
-        makeToast("WALL_CHANGE!")
+  //      makeToast("WALL_CHANGE!")
         clickSound(context)
         if (walls.size > 0 && wallDescs.size > 0) {
             randomNumber = Random().nextInt(walls.size)
-            makeToast("" + walls.size + " Rrrrd - " + wallDescs.size)
             setWallpaperFromUrl(context, walls.toMutableList().get(randomNumber))
             remoteViews.setTextViewText(R.id.tx_desc, wallDescs.toMutableList().get(randomNumber))
         }
@@ -316,7 +315,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     private fun clickSound(context: Context) {
 
-        makeToast("clickSound!")
         mp = MediaPlayer.create(context, R.raw.click)
         mp.start()
         Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
@@ -326,7 +324,6 @@ class NewAppWidget : AppWidgetProvider() {
 
     @OptIn(DelicateCoroutinesApi::class)
     fun setWallpaperFromUrl(context: Context, imageUrl: String) {
-        makeToast("setWallpaperFromUrl!")
 
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -341,7 +338,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     fun dialPhoneNumber(context: Context, phoneNumber: String) {
-        makeToast("tel:" + phoneNumber)
         val intent = Intent(Intent.ACTION_CALL)
         intent.data = Uri.parse("tel:" + phoneNumber)
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -353,7 +349,6 @@ class NewAppWidget : AppWidgetProvider() {
     @SuppressLint("Range", "UseCompatLoadingForDrawables")
     fun getFavoriteContacts(context: Context) {
 
-        makeToast("MC - getFavoriteContacts")
 
         favContacts = ArrayList()
 
@@ -395,7 +390,7 @@ class NewAppWidget : AppWidgetProvider() {
                 }
 
 
-            } else makeToast("N")
+            }
 
             val intent = Intent(Intent.ACTION_VIEW)
             val uri = Uri.withAppendedPath(
@@ -708,7 +703,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addAppInWidget(context: Context, app: App) {
 
-            makeToast("addAppInWidget!")
             Apps.add(app)
 
 

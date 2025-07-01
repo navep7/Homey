@@ -28,6 +28,9 @@ import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -198,13 +201,10 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
-        makeToast("CmpR GET - " + imgUrls.toString() + " - " + imgDescs.toString())
 
-        makeToast("fetchWallpaper! - " + imgUrls.size)
 
         if (imgUrls.size == 0) {
-            pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
-            makeToast("fetching from - " + pexelUrl + " : " + queryType)
+            pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
             val request: StringRequest = object : StringRequest(
 
                 com.android.volley.Request.Method.GET, pexelUrl,
@@ -216,8 +216,6 @@ class MainActivity : AppCompatActivity() {
 
                         val length = jsonArray.length()
 
-                        makeToast("Wlength7 - " + length)
-
 
                         for (i in 0 until length) {
                             val jsonObject = jsonArray.getJSONObject(i)
@@ -228,8 +226,7 @@ class MainActivity : AppCompatActivity() {
                         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
                         sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
 
-                        makeToast("CmpR PUT - " + imgUrls.toString() + " - " + imgDescs.toString())
-
+                        setRV(imgUrls, imgDescs)
 
                     } catch (e: JSONException) {
                         makeToast("EXE7 - " + e.message)
@@ -247,15 +244,20 @@ class MainActivity : AppCompatActivity() {
 
                     return params
                 }
-
-
             }
-
             val requestQueue = Volley.newRequestQueue(context)
             requestQueue.add(request)
-
-
         }
+
+    }
+
+    private fun setRV(imgUrls: java.util.ArrayList<String>, imgDescs: ArrayList<String>) {
+
+        makeToast("setRV - " + imgUrls.size + " : " + imgDescs.size)
+        var rv:RecyclerView = findViewById(R.id.rv_images)
+        rv.layoutManager = StaggeredGridLayoutManager(2, 1)
+        var rvAdapter = RvAdapter(applicationContext, imgUrls, imgDescs)
+        rv.adapter = rvAdapter
     }
 
     private fun getGrantStatus(): Boolean {
@@ -324,7 +326,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         fun makeToast(s: String) {
-          //  Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
+            Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
             Log.d("makeToastinG", s)
         }
 
