@@ -158,6 +158,9 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
+        walls.clear()
+        wallDescs.clear()
+
         walls = sharedPreferences.getStringSet("walls", walls) as HashSet<String>
         wallDescs = sharedPreferences.getStringSet("wallDescs", wallDescs) as HashSet<String>
 
@@ -169,6 +172,7 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
+        remoteViews.setTextViewText(R.id.tx_walltype, sharedPreferences.getString("walltype", "unKnown"))
         remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
@@ -225,7 +229,7 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
 
-        makeToast("onReceive")
+        makeToast("onReceive!")
 
         todaysDate(context)
         appUsageStats(context, timeOfDay)

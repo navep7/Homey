@@ -1,8 +1,6 @@
 package com.belaku.homey
 
 import android.Manifest
-import android.R.attr.height
-import android.R.attr.width
 import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
@@ -12,33 +10,29 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
+import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import com.belaku.homey.databinding.ActivityMainBinding
@@ -46,25 +40,21 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.snackbar.Snackbar
 import org.json.JSONException
 import org.json.JSONObject
-import java.io.IOException
-import java.net.URL
-import java.util.Date
-import java.util.Random
 
 
 class MainActivity : AppCompatActivity() {
 
 
-    private val pexelUrl: String =
-        "https://api.pexels.com/v1/search?query=vibrant&per_page=10"
+    private var queryType: String = "iphone"
+    private lateinit var editTextPrompt: EditText
+    private var pexelUrl: String =
+        "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
     private var imgUrls: ArrayList<String> = ArrayList()
     private var imgDescs: ArrayList<String> = ArrayList()
     private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
-    private lateinit var sinceDate: Date
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
-    lateinit var brTimeTick: TimeTickReceiver
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,16 +73,17 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
+        queryType = sharedPreferences.getString("walltype", "material design").toString()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
+        findViewByIds()
+
+        listeners()
 
 
 
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
 
         binding.fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -106,6 +97,29 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(intent, RESULT_ENABLE)
         }
 
+    }
+
+    private fun listeners() {
+
+        editTextPrompt.setOnEditorActionListener(OnEditorActionListener { v, actionId, event ->
+            if ((event != null && (event.keyCode == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                //do what you want on the press of 'done'
+                queryType = editTextPrompt.text.toString()
+                imgUrls.clear()
+                imgDescs.clear()
+                sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+                sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
+                sharedPreferencesEditor.putString("walltype", queryType).apply()
+                fetchWallpaper(applicationContext)
+            }
+            false
+        })
+
+    }
+
+    private fun findViewByIds() {
+
+        editTextPrompt = findViewById<EditText>(R.id.edtx_prompt)
     }
 
     private fun GetDisplayDimens() {
@@ -137,7 +151,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(brTimeTick)
     }
 
     private fun checkP() {
@@ -190,7 +203,8 @@ class MainActivity : AppCompatActivity() {
         makeToast("fetchWallpaper! - " + imgUrls.size)
 
         if (imgUrls.size == 0) {
-            makeToast("Vrequest")
+            pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
+            makeToast("fetching from - " + pexelUrl + " : " + queryType)
             val request: StringRequest = object : StringRequest(
 
                 com.android.volley.Request.Method.GET, pexelUrl,
@@ -286,11 +300,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
-    }
 
     companion object {
         var wallBitmaps: List<Bitmap> = ArrayList<Bitmap>().toMutableList()
