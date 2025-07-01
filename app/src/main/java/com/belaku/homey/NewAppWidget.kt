@@ -244,33 +244,34 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
+        var apps = readApps()
 
         if (APP1_CLICKED == intent.action) {
-            var app = readApps()[0]
+            var app = apps[0]
             Log.d("APP1_CLICKED", app)
             launchApp(context, app)
         }
 
         if (APP2_CLICKED == intent.action) {
-            var app = readApps()[1]
+            var app = apps[1]
             Log.d("APP2_CLICKED", app)
             launchApp(context, app)
         }
 
         if (APP3_CLICKED == intent.action) {
-            var app = readApps()[2]
+            var app = apps[2]
             Log.d("APP3_CLICKED", app)
             launchApp(context, app)
         }
 
         if (APP4_CLICKED == intent.action) {
-            var app = readApps()[3]
+            var app = apps[3]
             Log.d("APP4_CLICKED", app)
             launchApp(context, app)
         }
 
         if (APP5_CLICKED == intent.action) {
-            var app = readApps()[4]
+            var app = apps[4]
             Log.d("APP5_CLICKED", app)
             launchApp(context, app)
         }
@@ -439,13 +440,13 @@ class NewAppWidget : AppWidgetProvider() {
     private fun todaysDate(context: Context) {
 
         val c: Date = Calendar.getInstance().time
-        val df: SimpleDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
     }
 
     private fun launchApp(context: Context, pkgName: String) {
-        val launchIntent: Intent = context.getPackageManager().getLaunchIntentForPackage(pkgName)!!
+        val launchIntent: Intent = context.packageManager.getLaunchIntentForPackage(pkgName)!!
         context.startActivity(launchIntent)
     }
 
