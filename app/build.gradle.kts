@@ -43,6 +43,7 @@ android {
 
 dependencies {
 
+    implementation(libs.picasso.v28)
 
     implementation(libs.glide)
     implementation(libs.androidx.core.ktx)
@@ -53,6 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.androidx.activity)
     implementation(libs.volley)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

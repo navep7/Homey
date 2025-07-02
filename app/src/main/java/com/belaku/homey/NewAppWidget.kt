@@ -40,6 +40,8 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.belaku.homey.MainActivity.Companion.makeToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -51,6 +53,7 @@ import java.util.Date
 import java.util.LinkedList
 import java.util.Locale
 import java.util.Random
+import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
 
 
@@ -62,7 +65,7 @@ class NewAppWidget : AppWidgetProvider() {
 
     private lateinit var mp: MediaPlayer
 
-    private lateinit var newAppWidget: ComponentName
+
     private lateinit var wallType: String
     var wallTypes: List<String> = mutableListOf(
         "Beautiful",
@@ -93,6 +96,11 @@ class NewAppWidget : AppWidgetProvider() {
         for (appWidgId in appWidgetIds) {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
+
+            remoteViews.setOnClickPendingIntent(
+                R.id.imgbtn_refresh,
+                getPendingSelfIntent(context, WALL_CHANGE)
+            )
 
             remoteViews.setOnClickPendingIntent(
                 R.id.imgv_add1,
@@ -177,6 +185,12 @@ class NewAppWidget : AppWidgetProvider() {
             sharedPreferences.getString("walltype", "unKnown")
         )
         remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
+
+        remoteViews.setOnClickPendingIntent(
+            R.id.imgbtn_refresh,
+            getPendingSelfIntent(context, WALL_CHANGE)
+        )
+
         remoteViews.setOnClickPendingIntent(
             R.id.imgv_add1,
             getPendingSelfIntent(context, APP1_CLICKED)
@@ -253,6 +267,13 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         var apps = readApps()
+
+        if (WALL_CHANGE == intent.action) {
+            val periodicWorkRequest: PeriodicWorkRequest =
+                PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES).build()
+            val workManager = WorkManager.getInstance(context)
+            workManager.enqueue(periodicWorkRequest);
+        }
 
         if (APP1_CLICKED == intent.action) {
             var app = apps[0]
@@ -754,6 +775,7 @@ class NewAppWidget : AppWidgetProvider() {
         private var appIndex: Int = 0
         private var conIndex: Int = 0
         lateinit var remoteViews: RemoteViews
+        lateinit var newAppWidget: ComponentName
 
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"

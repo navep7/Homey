@@ -1,0 +1,91 @@
+package com.belaku.homey
+
+import android.app.WallpaperManager
+import android.appwidget.AppWidgetManager
+import android.content.Context
+import android.icu.util.Calendar
+import android.util.Log
+import android.widget.RemoteViews
+import androidx.annotation.NonNull
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.belaku.homey.MainActivity.Companion.makeToast
+import com.belaku.homey.NewAppWidget.Companion.newAppWidget
+import com.belaku.homey.NewAppWidget.Companion.remoteViews
+import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
+import java.io.IOException
+import java.net.URL
+import kotlin.random.Random
+
+
+class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
+    Worker(context!!, workerParams!!) {
+    @NonNull
+    override fun doWork(): Result {
+
+        for (i in 1..900){
+            try {
+                Log.d("PWLOG", "Let me sleep a moment...")
+                Thread.sleep((15000).toLong()) //1 minutes cycle
+            //    doTheActualProcessingWork()
+                setWall()
+            } catch (e: InterruptedException) {
+                Log.d("PWLOG", "Thread sleep failed...")
+                e.printStackTrace()
+            }
+        }
+
+       /* try {
+
+            var wm = WallpaperManager.getInstance(applicationContext)
+
+            var urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
+
+            try {
+                val inputStream = URL(urls[Random.Default.nextInt(urls.size)]).openStream()
+                WallpaperManager.getInstance(applicationContext).setStream(inputStream)
+                remoteViews = RemoteViews(applicationContext.packageName, R.layout.new_app_widget)
+                remoteViews.setTextViewText(R.id.tx_desc, "" + Calendar.HOUR_OF_DAY + ":" + Calendar.MINUTE)
+                AppWidgetManager.getInstance(applicationContext).updateAppWidget(R.id.tx_desc, remoteViews)
+            } catch (ex: Exception) {
+                makeToast(ex.message.toString() + " - EX!")
+                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+            }
+
+            return Result.success()
+        } catch (e: IOException) {
+            makeToast("doWork ExP - " + e.toString())
+            remoteViews.setTextViewText(R.id.tx_timwstamp, "EXPfu")
+            AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
+            // Handle exceptions (e.g., network errors, file access issues)
+            return Result.failure()
+        }*/
+        return Result.success()
+    }
+
+    private fun setWall() {
+
+        try {
+
+            val wm = WallpaperManager.getInstance(applicationContext)
+            val urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
+            MainActivity.randomNumber = Random.Default.nextInt(urls.size)
+
+            try {
+                val inputStream = URL(urls[MainActivity.randomNumber]).openStream()
+                wm.setStream(inputStream)
+            } catch (ex: Exception) {
+                makeToast(ex.message.toString() + " - EX!")
+                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+            }
+
+        } catch (e: IOException) {
+            makeToast("doWork ExP - " + e.toString())
+            remoteViews.setTextViewText(R.id.tx_timwstamp, "EXPfu")
+            AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
+            // Handle exceptions (e.g., network errors, file access issues)
+        }
+    }
+}
+
+

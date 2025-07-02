@@ -7,7 +7,6 @@ import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.app.WallpaperManager
-import android.app.admin.DevicePolicyManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -24,16 +23,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
-import android.widget.RemoteViews
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -52,7 +51,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
-import java.util.Random
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var editTextPrompt: EditText
     private var pexelUrl: String =
         "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
-    private var imgUrls: ArrayList<String> = ArrayList()
+
     private var imgDescs: ArrayList<String> = ArrayList()
     private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
@@ -124,10 +123,19 @@ class MainActivity : AppCompatActivity() {
         var newAppWidget = ComponentName(context, NewAppWidget::class.java)
         var randomNumber = 0
 
-        var serviceIntent = Intent(context, WallService::class.java)
+        /*var serviceIntent = Intent(context, WallService::class.java)
         serviceIntent.putStringArrayListExtra("URLs", imgUrls)
         serviceIntent.putStringArrayListExtra("DESCs", imgDescs)
-        startService(serviceIntent)
+        startService(serviceIntent)*/
+
+        val periodicWorkRequest: PeriodicWorkRequest =
+            PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES).build()
+        val workManager = WorkManager.getInstance(this)
+        workManager.enqueue(periodicWorkRequest);
+
+        remoteViews.setTextViewText(R.id.tx_desc, imgDescs.get(randomNumber))
+        AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
+
     }
 
 
@@ -354,6 +362,8 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        var randomNumber: Int = 0
+        val imgUrls: ArrayList<String> = ArrayList()
         var wallBitmaps: List<Bitmap> = ArrayList<Bitmap>().toMutableList()
         var cGranted: Boolean = false
         lateinit var appContx: Context
