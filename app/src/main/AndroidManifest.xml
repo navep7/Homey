@@ -42,64 +42,7 @@
         android:theme="@style/Theme.Homey"
         tools:targetApi="31">
 
-        <service
-            android:name=".WallService"
-            android:enabled="true"
-            android:foregroundServiceType="mediaProjection"
-            android:exported="false" />
 
-        <receiver
-            android:name=".TimeTickReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.TIME_TICK" />
-            </intent-filter>
-        </receiver>
-
-        <activity
-            android:name=".AppChooserDialog"
-            android:exported="false" />
-
-        <receiver
-            android:name=".DeviceAdmin"
-            android:description="@string/app_name"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/policies" />
-
-            <intent-filter android:priority="1000">
-                <action android:name="com.belaku.homey.NewAppWidget.WALL_CHANGE" />
-                <action android:name="com.belaku.homey.NewAppWidget.LOCK_PHONE" />
-                <action android:name="com.belaku.homey.NewAppWidget.APP1_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.APP2_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.APP3_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.APP4_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.C1_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.C2_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.C3_CLICKED" />
-                <action android:name="com.belaku.homey.NewAppWidget.C4_CLICKED" />
-                <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
-                <action android:name="android.intent.action.DEVICE_ADMIN_ENABLED" />
-                <action android:name="android.intent.action.PROFILE_PROVISIONING_COMPLETE" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".NewAppWidget"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/new_app_widget_info" />
-        </receiver>
 
         <activity
             android:name=".MainActivity"
