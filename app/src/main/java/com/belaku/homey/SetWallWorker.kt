@@ -3,6 +3,7 @@ package com.belaku.homey
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.content.Context.MODE_PRIVATE
 import android.icu.util.Calendar
 import android.util.Log
 import android.widget.RemoteViews
@@ -13,6 +14,7 @@ import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
+import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import java.io.IOException
 import java.net.URL
 import kotlin.random.Random
@@ -20,46 +22,31 @@ import kotlin.random.Random
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
+    private var delayInterval: Long = 10000
+
     @NonNull
     override fun doWork(): Result {
 
+        sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
+
+        if (MainActivity.updateInterval == "min")
+            delayInterval = 60000
+        else if (MainActivity.updateInterval == "hour")
+            delayInterval = 3600000
+        else if (MainActivity.updateInterval == "day")
+            delayInterval = 86400000
+
         for (i in 1..900){
             try {
-                Log.d("PWLOG", "Let me sleep a moment...")
-                Thread.sleep((15000).toLong()) //1 minutes cycle
-            //    doTheActualProcessingWork()
+                Log.d("PWLOG", "Let me sleep a moment... $delayInterval")
                 setWall()
+                Thread.sleep((delayInterval))
             } catch (e: InterruptedException) {
                 Log.d("PWLOG", "Thread sleep failed...")
                 e.printStackTrace()
             }
         }
-
-       /* try {
-
-            var wm = WallpaperManager.getInstance(applicationContext)
-
-            var urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
-
-            try {
-                val inputStream = URL(urls[Random.Default.nextInt(urls.size)]).openStream()
-                WallpaperManager.getInstance(applicationContext).setStream(inputStream)
-                remoteViews = RemoteViews(applicationContext.packageName, R.layout.new_app_widget)
-                remoteViews.setTextViewText(R.id.tx_desc, "" + Calendar.HOUR_OF_DAY + ":" + Calendar.MINUTE)
-                AppWidgetManager.getInstance(applicationContext).updateAppWidget(R.id.tx_desc, remoteViews)
-            } catch (ex: Exception) {
-                makeToast(ex.message.toString() + " - EX!")
-                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
-            }
-
-            return Result.success()
-        } catch (e: IOException) {
-            makeToast("doWork ExP - " + e.toString())
-            remoteViews.setTextViewText(R.id.tx_timwstamp, "EXPfu")
-            AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
-            // Handle exceptions (e.g., network errors, file access issues)
-            return Result.failure()
-        }*/
         return Result.success()
     }
 
