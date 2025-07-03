@@ -10,6 +10,7 @@ import android.widget.RemoteViews
 import androidx.annotation.NonNull
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
@@ -22,14 +23,16 @@ import kotlin.random.Random
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
-    private val TAG: String = "SetWallWorker7"
     private var delayInterval: Long = 10000
+    val TAG: String = "SetWallWorker7"
 
     @NonNull
     override fun doWork(): Result {
 
         sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
+
+        urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
 
         if (MainActivity.updateInterval == "min")
             delayInterval = 60000
@@ -53,28 +56,36 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         return Result.success()
     }
 
-    private fun setWall() {
 
-        try {
 
-            val wm = WallpaperManager.getInstance(applicationContext)
-            val urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
-            MainActivity.randomNumber = Random.Default.nextInt(urls.size)
+    companion object {
+        var urls: ArrayList<String> = ArrayList()
+
+        fun setWall() {
+
+            val TAG: String = "SetWallWorker7"
 
             try {
-                val inputStream = URL(urls[MainActivity.randomNumber]).openStream()
-                wm.setStream(inputStream)
-                Log.d(TAG, "Set successfully")
-            } catch (ex: Exception) {
-                Log.d(TAG, ex.message.toString() + " - EX!")
-                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
-            }
 
-        } catch (e: IOException) {
-            Log.d(TAG,  e.toString())
-            remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
-            AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
-            // Handle exceptions (e.g., network errors, file access issues)
+                urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
+                val wm = WallpaperManager.getInstance(appContx)
+                MainActivity.randomNumber = Random.Default.nextInt(urls.size)
+
+                try {
+                    val inputStream = URL(urls[Random.Default.nextInt(urls.size)]).openStream()
+                    wm.setStream(inputStream)
+                    Log.d(TAG, "Set successfully")
+                } catch (ex: Exception) {
+                    Log.d(TAG, "$ex - EX!")
+                    //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
+                }
+
+            } catch (e: IOException) {
+                Log.d(TAG,  e.toString())
+                remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
+                AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+                // Handle exceptions (e.g., network errors, file access issues)
+            }
         }
     }
 }

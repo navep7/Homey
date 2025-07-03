@@ -42,6 +42,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
+import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -279,10 +280,10 @@ class NewAppWidget : AppWidgetProvider() {
         var apps = readApps()
 
         if (WALL_CHANGE == intent.action) {
-            val periodicWorkRequest: PeriodicWorkRequest =
-                PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES).build()
-            val workManager = WorkManager.getInstance(context)
-            workManager.enqueue(periodicWorkRequest);
+            appContx = context
+            Thread {
+            SetWallWorker.setWall()
+            }.start()
         }
 
         if (APP1_CLICKED == intent.action) {
