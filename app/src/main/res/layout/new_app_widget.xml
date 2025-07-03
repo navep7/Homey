@@ -232,7 +232,7 @@
         tools:ignore="HardcodedText" />
 
     <ImageButton
-        android:id="@+id/imgbtn_refresh"
+        android:id="@+id/imgbtn_set"
         android:background="?android:attr/selectableItemBackground"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
@@ -278,6 +278,7 @@
         android:layout_marginStart="50dp"
         android:layout_marginBottom="50dp"
         android:scaleType="fitXY"
+        android:visibility="gone"
         android:layout_width="60dp"
         android:layout_height="60dp"/>
 

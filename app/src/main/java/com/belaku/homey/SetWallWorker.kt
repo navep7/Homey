@@ -2,10 +2,12 @@ package com.belaku.homey
 
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.icu.util.Calendar
 import android.util.Log
+import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.NonNull
 import androidx.work.Worker
@@ -75,6 +77,10 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     val inputStream = URL(urls[Random.Default.nextInt(urls.size)]).openStream()
                     wm.setStream(inputStream)
                     Log.d(TAG, "Set successfully")
+                    remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
+                    remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
+                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
                 } catch (ex: Exception) {
                     Log.d(TAG, "$ex - EX!")
                     //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())

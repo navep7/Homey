@@ -106,7 +106,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.imgbtn_refresh,
+                R.id.imgbtn_set,
                 getPendingSelfIntent(context, WALL_CHANGE)
             )
 
@@ -201,7 +201,7 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
-            R.id.imgbtn_refresh,
+            R.id.imgbtn_set,
             getPendingSelfIntent(context, WALL_CHANGE)
         )
 
@@ -289,10 +289,21 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         if (WALL_CHANGE == intent.action) {
+
+            remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.VISIBLE)
+            remoteViews?.setViewVisibility(R.id.imgbtn_set, View.INVISIBLE)
+            newAppWidget = ComponentName(context, NewAppWidget::class.java)
+            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
+
             appContx = context
             Thread {
             SetWallWorker.setWall()
             }.start()
+
+            /*remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
+            remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
+            newAppWidget = ComponentName(context, NewAppWidget::class.java)
+            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)*/
         }
 
         if (APP1_CLICKED == intent.action) {
