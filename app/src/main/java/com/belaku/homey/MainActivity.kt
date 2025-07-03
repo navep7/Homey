@@ -94,12 +94,11 @@ class MainActivity : AppCompatActivity() {
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        queryType = sharedPreferences.getString("walltype", "material design").toString()
+        queryType = sharedPreferences.getString("walltype", "Trending").toString()
 
         findViewByIds()
         setRV(imgUrls, imgDescs)
         listeners()
-        makeToast("fetchWallpaper1")
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
@@ -202,7 +201,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun findViewByIds() {
 
-        makeToast("findViewByIds")
         editTextPrompt = findViewById(R.id.edtx_prompt)
         fabMain = findViewById(R.id.fab_main)
         frameMin = findViewById(R.id.frame_fab1)
@@ -293,8 +291,10 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
 
+        makeToast("fetchWallpaper 1st ${imgUrls.size}" )
 
         if (imgUrls.size == 0) {
+            makeToast("fetching : $queryType  - wallpapers" )
             pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
             val request: StringRequest = @SuppressLint("NotifyDataSetChanged")
             object : StringRequest(
@@ -349,7 +349,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun setRV(imgUrls: java.util.ArrayList<String>, imgDescs: ArrayList<String>) {
 
-        makeToast("setRV - " + imgUrls.size + " : " + imgDescs.size)
         rv = findViewById(R.id.rv_images)
         rv.layoutManager = StaggeredGridLayoutManager(2, 1)
         rvAdapter = RvAdapter(applicationContext, imgUrls, imgDescs)
