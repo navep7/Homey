@@ -26,7 +26,6 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
@@ -35,7 +34,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.work.Constraints
 import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.android.volley.AuthFailureError
 import com.android.volley.Response
@@ -53,6 +54,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -133,10 +135,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setWalls() {
-        val uploadRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java)
+        val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java)
             .build()
+
+        val periodicWorkRequest =
+            PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES)
+                .setConstraints(Constraints.NONE)
+                .build()
+
         val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(uploadRequest)
+        workManager.enqueue(periodicWorkRequest)
     }
 
 
