@@ -158,7 +158,7 @@ class WallService : Service() {
                 //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
             }
         }
-        remoteViews.setTextViewText(R.id.tx_desc, wallDESCs.get(rn))
+        remoteViews?.setTextViewText(R.id.tx_desc, wallDESCs.get(rn))
         AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
     }
 

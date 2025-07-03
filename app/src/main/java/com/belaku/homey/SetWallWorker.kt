@@ -81,7 +81,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         } catch (e: IOException) {
             makeToast("doWork ExP - " + e.toString())
-            remoteViews.setTextViewText(R.id.tx_timwstamp, "EXPfu")
+            remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
             AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
             // Handle exceptions (e.g., network errors, file access issues)
         }

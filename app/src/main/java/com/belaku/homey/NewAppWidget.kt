@@ -86,6 +86,16 @@ class NewAppWidget : AppWidgetProvider() {
     lateinit var gpName: String
 
 
+    override fun onEnabled(context: Context?) {
+        super.onEnabled(context)
+        makeToast("onEnabled!")
+    }
+
+    override fun onDisabled(context: Context?) {
+        super.onDisabled(context)
+        makeToast("onDisabled!")
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -97,52 +107,52 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_refresh,
                 getPendingSelfIntent(context, WALL_CHANGE)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_add1,
                 getPendingSelfIntent(context, APP1_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_add2,
                 getPendingSelfIntent(context, APP2_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_add3,
                 getPendingSelfIntent(context, APP3_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_add4,
                 getPendingSelfIntent(context, APP4_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_add5,
                 getPendingSelfIntent(context, APP5_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_contact1,
                 getPendingSelfIntent(context, C1_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_contact2,
                 getPendingSelfIntent(context, C2_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_contact3,
                 getPendingSelfIntent(context, C3_CLICKED)
             )
 
-            remoteViews.setOnClickPendingIntent(
+            remoteViews?.setOnClickPendingIntent(
                 R.id.imgv_contact4,
                 getPendingSelfIntent(context, C4_CLICKED)
             )
@@ -180,58 +190,58 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-        remoteViews.setTextViewText(
+        remoteViews?.setTextViewText(
             R.id.tx_walltype,
             sharedPreferences.getString("walltype", "unKnown")
         )
-        remoteViews.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
+        remoteViews?.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
             getPendingSelfIntent(context, WALL_CHANGE)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_add1,
             getPendingSelfIntent(context, APP1_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_add2,
             getPendingSelfIntent(context, APP2_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_add3,
             getPendingSelfIntent(context, APP3_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_add4,
             getPendingSelfIntent(context, APP4_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_add5,
             getPendingSelfIntent(context, APP5_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_contact1,
             getPendingSelfIntent(context, C1_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_contact2,
             getPendingSelfIntent(context, C2_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_contact3,
             getPendingSelfIntent(context, C3_CLICKED)
         )
 
-        remoteViews.setOnClickPendingIntent(
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgv_contact4,
             getPendingSelfIntent(context, C4_CLICKED)
         )
@@ -260,7 +270,7 @@ class NewAppWidget : AppWidgetProvider() {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
         ) {
-            greeting(context, remoteViews, timeOfDay)
+            greeting(context, remoteViews!!, timeOfDay)
             if (favContacts.size == 0)
                 getFavoriteContacts(context)
         }
@@ -437,7 +447,7 @@ class NewAppWidget : AppWidgetProvider() {
         val c: Date = Calendar.getInstance().time
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
-        remoteViews.setTextViewText(R.id.date_text_view, formattedDate)
+        remoteViews?.setTextViewText(R.id.date_text_view, formattedDate)
     }
 
     private fun launchApp(context: Context, pkgName: String) {
@@ -645,6 +655,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var remoteViews: RemoteViews? = null
         private var Apps: ArrayList<App> = ArrayList()
         lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         lateinit var sharedPreferences: SharedPreferences
@@ -658,28 +669,28 @@ class NewAppWidget : AppWidgetProvider() {
                 nullD = context.getDrawable(R.drawable.face_holder)!!
             else nullD = drawable
             if (conIndex == 0) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_contact1,
                     nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews.setTextViewText(R.id.tx_c1, strN)
+                remoteViews?.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_contact2,
                     nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews.setTextViewText(R.id.tx_c2, strN)
+                remoteViews?.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_contact3,
                     nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews.setTextViewText(R.id.tx_c3, strN)
+                remoteViews?.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_contact4,
                     nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews.setTextViewText(R.id.tx_c4, strN)
+                remoteViews?.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
         }
@@ -704,35 +715,35 @@ class NewAppWidget : AppWidgetProvider() {
 
 
             if (appIndex == 0) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_add1,
                     app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 1
-                remoteViews.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
             } else if (appIndex == 1) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_add2,
                     app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 2
-                remoteViews.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
             } else if (appIndex == 2) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_add3,
                     app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 3
-                remoteViews.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
             } else if (appIndex == 3) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_add4,
                     app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 4
-                remoteViews.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
             } else if (appIndex == 4) {
-                remoteViews.setImageViewBitmap(
+                remoteViews?.setImageViewBitmap(
                     R.id.imgv_add5,
                     app.image?.let { drawableToBitmap(context, it) })
                 appIndex = 4
-                remoteViews.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
             }
 
 
@@ -774,7 +785,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private var appIndex: Int = 0
         private var conIndex: Int = 0
-        lateinit var remoteViews: RemoteViews
+
         lateinit var newAppWidget: ComponentName
 
         private const val LOCK_PHONE = "lockPhone"

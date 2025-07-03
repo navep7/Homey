@@ -121,19 +121,14 @@ class MainActivity : AppCompatActivity() {
     private fun setWalls(context: Context) {
 
         var newAppWidget = ComponentName(context, NewAppWidget::class.java)
-        var randomNumber = 0
-
-        /*var serviceIntent = Intent(context, WallService::class.java)
-        serviceIntent.putStringArrayListExtra("URLs", imgUrls)
-        serviceIntent.putStringArrayListExtra("DESCs", imgDescs)
-        startService(serviceIntent)*/
 
         val periodicWorkRequest: PeriodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES).build()
         val workManager = WorkManager.getInstance(this)
         workManager.enqueue(periodicWorkRequest);
 
-        remoteViews.setTextViewText(R.id.tx_desc, imgDescs.get(randomNumber))
+
+        remoteViews?.setTextViewText(R.id.tx_desc, imgDescs.get(randomNumber))
         AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
 
     }
