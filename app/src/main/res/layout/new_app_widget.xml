@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rl_widget_layout"
     android:theme="@style/Theme.Material3.DynamicColors.DayNight"
     android:layout_width="match_parent"
@@ -218,8 +219,8 @@
 
 
     <TextView
-        android:id="@+id/tx_desc"
-        android:text=""
+        android:id="@+id/tx_openapp"
+        android:text="Config Wallpapers!"
         android:textStyle="bold|italic"
         android:textSize="21sp"
         android:textColor="@android:color/holo_red_dark"
@@ -227,7 +228,8 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/fab_margin"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        tools:ignore="HardcodedText" />
 
     <ImageButton
         android:id="@+id/imgbtn_refresh"

@@ -1,11 +1,10 @@
 package com.belaku.homey
 
 import android.Manifest
+
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.app.WallpaperManager
-import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
@@ -40,21 +39,12 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.net.URL
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
 import java.util.Locale
-import java.util.Random
-import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
 
 
@@ -104,9 +94,16 @@ class NewAppWidget : AppWidgetProvider() {
     ) {
 
 
-        for (appWidgId in appWidgetIds) {
+        for (appWidgetId in appWidgetIds) {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
+
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.tx_openapp,
+                getPendingSelfIntent(context, OPEN_APP)
+            )
+
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_refresh,
@@ -160,7 +157,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
 
-            appWidgetManager.updateAppWidget(appWidgId, remoteViews)
+            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
         appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
@@ -196,6 +193,12 @@ class NewAppWidget : AppWidgetProvider() {
             sharedPreferences.getString("walltype", "unKnown")
         )
         remoteViews?.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
+
+
+        remoteViews?.setOnClickPendingIntent(
+            R.id.tx_openapp,
+            getPendingSelfIntent(context, OPEN_APP)
+        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_refresh,
@@ -278,6 +281,12 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         var apps = readApps()
+
+
+        if (OPEN_APP == intent.action) {
+            val launchIntent: Intent = context.packageManager.getLaunchIntentForPackage("com.belaku.homey")!!
+            context.startActivity(launchIntent)
+        }
 
         if (WALL_CHANGE == intent.action) {
             appContx = context
@@ -791,6 +800,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
+        private const val OPEN_APP = "openApp"
         private const val WALLTYPE_CLICKED = "wallType"
         private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
