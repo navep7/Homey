@@ -22,6 +22,7 @@ import kotlin.random.Random
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
+    private val TAG: String = "SetWallWorker7"
     private var delayInterval: Long = 10000
 
     @NonNull
@@ -37,13 +38,15 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         else if (MainActivity.updateInterval == "day")
             delayInterval = 86400000
 
+        setWall()
+
         for (i in 1..900){
             try {
-                Log.d("PWLOG", "Let me sleep a moment... $delayInterval")
-                setWall()
+                Log.d(TAG, "Let me sleep a moment... $delayInterval")
                 Thread.sleep((delayInterval))
+                setWall()
             } catch (e: InterruptedException) {
-                Log.d("PWLOG", "Thread sleep failed...")
+                Log.d(TAG, "Thread sleep failed...")
                 e.printStackTrace()
             }
         }
@@ -61,13 +64,14 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
             try {
                 val inputStream = URL(urls[MainActivity.randomNumber]).openStream()
                 wm.setStream(inputStream)
+                Log.d(TAG, "Set successfully")
             } catch (ex: Exception) {
-                makeToast(ex.message.toString() + " - EX!")
+                Log.d(TAG, ex.message.toString() + " - EX!")
                 //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
             }
 
         } catch (e: IOException) {
-            makeToast("doWork ExP - " + e.toString())
+            Log.d(TAG,  e.toString())
             remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
             AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
             // Handle exceptions (e.g., network errors, file access issues)
