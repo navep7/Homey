@@ -7,13 +7,14 @@ import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.app.WallpaperManager
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.Process
 import android.provider.Settings
 import android.util.DisplayMetrics
@@ -21,8 +22,10 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
@@ -31,6 +34,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.work.Constraints
+import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.android.volley.AuthFailureError
@@ -38,11 +43,9 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.belaku.homey.NewAppWidget.Companion.remoteViews
-import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
-import com.belaku.homey.NewAppWidget.Companion.sharedPreferencesEditor
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.google.android.material.color.DynamicColors
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -57,6 +60,13 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private lateinit var frameMin: FrameLayout
+    private lateinit var frameHour: FrameLayout
+    private lateinit var frameDay: FrameLayout
+    private lateinit var fabMain: FloatingActionButton
+    private lateinit var fabMin: FloatingActionButton
+    private lateinit var fabHour: FloatingActionButton
+    private lateinit var fabDay: FloatingActionButton
     private lateinit var rvAdapter: RvAdapter
     private lateinit var rv: RecyclerView
     private var queryType: String = "iphone"
@@ -84,9 +94,6 @@ class MainActivity : AppCompatActivity() {
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-        sharedPreferencesEditor = sharedPreferences.edit()
-
         queryType = sharedPreferences.getString("walltype", "material design").toString()
 
         findViewByIds()
@@ -97,45 +104,47 @@ class MainActivity : AppCompatActivity() {
         GetDisplayDimens()
         checkP()
 
+        fabMain.setOnClickListener { view ->
 
+            if (fabDay.visibility == View.GONE) {
+                Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .setAnchorView(R.id.fab_main).show()
+                fabDay.visibility = View.VISIBLE
+                frameMin.visibility = View.VISIBLE
+                frameHour.visibility = View.VISIBLE
+                frameDay.visibility = View.VISIBLE
+                // Add animation here to expand the menu
+            } else {
+                fabDay.visibility = View.GONE
+                frameMin.visibility = View.GONE
+                frameHour.visibility = View.GONE
+                frameDay.visibility = View.GONE
+                // Add animation here to collapse the menu
+            }
 
+            //   setWalls(applicationContext)
 
-
-
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .setAnchorView(R.id.fab).show()
-
-            setWalls(applicationContext)
-
-           /* val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-            var compName = ComponentName(this, DeviceAdmin::class.java)
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-            startActivityForResult(intent, RESULT_ENABLE)*/
+            /* val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+             var compName = ComponentName(this, DeviceAdmin::class.java)
+             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+             startActivityForResult(intent, RESULT_ENABLE)*/
         }
 
     }
 
-    private fun setWalls(context: Context) {
+    private fun setWalls() {
+        val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java)
+            .build()
 
-        var newAppWidget = ComponentName(context, NewAppWidget::class.java)
-        var randomNumber = 0
+        val periodicWorkRequest =
+            PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES)
+                .setConstraints(Constraints.NONE)
+                .build()
 
-        /*var serviceIntent = Intent(context, WallService::class.java)
-        serviceIntent.putStringArrayListExtra("URLs", imgUrls)
-        serviceIntent.putStringArrayListExtra("DESCs", imgDescs)
-        startService(serviceIntent)*/
-
-        val periodicWorkRequest: PeriodicWorkRequest =
-            PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES).build()
-        val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(periodicWorkRequest);
-
-        remoteViews.setTextViewText(R.id.tx_desc, imgDescs.get(randomNumber))
-        AppWidgetManager.getInstance(applicationContext).updateAppWidget(newAppWidget, remoteViews)
-
+        val workManager = WorkManager.getInstance(applicationContext)
+        workManager.enqueue(periodicWorkRequest)
     }
 
 
@@ -170,11 +179,37 @@ class MainActivity : AppCompatActivity() {
             false
         })
 
+        fabMin.setOnClickListener {
+            updateInterval = "min"
+            makeToast("Wallpaper updates every Minute!")
+            Handler(Looper.getMainLooper()).postDelayed(Runnable { setWalls() }, 1000)
+
+        }
+
+        fabHour.setOnClickListener {
+            updateInterval = "hour"
+            makeToast("Wallpaper updates every Hour!")
+            setWalls()
+        }
+
+        fabDay.setOnClickListener {
+            updateInterval = "day"
+            makeToast("Wallpaper updates every Day!")
+            setWalls()
+        }
+
     }
 
     private fun findViewByIds() {
 
-        editTextPrompt = findViewById<EditText>(R.id.edtx_prompt)
+        editTextPrompt = findViewById(R.id.edtx_prompt)
+        fabMain = findViewById(R.id.fab_main)
+        frameMin = findViewById(R.id.frame_fab1)
+        frameHour = findViewById(R.id.frame_fab2)
+        frameDay = findViewById(R.id.frame_fab3)
+        fabMin = findViewById(R.id.fab_option_1)
+        fabHour = findViewById(R.id.fab_option_2)
+        fabDay = findViewById(R.id.fab_option_3)
     }
 
     private fun GetDisplayDimens() {
@@ -203,16 +238,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onDestroy() {
         super.onDestroy()
     }
 
     private fun checkP() {
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CONTACTS)
-            != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_CONTACTS
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
 
             ActivityCompat.requestPermissions(
@@ -222,7 +259,7 @@ class MainActivity : AppCompatActivity() {
             )
 
 
-        } else  {
+        } else {
             cGranted = true
             UsageStatsPermissionDialog()
         }
@@ -232,14 +269,15 @@ class MainActivity : AppCompatActivity() {
         val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
         alertDialog.setTitle("Permission Request")
         alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
-        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK"
+        alertDialog.setButton(
+            AlertDialog.BUTTON_NEUTRAL, "OK"
         ) { dialog, which ->
             val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
             applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             dialog.dismiss()
         }
 
-        if(!getGrantStatus()) {
+        if (!getGrantStatus()) {
             alertDialog.show()
         }
 
@@ -281,7 +319,6 @@ class MainActivity : AppCompatActivity() {
 
                         sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
                         sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
-
 
 
                     } catch (e: JSONException) {
@@ -343,7 +380,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -362,28 +398,15 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        lateinit var updateInterval: String
+        lateinit var sharedPreferences: SharedPreferences
+        lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         var randomNumber: Int = 0
         val imgUrls: ArrayList<String> = ArrayList()
         var wallBitmaps: List<Bitmap> = ArrayList<Bitmap>().toMutableList()
         var cGranted: Boolean = false
         lateinit var appContx: Context
 
-        fun notifyW() {
-
-            try {
-                val intent = Intent(
-                    appContx,
-                    NewAppWidget::class.java)
-                intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
-                val ids: IntArray = AppWidgetManager.getInstance(appContx)
-                    .getAppWidgetIds(ComponentName(appContx, NewAppWidget::class.java))
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
-                appContx.sendBroadcast(intent);
-            } catch (e: Exception) {
-                // TODO: handle exception
-            }
-
-        }
 
         fun makeToast(s: String) {
             Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
