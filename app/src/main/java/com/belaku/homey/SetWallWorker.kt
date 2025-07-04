@@ -13,7 +13,9 @@ import androidx.annotation.NonNull
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.belaku.homey.MainActivity.Companion.appContx
+import com.belaku.homey.MainActivity.Companion.imgDescs
 import com.belaku.homey.MainActivity.Companion.makeToast
+import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
@@ -77,7 +79,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                 MainActivity.randomNumber = Random.Default.nextInt(urls.size)
 
                 try {
-                    val inputStream = URL(urls[Random.Default.nextInt(urls.size)]).openStream()
+                    val inputStream = URL(urls[randomNumber].substring(4, urls[randomNumber].length)).openStream()
                     wm.setStream(inputStream)
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
