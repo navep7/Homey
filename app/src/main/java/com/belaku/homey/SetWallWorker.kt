@@ -36,6 +36,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
 
+        urls.sort()
+
         if (MainActivity.updateInterval == "min")
             delayInterval = 60000
         else if (MainActivity.updateInterval == "hour")
@@ -70,6 +72,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
             try {
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
+                urls.sort()
                 val wm = WallpaperManager.getInstance(appContx)
                 MainActivity.randomNumber = Random.Default.nextInt(urls.size)
 

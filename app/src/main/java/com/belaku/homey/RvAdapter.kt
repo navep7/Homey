@@ -2,6 +2,7 @@ package com.belaku.homey
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,8 +32,12 @@ class RvAdapter internal constructor(
     // binds the data to the TextView in each row
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
     //    val desc = mDescs[position]
-        val url = mUrls[position]
+        var url = mUrls[position]
     //    holder.ryTextView.text = desc
+        url = url.split("+ ")[1]
+
+        Log.d("SSver7", url)
+
         holder.rvImgv.setImageURI(Uri.parse(url))
 
         Glide.with(context!!)
@@ -59,6 +64,7 @@ class RvAdapter internal constructor(
         override fun onClick(view: View) {
             if (mClickListener != null) mClickListener!!.onItemClick(view, adapterPosition)
             makeToast(mDescs[adapterPosition])
+            MainActivity.showSelected(adapterPosition)
         }
     }
 

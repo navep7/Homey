@@ -51,8 +51,8 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-    private var walls: HashSet<String> = HashSet()
-    private var wallDescs: HashSet<String> = HashSet()
+    private var walls: ArrayList<String> = ArrayList()
+    private var wallDescs: ArrayList<String> = ArrayList()
 
     private lateinit var mp: MediaPlayer
 
@@ -177,8 +177,11 @@ class NewAppWidget : AppWidgetProvider() {
         walls.clear()
         wallDescs.clear()
 
-        walls = sharedPreferences.getStringSet("walls", walls) as HashSet<String>
-        wallDescs = sharedPreferences.getStringSet("wallDescs", wallDescs) as HashSet<String>
+        walls = ArrayList(sharedPreferences.getStringSet("walls", null) as HashSet<String>)
+        wallDescs = ArrayList(sharedPreferences.getStringSet("wallDescs", null) as HashSet<String>)
+
+        walls.sort()
+        wallDescs.sort()
 
         appIndex = 0
         conIndex = 0

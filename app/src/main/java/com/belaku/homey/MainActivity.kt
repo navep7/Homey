@@ -2,16 +2,17 @@ package com.belaku.homey
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
+import android.app.Dialog
 import android.app.WallpaperManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -24,8 +25,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
@@ -43,7 +47,9 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.SetWallWorker.Companion.urls
 import com.belaku.homey.databinding.ActivityMainBinding
+import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -55,6 +61,7 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
@@ -74,7 +81,6 @@ class MainActivity : AppCompatActivity() {
     private var pexelUrl: String =
         "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
 
-    private var imgDescs: ArrayList<String> = ArrayList()
     private val RESULT_ENABLE: Int = 1
     private val MY_PERMISSIONS_REQUEST_READ_CONTACTS: Int = 1
     private lateinit var binding: ActivityMainBinding
@@ -91,6 +97,8 @@ class MainActivity : AppCompatActivity() {
         appContx = applicationContext
         sharedPreferences = getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
+
+        mAct = this@MainActivity
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
@@ -170,8 +178,7 @@ class MainActivity : AppCompatActivity() {
                 queryType = editTextPrompt.text.toString()
                 imgUrls.clear()
                 imgDescs.clear()
-                sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
-                sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
+
                 sharedPreferencesEditor.putString("walltype", queryType).apply()
                 fetchWallpaper(applicationContext)
             }
@@ -290,6 +297,8 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
+        imgUrls.sort()
+        imgDescs.sort()
 
 
         if (imgUrls.size == 0) {
@@ -313,8 +322,8 @@ class MainActivity : AppCompatActivity() {
                             for (i in 0 until length) {
                                 val jsonObject = jsonArray.getJSONObject(i)
                                 val objectImages = jsonObject.getJSONObject("src")
-                                imgUrls.add(objectImages.getString("original"))
-                                imgDescs.add(jsonObject.getString("alt"))
+                                imgUrls.add("$i + ${objectImages.getString("original")}")
+                                imgDescs.add("$i + ${jsonObject.getString("alt")})")
                             }
 
                             rvAdapter.notifyItemRangeChanged(0, length)
@@ -400,11 +409,13 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        private lateinit var mAct: Activity
         lateinit var updateInterval: String
         lateinit var sharedPreferences: SharedPreferences
         lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         var randomNumber: Int = 0
         val imgUrls: ArrayList<String> = ArrayList()
+        var imgDescs: ArrayList<String> = ArrayList()
         var cGranted: Boolean = false
         lateinit var appContx: Context
 
@@ -414,5 +425,36 @@ class MainActivity : AppCompatActivity() {
             Log.d("makeToastinG", s)
         }
 
+        fun showSelected(adapterPosition: Int) {
+
+            var url = imgUrls[adapterPosition]
+            url = url.split("+ ")[1]
+
+            val dialog = Dialog(mAct)
+            dialog.setContentView(R.layout.imgv_dialog_layout)
+            dialog.setTitle("Title...")
+
+            var image: ImageView = dialog.findViewById(R.id.imgv_dialog)
+            var txt: TextView = dialog.findViewById(R.id.tx_dialog)
+            var set: Button = dialog.findViewById(R.id.btn_set_dialog)
+
+            set.setOnClickListener(View.OnClickListener {
+                Thread {
+                val inputStream = URL(url).openStream()
+                WallpaperManager.getInstance(appContx).setStream(inputStream)
+                }.start()
+                Handler(Looper.getMainLooper()).postDelayed( Runnable { makeToast("Set!") }, 1000)
+
+            })
+
+            txt.text = imgDescs[adapterPosition].substring(4, imgDescs[adapterPosition].length)
+
+
+            Glide.with(appContx)
+                .load(url)
+                .into(image)
+
+            dialog.show()
+        }
     }
 }
