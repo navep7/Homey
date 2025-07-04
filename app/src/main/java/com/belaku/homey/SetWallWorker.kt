@@ -12,10 +12,12 @@ import android.widget.RemoteViews
 import androidx.annotation.NonNull
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.belaku.homey.MainActivity.Companion
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.imgDescs
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.randomNumber
+import com.belaku.homey.MainActivity.Companion.updateInterval
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
@@ -27,6 +29,7 @@ import kotlin.random.Random
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
+
     private var delayInterval: Long = 10000
     val TAG: String = "SetWallWorker7"
 
@@ -38,13 +41,18 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
 
+
         urls.sort()
 
-        if (MainActivity.updateInterval == "min")
+        appContx = applicationContext
+        wm = WallpaperManager.getInstance(appContx)
+
+        if (updateInterval != null)
+        if (updateInterval == "min")
             delayInterval = 60000
-        else if (MainActivity.updateInterval == "hour")
+        else if (updateInterval == "hour")
             delayInterval = 3600000
-        else if (MainActivity.updateInterval == "day")
+        else if (updateInterval == "day")
             delayInterval = 86400000
 
         setWall()
@@ -66,16 +74,22 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
     companion object {
         var urls: ArrayList<String> = ArrayList()
+        lateinit var wm: WallpaperManager
 
         fun setWall() {
 
             val TAG: String = "SetWallWorker7"
 
+            var c = Calendar.getInstance()
+
+            remoteViews?.setTextViewText(R.id.tx_walltype, MainActivity.queryType + " : " + updateInterval + " - " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND))
+
+
             try {
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
                 urls.sort()
-                val wm = WallpaperManager.getInstance(appContx)
+
                 MainActivity.randomNumber = Random.Default.nextInt(urls.size)
 
                 try {

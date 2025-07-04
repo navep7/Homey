@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -76,7 +77,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fabDay: FloatingActionButton
     private lateinit var rvAdapter: RvAdapter
     private lateinit var rv: RecyclerView
-    private var queryType: String = "iphone"
     private lateinit var editTextPrompt: EditText
     private var pexelUrl: String =
         "https://api.pexels.com/v1/search?query=$queryType&per_page=10"
@@ -103,6 +103,9 @@ class MainActivity : AppCompatActivity() {
         DynamicColors.applyToActivitiesIfAvailable(application)
 
         queryType = sharedPreferences.getString("walltype", "").toString()
+        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
+        sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
+
 
         findViewByIds()
         setRV(imgUrls, imgDescs)
@@ -151,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
         val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(periodicWorkRequest)
+        workManager.enqueue(oneTimeWorkRequest)
     }
 
 
@@ -179,8 +182,7 @@ class MainActivity : AppCompatActivity() {
                 imgUrls.clear()
                 imgDescs.clear()
 
-                sharedPreferencesEditor.putString("walltype", queryType).apply()
-                fetchWallpaper(applicationContext)
+               fetchWallpaper(applicationContext)
             }
             false
         })
@@ -294,8 +296,6 @@ class MainActivity : AppCompatActivity() {
         imgUrls.clear()
         imgDescs.clear()
 
-        sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
-        sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
         imgUrls.sort()
         imgDescs.sort()
@@ -409,8 +409,9 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
-        private lateinit var mAct: Activity
-        lateinit var updateInterval: String
+        var queryType: String = "iphone"
+        lateinit var mAct: Activity
+        var updateInterval: String? = null
         lateinit var sharedPreferences: SharedPreferences
         lateinit var sharedPreferencesEditor: SharedPreferences.Editor
         var randomNumber: Int = 0

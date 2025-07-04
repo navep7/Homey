@@ -79,11 +79,13 @@ class NewAppWidget : AppWidgetProvider() {
 
     override fun onEnabled(context: Context?) {
         super.onEnabled(context)
+        appContx = context!!
         makeToast("onEnabled!")
     }
 
     override fun onDisabled(context: Context?) {
         super.onDisabled(context)
+        appContx = context!!
         makeToast("onDisabled!")
     }
 
@@ -191,11 +193,7 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-        remoteViews?.setTextViewText(
-            R.id.tx_walltype,
-            sharedPreferences.getString("walltype", "unKnown")
-        )
-        remoteViews?.setTextViewText(R.id.tx_timwstamp, "" + currentHour + ":" + currentMin)
+
 
 
         remoteViews?.setOnClickPendingIntent(
