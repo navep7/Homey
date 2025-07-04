@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        queryType = sharedPreferences.getString("walltype", "Trending").toString()
+        queryType = sharedPreferences.getString("walltype", "").toString()
 
         findViewByIds()
         setRV(imgUrls, imgDescs)
@@ -291,60 +291,62 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
 
-        makeToast("fetchWallpaper 1st ${imgUrls.size}" )
 
         if (imgUrls.size == 0) {
-            makeToast("fetching : $queryType  - wallpapers" )
-            pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
-            val request: StringRequest = @SuppressLint("NotifyDataSetChanged")
-            object : StringRequest(
 
-                com.android.volley.Request.Method.GET, pexelUrl,
-                Response.Listener<String?> { response ->
-                    try {
-                        val jsonObject = JSONObject(response)
+            if (queryType.length != 0) {
+                makeToast("Showing $queryType wallpapers")
+                pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
+                val request: StringRequest = @SuppressLint("NotifyDataSetChanged")
+                object : StringRequest(
 
-                        val jsonArray = jsonObject.getJSONArray("photos")
+                    com.android.volley.Request.Method.GET, pexelUrl,
+                    Response.Listener<String?> { response ->
+                        try {
+                            val jsonObject = JSONObject(response)
 
-                        val length = jsonArray.length()
+                            val jsonArray = jsonObject.getJSONArray("photos")
+
+                            val length = jsonArray.length()
 
 
-                        for (i in 0 until length) {
-                            val jsonObject = jsonArray.getJSONObject(i)
-                            val objectImages = jsonObject.getJSONObject("src")
-                            imgUrls.add(objectImages.getString("original"))
-                            imgDescs.add(jsonObject.getString("alt"))
+                            for (i in 0 until length) {
+                                val jsonObject = jsonArray.getJSONObject(i)
+                                val objectImages = jsonObject.getJSONObject("src")
+                                imgUrls.add(objectImages.getString("original"))
+                                imgDescs.add(jsonObject.getString("alt"))
+                            }
+
+                            rvAdapter.notifyItemRangeChanged(0, length)
+
+                            sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+                            sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs))
+                                .apply()
+
+
+                        } catch (e: JSONException) {
+                            makeToast("EXE7 - " + e.message)
                         }
 
-                        rvAdapter.notifyItemRangeChanged(0, length)
 
-                        sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
-                        sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
+                    }, object : Response.ErrorListener {
+                        override fun onErrorResponse(error: VolleyError?) {
+                            makeToast("onErrorResponse - " + error.toString())
+                        }
+                    }) {
+                    @Throws(AuthFailureError::class)
+                    override fun getHeaders(): Map<String, String> {
+                        val params: MutableMap<String, String> = HashMap()
+                        params["Authorization"] =
+                            "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
 
-
-                    } catch (e: JSONException) {
-                        makeToast("EXE7 - " + e.message)
+                        return params
                     }
-
-
-                }, object : Response.ErrorListener {
-                    override fun onErrorResponse(error: VolleyError?) {
-                        makeToast("onErrorResponse - " + error.toString())
-                    }
-                }) {
-                @Throws(AuthFailureError::class)
-                override fun getHeaders(): Map<String, String> {
-                    val params: MutableMap<String, String> = HashMap()
-                    params["Authorization"] =
-                        "563492ad6f9170000100000123804538e2a24b5c9381b7c388de9f80"
-
-                    return params
                 }
-            }
-            val requestQueue = Volley.newRequestQueue(context)
-            requestQueue.add(request)
+                val requestQueue = Volley.newRequestQueue(context)
+                requestQueue.add(request)
+            } else makeToast("Please Search for the Walls using the above search bar..")
         }
-
     }
 
     private fun setRV(imgUrls: java.util.ArrayList<String>, imgDescs: ArrayList<String>) {

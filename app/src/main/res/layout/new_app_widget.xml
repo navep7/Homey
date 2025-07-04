@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rl_widget_layout"
-    android:theme="@style/Theme.Material3.DynamicColors.DayNight"
+    android:theme="@style/Theme.Material3.DynamicColors.Light"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_glass"
@@ -16,8 +16,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimaryInverse"
-        android:textSize="35sp" />
+        android:textColor="?attr/colorPrimaryFixedDim"
+        android:text="a Wish..."
+        android:textSize="35sp"
+        tools:ignore="HardcodedText" />
 
     <android.widget.TextClock
         android:id="@+id/clock"
@@ -28,24 +30,36 @@
         android:layout_gravity="center"
         android:format12Hour="k:mm:ss"
         android:format24Hour="k:mm:ss"
-        android:textColor="?attr/colorPrimaryContainer"
+        android:textColor="?attr/colorPrimary"
         android:textSize="50sp"
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/date_text_view"
+        android:id="@+id/tx_date"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimaryInverse"
+        android:textColor="?attr/colorPrimaryFixed"
+        android:text="Date.."
+        tools:ignore="HardcodedText"
         android:textSize="35sp" />
+
+    <TextView
+        android:id="@+id/tx_day"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tx_date"
+        android:textColor="?attr/colorPrimaryDark"
+        android:text="Day.."
+        tools:ignore="HardcodedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
     <LinearLayout
         android:id="@+id/ll_apps"
         android:background="@drawable/rounded_corner"
-        android:layout_below="@+id/date_text_view"
+        android:layout_below="@+id/tx_day"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"

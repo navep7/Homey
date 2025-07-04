@@ -468,7 +468,8 @@ class NewAppWidget : AppWidgetProvider() {
         val c: Date = Calendar.getInstance().time
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
-        remoteViews?.setTextViewText(R.id.date_text_view, formattedDate)
+        remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
+        remoteViews?.setTextViewText(R.id.tx_day, SimpleDateFormat("EEEE", Locale.getDefault()).format(c))
     }
 
     private fun launchApp(context: Context, pkgName: String) {
