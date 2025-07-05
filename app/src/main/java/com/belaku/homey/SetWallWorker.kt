@@ -16,6 +16,7 @@ import com.belaku.homey.MainActivity.Companion
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.imgDescs
 import com.belaku.homey.MainActivity.Companion.makeToast
+import com.belaku.homey.MainActivity.Companion.queryType
 import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.updateInterval
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
@@ -80,7 +81,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
             val TAG: String = "SetWallWorker7"
 
-
             try {
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
@@ -94,10 +94,10 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
-                    var c = Calendar.getInstance()
+                    /*var c = Calendar.getInstance()
                     remoteViews?.setTextViewText(R.id.tx_walltype, MainActivity.queryType + " : " + updateInterval + " - " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND))
                     newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
-                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)*/
                 } catch (ex: Exception) {
                     Log.d(TAG, "$ex - EX!")
                     //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
@@ -105,8 +105,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
             } catch (e: IOException) {
                 Log.d(TAG,  e.toString())
-                remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
-                AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+                /*remoteViews?.setTextViewText(R.id.tx_timwstamp, "EXPfu")
+                AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)*/
                 // Handle exceptions (e.g., network errors, file access issues)
             }
         }

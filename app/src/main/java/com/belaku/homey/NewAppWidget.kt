@@ -42,6 +42,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
+import com.belaku.homey.MainActivity.Companion.queryType
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -101,6 +102,7 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
+            remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_openapp,
@@ -184,8 +186,8 @@ class NewAppWidget : AppWidgetProvider() {
         walls.clear()
         wallDescs.clear()
 
-        walls = ArrayList(sharedPreferences.getStringSet("walls", null) as HashSet<String>)
-        wallDescs = ArrayList(sharedPreferences.getStringSet("wallDescs", null) as HashSet<String>)
+        walls = ArrayList(sharedPreferences.getStringSet("walls", HashSet(walls)) as HashSet<String>)
+        wallDescs = ArrayList(sharedPreferences.getStringSet("wallDescs", HashSet(walls)) as HashSet<String>)
 
         walls.sort()
         wallDescs.sort()
@@ -194,6 +196,8 @@ class NewAppWidget : AppWidgetProvider() {
         conIndex = 0
 
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+
+        remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]

@@ -8,8 +8,10 @@ import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.app.Dialog
+import android.app.ProgressDialog
 import android.app.WallpaperManager
 import android.app.admin.DevicePolicyManager
+import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -31,6 +33,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.RemoteViews
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
@@ -49,6 +52,8 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.NewAppWidget.Companion.newAppWidget
+import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
@@ -67,6 +72,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private lateinit var pD: ProgressDialog
     private lateinit var frameMin: FrameLayout
     private lateinit var frameHour: FrameLayout
     private lateinit var frameDay: FrameLayout
@@ -99,9 +105,19 @@ class MainActivity : AppCompatActivity() {
 
         mAct = this@MainActivity
 
+        pD = ProgressDialog(this@MainActivity)
+        pD.setMessage("fetching Walls...")
+
+
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        queryType = sharedPreferences.getString("walltype", "").toString()
+        queryType = sharedPreferences.getString("walltype", "Pixel").toString()
+
+        newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+        remoteViews = RemoteViews(applicationContext.packageName, R.layout.new_app_widget)
+
+        AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
@@ -177,11 +193,13 @@ class MainActivity : AppCompatActivity() {
         editTextPrompt.setOnEditorActionListener(OnEditorActionListener { v, actionId, event ->
             if ((event != null && (event.keyCode == KeyEvent.KEYCODE_ENTER)) || (actionId == EditorInfo.IME_ACTION_DONE)) {
                 //do what you want on the press of 'done'
-                queryType = editTextPrompt.text.toString()
+
                 imgUrls.clear()
                 imgDescs.clear()
 
-               fetchWallpaper(applicationContext)
+                queryType = editTextPrompt.text.toString()
+                pD.show()
+                fetchWallpaper(applicationContext)
             }
             false
         })
@@ -190,19 +208,24 @@ class MainActivity : AppCompatActivity() {
             updateInterval = "min"
             makeToast("Wallpaper updates every Min!")
             setWalls(1)
-
+            sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+            sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
 
         fabHour.setOnClickListener {
             updateInterval = "hour"
             makeToast("Wallpaper updates every 5 Mins!")
             setWalls(5)
+            sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+            sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
 
         fabDay.setOnClickListener {
             updateInterval = "day"
             makeToast("Wallpaper updates every 10 Mins!")
             setWalls(10)
+            sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
+            sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
 
     }
@@ -298,6 +321,7 @@ class MainActivity : AppCompatActivity() {
 
     fun fetchWallpaper(context: Context) {
 
+
         imgUrls.clear()
         imgDescs.clear()
 
@@ -332,10 +356,7 @@ class MainActivity : AppCompatActivity() {
                             }
 
                             rvAdapter.notifyItemRangeChanged(0, length)
-
-                            sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
-                            sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs))
-                                .apply()
+                            pD.dismiss()
 
 
                         } catch (e: JSONException) {
@@ -414,7 +435,7 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
-        var queryType: String = "iphone"
+        var queryType: String = "Pixels"
         lateinit var mAct: Activity
         var updateInterval: String? = null
         lateinit var sharedPreferences: SharedPreferences
