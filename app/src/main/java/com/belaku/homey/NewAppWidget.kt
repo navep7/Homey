@@ -5,6 +5,7 @@ import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
@@ -106,6 +107,10 @@ class NewAppWidget : AppWidgetProvider() {
                 getPendingSelfIntent(context, OPEN_APP)
             )
 
+            remoteViews?.setOnClickPendingIntent(
+                R.id.imgbtn_lock,
+                getPendingSelfIntent(context, LOCK_PHONE)
+            )
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_set,
@@ -202,6 +207,11 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
+            R.id.imgbtn_lock,
+            getPendingSelfIntent(context, LOCK_PHONE)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_set,
             getPendingSelfIntent(context, WALL_CHANGE)
         )
@@ -287,6 +297,17 @@ class NewAppWidget : AppWidgetProvider() {
         if (OPEN_APP == intent.action) {
             val launchIntent: Intent = context.packageManager.getLaunchIntentForPackage("com.belaku.homey")!!
             context.startActivity(launchIntent)
+        }
+
+        if (LOCK_PHONE == intent.action) {
+
+            var deviceManger =
+                context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            var compName = ComponentName(context, DeviceAdmin::class.java)
+            val active: Boolean = deviceManger.isAdminActive(compName)
+
+            if (active)
+                deviceManger.lockNow()
         }
 
         if (WALL_CHANGE == intent.action) {

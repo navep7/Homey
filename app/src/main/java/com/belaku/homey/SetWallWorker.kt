@@ -36,11 +36,11 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     @NonNull
     override fun doWork(): Result {
 
+        Log.d(TAG, "doWork!")
         sharedPreferences = applicationContext.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
         urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
-
 
         urls.sort()
 
@@ -51,13 +51,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         if (updateInterval == "min")
             delayInterval = 60000
         else if (updateInterval == "hour")
-            delayInterval = 3600000
+            delayInterval = 300000
         else if (updateInterval == "day")
-            delayInterval = 86400000
+            delayInterval = 600000
 
         setWall()
 
-        for (i in 1..900){
+        for (i in 1..100){
             try {
                 Log.d(TAG, "Let me sleep a moment... $delayInterval")
                 Thread.sleep((delayInterval))
@@ -80,17 +80,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
             val TAG: String = "SetWallWorker7"
 
-            var c = Calendar.getInstance()
-
-            remoteViews?.setTextViewText(R.id.tx_walltype, MainActivity.queryType + " : " + updateInterval + " - " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND))
-
 
             try {
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
                 urls.sort()
 
-                MainActivity.randomNumber = Random.Default.nextInt(urls.size)
+                randomNumber = Random.Default.nextInt(urls.size)
 
                 try {
                     val inputStream = URL(urls[randomNumber].substring(4, urls[randomNumber].length)).openStream()
@@ -98,6 +94,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
+                    var c = Calendar.getInstance()
+                    remoteViews?.setTextViewText(R.id.tx_walltype, MainActivity.queryType + " : " + updateInterval + " - " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND))
                     newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
                     AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
                 } catch (ex: Exception) {

@@ -9,6 +9,8 @@ import android.app.AppOpsManager.MODE_ALLOWED
 import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.app.Dialog
 import android.app.WallpaperManager
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -47,7 +49,6 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.belaku.homey.SetWallWorker.Companion.urls
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
@@ -60,9 +61,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
@@ -144,12 +143,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun setWalls() {
+    private fun setWalls(delay: Long) {
         val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java)
             .build()
 
         val periodicWorkRequest =
-            PeriodicWorkRequest.Builder(SetWallWorker::class.java, 15, TimeUnit.MINUTES)
+            PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
                 .setConstraints(Constraints.NONE)
                 .build()
 
@@ -189,21 +188,21 @@ class MainActivity : AppCompatActivity() {
 
         fabMin.setOnClickListener {
             updateInterval = "min"
-            makeToast("Wallpaper updates every Minute!")
-            Handler(Looper.getMainLooper()).postDelayed(Runnable { setWalls() }, 1000)
+            makeToast("Wallpaper updates every Min!")
+            setWalls(1)
 
         }
 
         fabHour.setOnClickListener {
             updateInterval = "hour"
-            makeToast("Wallpaper updates every Hour!")
-            setWalls()
+            makeToast("Wallpaper updates every 5 Mins!")
+            setWalls(5)
         }
 
         fabDay.setOnClickListener {
             updateInterval = "day"
-            makeToast("Wallpaper updates every Day!")
-            setWalls()
+            makeToast("Wallpaper updates every 10 Mins!")
+            setWalls(10)
         }
 
     }
@@ -271,6 +270,12 @@ class MainActivity : AppCompatActivity() {
             cGranted = true
             UsageStatsPermissionDialog()
         }
+
+        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+        var compName = ComponentName(this, DeviceAdmin::class.java)
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
+        startActivityForResult(intent, RESULT_ENABLE)
     }
 
     private fun UsageStatsPermissionDialog() {
