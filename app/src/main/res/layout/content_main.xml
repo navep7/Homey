@@ -67,7 +67,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="1 Min"
+                android:text="15 Min"
                 android:elevation="16dp"
                 android:textColor="@android:color/black"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -91,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="5 Min"
+                android:text="1 Hour"
                 android:elevation="16dp"
                 android:textColor="@android:color/black"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -119,7 +119,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="10 Min"
+            android:text="1 Day"
             android:elevation="16dp"
             android:textColor="@android:color/black"
             android:textAppearance="?android:attr/textAppearanceMedium" />

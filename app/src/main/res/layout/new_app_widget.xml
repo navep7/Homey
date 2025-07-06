@@ -298,7 +298,7 @@
 
 
     <TextView
-        android:id="@+id/tx_timwstamp"
+        android:id="@+id/tx_timestamp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:text="!"

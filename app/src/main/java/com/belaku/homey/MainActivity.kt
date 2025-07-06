@@ -17,6 +17,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -44,6 +45,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
@@ -72,6 +74,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private val TAG: String = "WallWorkRequest"
     private lateinit var pD: ProgressDialog
     private lateinit var frameMin: FrameLayout
     private lateinit var frameHour: FrameLayout
@@ -160,8 +163,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setWalls(delay: Long) {
-        val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java)
-            .build()
+    //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
+
+        delayUnit = delay.toString()
+        var c = Calendar.getInstance()
+        updateTime = "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND)
 
         val periodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
@@ -169,24 +175,11 @@ class MainActivity : AppCompatActivity() {
                 .build()
 
         val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(oneTimeWorkRequest)
+
+        workManager.enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE , periodicWorkRequest)
     }
 
 
-    @OptIn(DelicateCoroutinesApi::class)
-    fun setWallpaperFromUrl(context: Context, imageUrl: String) {
-
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val inputStream = URL(imageUrl).openStream()
-                WallpaperManager.getInstance(context).setStream(inputStream)
-            } catch (ex: Exception) {
-                makeToast(ex.message.toString() + " - EX!")
-                //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
-            }
-        }
-    }
 
     private fun listeners() {
 
@@ -207,7 +200,7 @@ class MainActivity : AppCompatActivity() {
         fabMin.setOnClickListener {
             updateInterval = "min"
             makeToast("Wallpaper updates every Min!")
-            setWalls(1)
+            setWalls(15)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
@@ -215,7 +208,7 @@ class MainActivity : AppCompatActivity() {
         fabHour.setOnClickListener {
             updateInterval = "hour"
             makeToast("Wallpaper updates every 5 Mins!")
-            setWalls(5)
+            setWalls(60)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
@@ -223,7 +216,7 @@ class MainActivity : AppCompatActivity() {
         fabDay.setOnClickListener {
             updateInterval = "day"
             makeToast("Wallpaper updates every 10 Mins!")
-            setWalls(10)
+            setWalls(1440)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
@@ -435,7 +428,9 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        var delayUnit: String = ""
         var queryType: String = "Pixels"
+        var updateTime: String = "00:00"
         lateinit var mAct: Activity
         var updateInterval: String? = null
         lateinit var sharedPreferences: SharedPreferences

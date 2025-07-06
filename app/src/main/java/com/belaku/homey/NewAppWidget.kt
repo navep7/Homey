@@ -41,8 +41,10 @@ import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
+import com.belaku.homey.MainActivity.Companion.delayUnit
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.queryType
+import com.belaku.homey.MainActivity.Companion.updateTime
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -82,6 +84,7 @@ class NewAppWidget : AppWidgetProvider() {
     override fun onEnabled(context: Context?) {
         super.onEnabled(context)
         appContx = context!!
+        onEn = true
         makeToast("onEnabled!")
     }
 
@@ -102,7 +105,7 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
-            remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
+        //    remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_openapp,
@@ -197,7 +200,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
-        remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
+        remoteViews?.setTextViewText(R.id.tx_walltype, queryType.substring(0, 1).uppercase() + queryType.substring(1) + "\t\t\t" + delayUnit)
+        remoteViews?.setTextViewText(R.id.tx_timestamp, updateTime)
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
@@ -703,6 +707,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
         private var Apps: ArrayList<App> = ArrayList()
         lateinit var sharedPreferencesEditor: SharedPreferences.Editor

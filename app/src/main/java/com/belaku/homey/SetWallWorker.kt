@@ -6,6 +6,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.icu.util.Calendar
+import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
@@ -42,7 +45,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         sharedPreferencesEditor = sharedPreferences.edit()
 
         urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
-
         urls.sort()
 
         appContx = applicationContext
@@ -56,18 +58,18 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         else if (updateInterval == "day")
             delayInterval = 600000
 
-        setWall()
+        var c = Calendar.getInstance()
 
-        for (i in 1..100){
-            try {
-                Log.d(TAG, "Let me sleep a moment... $delayInterval")
-                Thread.sleep((delayInterval))
-                setWall()
-            } catch (e: InterruptedException) {
-                Log.d(TAG, "Thread sleep failed...")
-                e.printStackTrace()
-            }
-        }
+
+        setWall()
+        var mp = MediaPlayer.create(applicationContext, R.raw.click)
+        mp.start()
+        Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
+
+        Log.d("6J25",  "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
+            Calendar.SECOND))
+
+
         return Result.success()
     }
 
@@ -80,11 +82,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         fun setWall() {
 
             val TAG: String = "SetWallWorker7"
+            wm = WallpaperManager.getInstance(appContx)
 
             try {
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
                 urls.sort()
+
 
                 randomNumber = Random.Default.nextInt(urls.size)
 
@@ -94,10 +98,11 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
+                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
                     /*var c = Calendar.getInstance()
                     remoteViews?.setTextViewText(R.id.tx_walltype, MainActivity.queryType + " : " + updateInterval + " - " + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND))
-                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
-                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)*/
+                    */
                 } catch (ex: Exception) {
                     Log.d(TAG, "$ex - EX!")
                     //    remoteViews.setTextViewText(R.id.tx_desc, ex.message.toString())
