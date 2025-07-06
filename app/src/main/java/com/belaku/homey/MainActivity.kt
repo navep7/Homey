@@ -108,13 +108,15 @@ class MainActivity : AppCompatActivity() {
 
         mAct = this@MainActivity
 
+        parentLayout = findViewById(android.R.id.content);
+
         pD = ProgressDialog(this@MainActivity)
         pD.setMessage("fetching Walls...")
 
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        queryType = sharedPreferences.getString("walltype", "Pixel").toString()
+        queryType = sharedPreferences.getString("walltype", "Material Design").toString()
 
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
@@ -160,13 +162,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setWalls(delay: Long) {
-    //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
+        //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
 
         delayUnit = delay.toString()
         sharedPreferencesEditor.putString("dU", delayUnit).apply()
-        var c = Calendar.getInstance()
-        updateTime = "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND)
-        sharedPreferencesEditor.putString("uT", updateTime)
+
 
         val periodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
@@ -175,9 +175,12 @@ class MainActivity : AppCompatActivity() {
 
         val workManager = WorkManager.getInstance(applicationContext)
 
-        workManager.enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE , periodicWorkRequest)
+        workManager.enqueueUniquePeriodicWork(
+            TAG,
+            ExistingPeriodicWorkPolicy.REPLACE,
+            periodicWorkRequest
+        )
     }
-
 
 
     private fun listeners() {
@@ -192,6 +195,7 @@ class MainActivity : AppCompatActivity() {
                 queryType = editTextPrompt.text.toString()
                 sharedPreferencesEditor.putString("qT", queryType).apply()
                 pD.show()
+                sN.dismiss()
                 fetchWallpaper(applicationContext)
             }
             false
@@ -326,7 +330,7 @@ class MainActivity : AppCompatActivity() {
         if (imgUrls.size == 0) {
 
             if (queryType.length != 0) {
-                makeToast("Showing $queryType wallpapers")
+                makeSnack("Showing $queryType wallpapers \n Search using above Bar if you seek something else..")
                 pexelUrl = "https://api.pexels.com/v1/search?query=$queryType&per_page=35"
                 val request: StringRequest = @SuppressLint("NotifyDataSetChanged")
                 object : StringRequest(
@@ -428,8 +432,10 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        lateinit var sN: Snackbar
+        lateinit var parentLayout: View
         var delayUnit: String = ""
-        var queryType: String = "Pixels"
+        var queryType: String = "Material Design"
         var updateTime: String = "00:00"
         lateinit var mAct: Activity
         var updateInterval: String? = null
@@ -444,6 +450,12 @@ class MainActivity : AppCompatActivity() {
 
         fun makeToast(s: String) {
             Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
+            Log.d("makeToastinG", s)
+        }
+
+        fun makeSnack(s: String) {
+            sN = Snackbar.make(parentLayout, s, Snackbar.LENGTH_INDEFINITE)
+            sN.show()
             Log.d("makeToastinG", s)
         }
 
@@ -462,10 +474,10 @@ class MainActivity : AppCompatActivity() {
 
             set.setOnClickListener(View.OnClickListener {
                 Thread {
-                val inputStream = URL(url).openStream()
-                WallpaperManager.getInstance(appContx).setStream(inputStream)
+                    val inputStream = URL(url).openStream()
+                    WallpaperManager.getInstance(appContx).setStream(inputStream)
                 }.start()
-                Handler(Looper.getMainLooper()).postDelayed( Runnable { makeToast("Set!") }, 1000)
+                Handler(Looper.getMainLooper()).postDelayed(Runnable { makeToast("Set!") }, 1000)
 
             })
 

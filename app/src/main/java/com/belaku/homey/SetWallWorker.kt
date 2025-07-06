@@ -13,9 +13,11 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.belaku.homey.MainActivity.Companion
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.queryType
 import com.belaku.homey.MainActivity.Companion.randomNumber
+import com.belaku.homey.MainActivity.Companion.updateTime
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.NewAppWidget.Companion.sharedPreferences
@@ -52,13 +54,15 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         mp.start()
         Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
 
-        Log.d("6J25",  "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
-            Calendar.SECOND))
+        Log.d(
+            "6J25", "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
+                Calendar.SECOND
+            )
+        )
 
 
         return Result.success()
     }
-
 
 
     companion object {
@@ -79,16 +83,19 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                 randomNumber = Random.Default.nextInt(urls.size)
 
                 try {
-                    val inputStream = URL(urls[randomNumber].substring(4, urls[randomNumber].length)).openStream()
+                    val inputStream =
+                        URL(urls[randomNumber].substring(4, urls[randomNumber].length)).openStream()
                     wm.setStream(inputStream)
+                    var c = Calendar.getInstance()
+                    updateTime =
+                        "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
+                            Calendar.SECOND
+                        )
+                    MainActivity.sharedPreferencesEditor.putString("uT", updateTime).apply()
                     Log.d(TAG, "Set successfully")
-                    remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
-                    val intent: Intent = Intent(appContx, NewAppWidget::class.java)
+
+                    val intent = Intent(appContx, NewAppWidget::class.java)
                     intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-
-
-                    // Use an array and EXTRA_APPWIDGET_IDS instead of AppWidgetManager.EXTRA_APPWIDGET_ID,
-// since it seems the onUpdate() is only fired on that:
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newAppWidget)
                     appContx.sendBroadcast(intent)
 
@@ -97,7 +104,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                 }
 
             } catch (e: IOException) {
-                Log.d(TAG,  e.toString())
+                Log.d(TAG, e.toString())
             }
         }
     }

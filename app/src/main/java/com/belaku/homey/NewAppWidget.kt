@@ -196,7 +196,7 @@ class NewAppWidget : AppWidgetProvider() {
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
         Log.d(TAG, "onReceive $qT $dU $uT")
-        remoteViews?.setTextViewText(R.id.tx_walltype, qT.substring(0, 1).uppercase() + qT.substring(1) + "\t\t\t" + dU)
+        remoteViews?.setTextViewText(R.id.tx_walltype, qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU)
         remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
 
 
