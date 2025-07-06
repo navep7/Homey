@@ -55,6 +55,10 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private val TAG: String = "NewAppWidget LOG7"
+    private lateinit var qT: String
+    private lateinit var uT: String
+    private lateinit var dU: String
     private var walls: ArrayList<String> = ArrayList()
     private var wallDescs: ArrayList<String> = ArrayList()
 
@@ -100,12 +104,15 @@ class NewAppWidget : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
 
+        Log.d(TAG, "onUpdate")
+
+        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
 
         for (appWidgetId in appWidgetIds) {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
-        //    remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_openapp,
@@ -167,8 +174,6 @@ class NewAppWidget : AppWidgetProvider() {
                 getPendingSelfIntent(context, C4_CLICKED)
             )
 
-
-
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
@@ -182,9 +187,19 @@ class NewAppWidget : AppWidgetProvider() {
         // TODO Auto-generated method stub
 
         super.onReceive(context, intent)
+        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
+
+        qT = sharedPreferences.getString("qT", "").toString()
+        dU = sharedPreferences.getString("dU", "").toString()
+        uT = sharedPreferences.getString("uT", "").toString()
+        Log.d(TAG, "onReceive $qT $dU $uT")
+        remoteViews?.setTextViewText(R.id.tx_walltype, qT.substring(0, 1).uppercase() + qT.substring(1) + "\t\t\t" + dU)
+        remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
+
+
 
         walls.clear()
         wallDescs.clear()
@@ -197,11 +212,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         appIndex = 0
         conIndex = 0
-
-        remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
-
-        remoteViews?.setTextViewText(R.id.tx_walltype, queryType.substring(0, 1).uppercase() + queryType.substring(1) + "\t\t\t" + delayUnit)
-        remoteViews?.setTextViewText(R.id.tx_timestamp, updateTime)
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
@@ -285,11 +295,6 @@ class NewAppWidget : AppWidgetProvider() {
         appUsageStats(context, timeOfDay)
 
 
-        //    makeToast("CHKI " + intent.action)
-
-        /*if (intent.action!!.contains("."))
-            setWalls(context)*/
-
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -320,20 +325,11 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (WALL_CHANGE == intent.action) {
 
-            remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.VISIBLE)
-            remoteViews?.setViewVisibility(R.id.imgbtn_set, View.INVISIBLE)
-            newAppWidget = ComponentName(context, NewAppWidget::class.java)
-            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
-
             appContx = context
             Thread {
             SetWallWorker.setWall()
             }.start()
 
-            /*remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
-            remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
-            newAppWidget = ComponentName(context, NewAppWidget::class.java)
-            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)*/
         }
 
         if (APP1_CLICKED == intent.action) {

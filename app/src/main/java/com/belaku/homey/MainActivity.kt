@@ -116,11 +116,6 @@ class MainActivity : AppCompatActivity() {
 
         queryType = sharedPreferences.getString("walltype", "Pixel").toString()
 
-        newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
-        remoteViews = RemoteViews(applicationContext.packageName, R.layout.new_app_widget)
-
-        AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
-
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
@@ -131,6 +126,8 @@ class MainActivity : AppCompatActivity() {
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
+
+        sharedPreferencesEditor.putString("qT", queryType).apply()
 
         fabMain.setOnClickListener { view ->
 
@@ -166,8 +163,10 @@ class MainActivity : AppCompatActivity() {
     //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
 
         delayUnit = delay.toString()
+        sharedPreferencesEditor.putString("dU", delayUnit).apply()
         var c = Calendar.getInstance()
         updateTime = "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(Calendar.SECOND)
+        sharedPreferencesEditor.putString("uT", updateTime)
 
         val periodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
@@ -191,6 +190,7 @@ class MainActivity : AppCompatActivity() {
                 imgDescs.clear()
 
                 queryType = editTextPrompt.text.toString()
+                sharedPreferencesEditor.putString("qT", queryType).apply()
                 pD.show()
                 fetchWallpaper(applicationContext)
             }
@@ -199,7 +199,7 @@ class MainActivity : AppCompatActivity() {
 
         fabMin.setOnClickListener {
             updateInterval = "min"
-            makeToast("Wallpaper updates every Min!")
+            makeToast("Wallpaper updates every 15 Mins!")
             setWalls(15)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity() {
 
         fabHour.setOnClickListener {
             updateInterval = "hour"
-            makeToast("Wallpaper updates every 5 Mins!")
+            makeToast("Wallpaper updates every 30 Mins!")
             setWalls(60)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
@@ -215,7 +215,7 @@ class MainActivity : AppCompatActivity() {
 
         fabDay.setOnClickListener {
             updateInterval = "day"
-            makeToast("Wallpaper updates every 10 Mins!")
+            makeToast("Wallpaper updates every 60 Mins!")
             setWalls(1440)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
