@@ -11,6 +11,7 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
 import androidx.annotation.NonNull
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -51,10 +52,10 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
         setWall()
-        var mp = MediaPlayer.create(applicationContext, R.raw.click)
+        /*var mp = MediaPlayer.create(applicationContext, R.raw.click)
         mp.start()
         Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
-
+*/
         Log.d(
             "6J25", "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
                 Calendar.SECOND
@@ -67,6 +68,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
     companion object {
+        var wallDesc: String = ""
+        var wallDescs: ArrayList<String> = ArrayList()
         var urls: ArrayList<String> = ArrayList()
         lateinit var wm: WallpaperManager
 
@@ -79,9 +82,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
                 urls = ArrayList(sharedPreferences.getStringSet("walls", null)!!)
                 urls.sort()
+                wallDescs = ArrayList(sharedPreferences.getStringSet("wallDescs", null)!!)
+                wallDescs.sort()
 
 
                 randomNumber = Random.Default.nextInt(urls.size)
+                wallDesc = wallDescs.get(randomNumber)
+
 
                 try {
                     val inputStream =
@@ -94,10 +101,14 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                         )
                     sharedPreferencesEditor.putString("uT", updateTime).apply()
                     Log.d(TAG, "Set successfully")
+                    remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
+                    remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
+                    remoteViews?.setTextViewText(R.id.tx_desc, wallDesc.split(" + ")[1])
+                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
 
                     val intent = Intent(appContx, NewAppWidget::class.java)
-                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newAppWidget)
                     appContx.sendBroadcast(intent)
 

@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 
-        queryType = sharedPreferences.getString("walltype", "Material Design").toString()
+        queryType = sharedPreferences.getString("walltype", "nature").toString()
 
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }

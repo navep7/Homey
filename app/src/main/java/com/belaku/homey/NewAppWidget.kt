@@ -9,6 +9,7 @@ import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
@@ -44,6 +45,7 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.delayUnit
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.queryType
+import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.MainActivity.Companion.updateTime
@@ -61,24 +63,9 @@ class NewAppWidget : AppWidgetProvider() {
     private lateinit var qT: String
     private lateinit var uT: String
     private lateinit var dU: String
-    private var walls: ArrayList<String> = ArrayList()
-    private var wallDescs: ArrayList<String> = ArrayList()
 
     private lateinit var mp: MediaPlayer
 
-
-    private lateinit var wallType: String
-    var wallTypes: List<String> = mutableListOf(
-        "Beautiful",
-        "Trending",
-        "festival",
-        "Sunset",
-        "Beach",
-        "Rain",
-        "Diwali",
-        "Street",
-        "Cityscapes"
-    )
 
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
@@ -92,6 +79,7 @@ class NewAppWidget : AppWidgetProvider() {
         appContx = context!!
         onEn = true
         makeToast("onEnabled!")
+
     }
 
     override fun onDisabled(context: Context?) {
@@ -115,11 +103,6 @@ class NewAppWidget : AppWidgetProvider() {
 
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.tx_openapp,
-                getPendingSelfIntent(context, OPEN_APP)
-            )
-
-            remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_lock,
                 getPendingSelfIntent(context, LOCK_PHONE)
             )
@@ -127,6 +110,11 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_set,
                 getPendingSelfIntent(context, WALL_CHANGE)
+            )
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.imgbtn_note,
+                getPendingSelfIntent(context, SET_CLICKED)
             )
 
             remoteViews?.setOnClickPendingIntent(
@@ -189,24 +177,23 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
+        Log.d(TAG, "onReceive ${intent.action}")
+
+        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        sharedPreferencesEditor = sharedPreferences.edit()
 
         qT = sharedPreferences.getString("qT", "").toString()
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
-        Log.d(TAG, "onReceive $qT $dU $uT")
-        remoteViews?.setTextViewText(R.id.tx_walltype, qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU)
+
+
+        remoteViews?.setTextViewText(R.id.tx_desc, SetWallWorker.wallDesc.split(" + ")[1])
+        remoteViews?.setTextViewText(
+            R.id.tx_walltype,
+            qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
+        )
         remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
 
-
-
-        walls.clear()
-        wallDescs.clear()
-
-        walls = ArrayList(sharedPreferences.getStringSet("walls", HashSet(walls)) as HashSet<String>)
-        wallDescs = ArrayList(sharedPreferences.getStringSet("wallDescs", HashSet(walls)) as HashSet<String>)
-
-        walls.sort()
-        wallDescs.sort()
 
         appIndex = 0
         conIndex = 0
@@ -214,13 +201,6 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-
-
-
-        remoteViews?.setOnClickPendingIntent(
-            R.id.tx_openapp,
-            getPendingSelfIntent(context, OPEN_APP)
-        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
@@ -230,6 +210,11 @@ class NewAppWidget : AppWidgetProvider() {
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_set,
             getPendingSelfIntent(context, WALL_CHANGE)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
+            R.id.imgbtn_note,
+            getPendingSelfIntent(context, SET_CLICKED)
         )
 
         remoteViews?.setOnClickPendingIntent(
@@ -290,25 +275,20 @@ class NewAppWidget : AppWidgetProvider() {
         //     makeToast("onReceive!")
 
         todaysDate(context)
-        appUsageStats(context, timeOfDay)
 
-
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            greeting(context, remoteViews!!, timeOfDay)
-            if (favContacts.size == 0)
-                getFavoriteContacts(context)
+        if (intent.action != ACTION_APPWIDGET_OPTIONS_CHANGED) {
+            appUsageStats(context, timeOfDay)
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                greeting(context, remoteViews!!, timeOfDay)
+                if (favContacts.size == 0)
+                    getFavoriteContacts(context)
+            }
         }
-
 
         var apps = readApps()
 
-
-        if (OPEN_APP == intent.action) {
-            val launchIntent: Intent = context.packageManager.getLaunchIntentForPackage("com.belaku.homey")!!
-            context.startActivity(launchIntent)
-        }
 
         if (LOCK_PHONE == intent.action) {
 
@@ -321,12 +301,21 @@ class NewAppWidget : AppWidgetProvider() {
                 deviceManger.lockNow()
         }
 
+        if (SET_CLICKED == intent.action) {
+            val launchIntent: Intent =
+                context.packageManager.getLaunchIntentForPackage("com.belaku.homey")!!
+            context.startActivity(launchIntent)
+        }
+
         if (WALL_CHANGE == intent.action) {
 
+            remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.VISIBLE)
+            remoteViews?.setViewVisibility(R.id.imgbtn_set, View.INVISIBLE)
             appContx = context
             Thread {
-            SetWallWorker.setWall()
+                SetWallWorker.setWall()
             }.start()
+
 
         }
 
@@ -372,6 +361,7 @@ class NewAppWidget : AppWidgetProvider() {
         if (C4_CLICKED == intent.action) {
             dialPhoneNumber(context, favContacts.get(3).number)
         }
+
 
         newAppWidget = ComponentName(context, NewAppWidget::class.java)
         AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
@@ -493,7 +483,10 @@ class NewAppWidget : AppWidgetProvider() {
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
-        remoteViews?.setTextViewText(R.id.tx_day, SimpleDateFormat("EEEE", Locale.getDefault()).format(c))
+        remoteViews?.setTextViewText(
+            R.id.tx_day,
+            SimpleDateFormat("EEEE", Locale.getDefault()).format(c)
+        )
     }
 
     private fun launchApp(context: Context, pkgName: String) {
@@ -835,9 +828,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
-        private const val OPEN_APP = "openApp"
-        private const val WALLTYPE_CLICKED = "wallType"
-        private const val SYNC_CLICKED = "automaticWidgetSyncButtonClick"
+        private const val SET_CLICKED = "setButtonClick"
         private const val APP1_CLICKED = "App1Clicked"
         private const val APP2_CLICKED = "App2Clicked"
         private const val APP3_CLICKED = "App3Clicked"
