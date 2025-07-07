@@ -44,6 +44,8 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.delayUnit
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.queryType
+import com.belaku.homey.MainActivity.Companion.sharedPreferences
+import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.MainActivity.Companion.updateTime
 import java.util.Collections
 import java.util.Date
@@ -106,8 +108,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         Log.d(TAG, "onUpdate")
 
-        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-        sharedPreferencesEditor = sharedPreferences.edit()
 
         for (appWidgetId in appWidgetIds) {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
@@ -189,8 +189,6 @@ class NewAppWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
-        sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
-        sharedPreferencesEditor = sharedPreferences.edit()
 
         qT = sharedPreferences.getString("qT", "").toString()
         dU = sharedPreferences.getString("dU", "").toString()
@@ -706,8 +704,6 @@ class NewAppWidget : AppWidgetProvider() {
         var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
         private var Apps: ArrayList<App> = ArrayList()
-        lateinit var sharedPreferencesEditor: SharedPreferences.Editor
-        lateinit var sharedPreferences: SharedPreferences
 
 
         fun addContactInWidget(context: Context, strN: String, strNu: String, drawable: Drawable) {

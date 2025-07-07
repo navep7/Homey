@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
         fabHour.setOnClickListener {
             updateInterval = "hour"
             makeToast("Wallpaper updates every 30 Mins!")
-            setWalls(60)
+            setWalls(30)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
@@ -220,7 +220,7 @@ class MainActivity : AppCompatActivity() {
         fabDay.setOnClickListener {
             updateInterval = "day"
             makeToast("Wallpaper updates every 60 Mins!")
-            setWalls(1440)
+            setWalls(60)
             sharedPreferencesEditor.putStringSet("walls", HashSet(imgUrls)).apply()
             sharedPreferencesEditor.putStringSet("wallDescs", HashSet(imgDescs)).apply()
         }
