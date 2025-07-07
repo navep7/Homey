@@ -185,9 +185,11 @@ class NewAppWidget : AppWidgetProvider() {
         qT = sharedPreferences.getString("qT", "").toString()
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
+        try {
+            remoteViews?.setTextViewText(R.id.tx_desc, SetWallWorker.wallDesc.split(" + ")[1])
+        } catch (ex: Exception) {
 
-
-        remoteViews?.setTextViewText(R.id.tx_desc, SetWallWorker.wallDesc.split(" + ")[1])
+        }
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
             qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
