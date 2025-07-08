@@ -104,6 +104,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
                     remoteViews?.setTextViewText(R.id.tx_desc, wallDesc.split(" + ")[1])
+                    remoteViews?.setTextViewText(R.id.tx_timestamp, updateTime)
                     newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
                     AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
 

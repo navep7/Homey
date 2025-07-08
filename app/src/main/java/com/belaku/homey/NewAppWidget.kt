@@ -187,6 +187,7 @@ class NewAppWidget : AppWidgetProvider() {
         uT = sharedPreferences.getString("uT", "").toString()
         try {
             remoteViews?.setTextViewText(R.id.tx_desc, SetWallWorker.wallDesc.split(" + ")[1])
+            remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
         } catch (ex: Exception) {
 
         }
@@ -194,7 +195,7 @@ class NewAppWidget : AppWidgetProvider() {
             R.id.tx_walltype,
             qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
         )
-        remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
+
 
 
         appIndex = 0
