@@ -9,7 +9,6 @@ import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
@@ -60,6 +59,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
     private val TAG: String = "NewAppWidget LOG7"
+    private lateinit var wD: String
     private lateinit var qT: String
     private lateinit var uT: String
     private lateinit var dU: String
@@ -182,19 +182,21 @@ class NewAppWidget : AppWidgetProvider() {
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
 
+        wD = sharedPreferences.getString("wD", "").toString()
         qT = sharedPreferences.getString("qT", "").toString()
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
         try {
-            remoteViews?.setTextViewText(R.id.tx_desc, SetWallWorker.wallDesc.split(" + ")[1])
+            remoteViews?.setTextViewText(R.id.tx_desc, wD)
             remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
+            remoteViews?.setTextViewText(
+                R.id.tx_walltype,
+                qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
+            )
         } catch (ex: Exception) {
 
         }
-        remoteViews?.setTextViewText(
-            R.id.tx_walltype,
-            qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
-        )
+
 
 
 
@@ -279,7 +281,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         todaysDate(context)
 
-        if (intent.action != ACTION_APPWIDGET_OPTIONS_CHANGED) {
+
+        if (choosenApps.size == 0) {
             appUsageStats(context, timeOfDay)
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED

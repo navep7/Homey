@@ -32,7 +32,6 @@ import kotlin.random.Random
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
 
-    val TAG: String = "SetWallWorker LOG7"
 
     @NonNull
     override fun doWork(): Result {
@@ -68,6 +67,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
     companion object {
+        val TAG: String = "SetWallWorker LOG7"
         var wallDesc: String = ""
         var wallDescs: ArrayList<String> = ArrayList()
         var urls: ArrayList<String> = ArrayList()
@@ -75,7 +75,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         fun setWall() {
 
-            val TAG: String = "SetWallWorker7"
             wm = WallpaperManager.getInstance(appContx)
 
             try {
@@ -99,26 +98,28 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                         "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
                             Calendar.SECOND
                         )
+                    sharedPreferencesEditor.putString("wD", wallDesc.split("+")[1]).apply()
                     sharedPreferencesEditor.putString("uT", updateTime).apply()
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
-                    remoteViews?.setTextViewText(R.id.tx_desc, wallDesc.split(" + ")[1])
+                    /*remoteViews?.setTextViewText(R.id.tx_desc, wallDesc.split(" + ")[1])
                     remoteViews?.setTextViewText(R.id.tx_timestamp, updateTime)
-                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
+                  */  newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
                     AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
 
                     val intent = Intent(appContx, NewAppWidget::class.java)
-                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED)
+                    intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newAppWidget)
                     appContx.sendBroadcast(intent)
 
                 } catch (ex: Exception) {
-                    Log.d(TAG, "$ex - EX!")
+                    Log.d(TAG, "setWallEx1 - $ex")
                 }
 
             } catch (e: IOException) {
-                Log.d(TAG, e.toString())
+                Log.d(TAG, "setWallEx2 - $e")
             }
         }
     }
