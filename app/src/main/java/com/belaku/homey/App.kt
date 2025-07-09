@@ -4,5 +4,5 @@ import android.graphics.drawable.Drawable
 
 class App(
     var name: String,
-    var image: Drawable?
+    var image: String
 )

@@ -65,7 +65,7 @@ class NewAppWidget : AppWidgetProvider() {
 
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
-    val choosenApps: ArrayList<App> = ArrayList()
+    var choosenApps: ArrayList<App> = ArrayList()
     lateinit var gpName: String
 
 
@@ -189,6 +189,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         appContx = context
         readContacts()
+        readApps()
         makeToast("CTS RED - " + favContacts.size)
 
         appIndex = 0
@@ -284,7 +285,7 @@ class NewAppWidget : AppWidgetProvider() {
             }
         }
 
-        var apps = readApps()
+   //     readApps()
 
 
         if (LOCK_PHONE == intent.action) {
@@ -317,33 +318,33 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         if (APP1_CLICKED == intent.action) {
-            var app = apps[0]
-            Log.d("APP1_CLICKED", app)
-            launchApp(context, app)
+            var app = choosenApps[0]
+            Log.d("APP1_CLICKED", app.name)
+         //   launchApp(context, app.name)
         }
 
         if (APP2_CLICKED == intent.action) {
-            var app = apps[1]
-            Log.d("APP2_CLICKED", app)
-            launchApp(context, app)
+            var app = choosenApps[1]
+            Log.d("APP2_CLICKED", app.name)
+          //  launchApp(context, app)
         }
 
         if (APP3_CLICKED == intent.action) {
-            var app = apps[2]
-            Log.d("APP3_CLICKED", app)
-            launchApp(context, app)
+            var app = choosenApps[2]
+            Log.d("APP3_CLICKED", app.name)
+        //    launchApp(context, app)
         }
 
         if (APP4_CLICKED == intent.action) {
-            var app = apps[3]
-            Log.d("APP4_CLICKED", app)
-            launchApp(context, app)
+            var app = choosenApps[3]
+            Log.d("APP4_CLICKED", app.name)
+         //   launchApp(context, app)
         }
 
         if (APP5_CLICKED == intent.action) {
-            var app = apps[4]
-            Log.d("APP5_CLICKED", app)
-            launchApp(context, app)
+            var app = choosenApps[4]
+            Log.d("APP5_CLICKED", app.name)
+         //   launchApp(context, app)
         }
 
         if (C1_CLICKED == intent.action) {
@@ -365,19 +366,7 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-    private fun readContacts() {
 
-        val gson = Gson()
-        val response: String = sharedPreferences.getString("CTS", "").toString()
-        favContacts = gson.fromJson(
-            response,
-            object : TypeToken<List<Contact?>?>() {}.type
-        )
-
-        conIndex = 0
-
-            addContactInWidget(appContx, favContacts)
-    }
 
 
     private fun clickSound(context: Context) {
@@ -421,16 +410,34 @@ class NewAppWidget : AppWidgetProvider() {
         context.startActivity(launchIntent)
     }
 
+    private fun readContacts() {
 
-    private fun readApps(): ArrayList<String> {
-        val apps = ArrayList<String>()
+        val gson = Gson()
+        val response: String = sharedPreferences.getString("CTS", "").toString()
+        favContacts = gson.fromJson(
+            response,
+            object : TypeToken<List<Contact?>?>() {}.type
+        )
 
-        val size: Int = sharedPreferences.getInt("Status_size", 0)
-        for (i in 0 until size) {
-            apps.add(sharedPreferences.getString("Status_$i", null).toString())
-        }
+        conIndex = 0
 
-        return apps
+        addContactInWidget(appContx, favContacts)
+    }
+
+
+    private fun readApps() {
+
+        val gson = Gson()
+        val response: String = sharedPreferences.getString("MUA", "").toString()
+        choosenApps = gson.fromJson(
+            response,
+            object : TypeToken<List<App?>?>() {}.type
+        )
+
+        appIndex = 0
+
+        makeToast("readAppsSz - " + choosenApps.size)
+        addAppInWidget(appContx, choosenApps)
     }
 
 
@@ -521,15 +528,12 @@ class NewAppWidget : AppWidgetProvider() {
         fun addContactInWidget(context: Context, favC: ArrayList<Contact>) {
 
             makeToast("addContactInWidget!")
-            newAppWidget = ComponentName(context, NewAppWidget::class.java)
-            remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
             var input: InputStream
             var bm: Bitmap
             var d: Drawable
 
             for (i in 0 until  favC.size) {
-                makeToast("IMG7 - " + Uri.parse(favC[i].image))
 
                     input =
                         ContactsContract.Contacts.openContactPhotoInputStream(
@@ -582,43 +586,50 @@ class NewAppWidget : AppWidgetProvider() {
             return output
         }
 
-        fun addAppInWidget(context: Context, app: App) {
+        fun addAppInWidget(context: Context, fApps: ArrayList<App>) {
 
-            Apps.add(app)
+            makeToast("addAppInWidget! - " + fApps[0].image)
 
-            if (appIndex == 0) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_add1,
-                    app.image?.let { drawableToBitmap(context, it) })
-                appIndex = 1
-                remoteViews?.setViewVisibility(R.id.imgv_add1, View.VISIBLE)
-            } else if (appIndex == 1) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_add2,
-                    app.image?.let { drawableToBitmap(context, it) })
-                appIndex = 2
-                remoteViews?.setViewVisibility(R.id.imgv_add2, View.VISIBLE)
-            } else if (appIndex == 2) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_add3,
-                    app.image?.let { drawableToBitmap(context, it) })
-                appIndex = 3
-                remoteViews?.setViewVisibility(R.id.imgv_add3, View.VISIBLE)
-            } else if (appIndex == 3) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_add4,
-                    app.image?.let { drawableToBitmap(context, it) })
-                appIndex = 4
-                remoteViews?.setViewVisibility(R.id.imgv_add4, View.VISIBLE)
-            } else if (appIndex == 4) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_add5,
-                    app.image?.let { drawableToBitmap(context, it) })
-                appIndex = 4
-                remoteViews?.setViewVisibility(R.id.imgv_add5, View.VISIBLE)
+            var input: InputStream
+            var bm: Bitmap
+            var d: Drawable
+
+            for (i in 0 until  fApps.size) {
+
+                input =
+                    ContactsContract.Contacts.openContactPhotoInputStream(
+                        appContx.contentResolver,
+                        Uri.parse(fApps[i].image)
+                    )
+                bm = BitmapFactory.decodeStream(input)
+                d = BitmapDrawable(bm)
+
+                if (i == 0) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_add1,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                } else  if (i == 1) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_add2,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                 //   remoteViews!!.setTextViewText(R.id.tx_c2, fApps[1].name)
+                } else if (i == 2) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_add3,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+               //     remoteViews!!.setTextViewText(R.id.tx_c3, fApps[2].name)
+                } else  if (i == 3) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_add4,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                 //   remoteViews!!.setTextViewText(R.id.tx_c4, fApps[3].name)
+                }
+
             }
-
-
         }
 
 

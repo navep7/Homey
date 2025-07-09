@@ -26,7 +26,7 @@ class GridViewAdapter(
         val imageView = itemView.findViewById<ImageView>(R.id.image_view)
 
         textView.text = model!!.name
-        imageView.setImageDrawable(model.image)
+      //  imageView.setImageDrawable(model.image)
         return itemView
     }
 }

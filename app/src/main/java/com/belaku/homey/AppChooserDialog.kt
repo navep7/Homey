@@ -35,7 +35,7 @@ class AppChooserDialog : Activity() {
 
         gridView.onItemClickListener = OnItemClickListener { _, _, position, _ ->
             Toast.makeText(applicationContext, appLists.get(position).name, Toast.LENGTH_SHORT).show()
-            NewAppWidget.addAppInWidget(applicationContext, appLists.get(position))
+      //      NewAppWidget.addAppInWidget(applicationContext, appLists.get(position))
             choosenApps.add(appLists.get(position))
             goHome()
         }
@@ -86,7 +86,7 @@ class AppChooserDialog : Activity() {
                 var appIcon: Drawable = packageManager.getApplicationIcon(apps.get(i))
                 appNames.add(appName)
                 appIcons.add(appIcon)
-                appLists.add(App(apps.get(i).loadLabel(packageManager).toString(), appIcon))
+          //      appLists.add(App(apps.get(i).loadLabel(packageManager).toString(), appIcon))
                 sortApps(appLists)
             }
         }

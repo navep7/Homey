@@ -132,7 +132,6 @@ class MainActivity : AppCompatActivity() {
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
-        appUsageStats(applicationContext)
 
         sharedPreferencesEditor.putString("qT", queryType).apply()
 
@@ -225,24 +224,21 @@ class MainActivity : AppCompatActivity() {
                 "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground
             )
 
-            //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
+                if (queryUsageStats.get(i).totalTimeInForeground > 0)
             if (!appName.contains("Launcher"))
                 if (applicationContext.packageManager.getLaunchIntentForPackage(queryUsageStats[i].packageName) != null)
                     if (appNames.add(appName))
                         if (choosenApps.size < 5) {
                             choosenApps.add(
                                 App(
-                                    appName, appIcon
+                                    appName, favContacts[0].image
                                 )
                             )
                             Log.d("cLogSetAppIcon", appIcon.toString())
-                            addAppInWidget(
-                                applicationContext,
-                                App(queryUsageStats.get(i).packageName, appIcon)
-                            )
+
                         }
         }
-        saveApps(Apps)
+        saveApps(choosenApps)
 
     }
 
@@ -343,19 +339,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun saveApps(apps: java.util.ArrayList<App>) {
 
-        val set: MutableSet<String> = HashSet()
+        val key = "MUA"
 
-        for (i in 0 until apps.size)
-            set.add(apps.get(i).name)
+        val gson = Gson()
+        val json = gson.toJson(apps)
 
-        sharedPreferencesEditor.putInt("Status_size", set.size)
-
-        for (i in 0 until set.size) {
-            sharedPreferencesEditor.remove("Status_$i")
-            sharedPreferencesEditor.putString("Status_$i", apps.get(i).name)
-        }
-        sharedPreferencesEditor.commit()
-
+        sharedPreferencesEditor.remove(key).commit()
+        sharedPreferencesEditor.putString(key, json)
+        if (sharedPreferencesEditor.commit())
+            makeToast("MUA saved - " + apps.size)
     }
 
     private fun sortApps(queryUsageStats: List<UsageStats>) {
@@ -368,6 +360,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 
 
     private fun getAppIconFromPkg(context: Context, packageName: String?): Drawable? {
@@ -397,6 +390,7 @@ class MainActivity : AppCompatActivity() {
     private fun setWalls(delay: Long) {
         //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
 
+        appUsageStats(applicationContext)
         delayUnit = delay.toString()
         sharedPreferencesEditor.putString("dU", delayUnit).apply()
 
