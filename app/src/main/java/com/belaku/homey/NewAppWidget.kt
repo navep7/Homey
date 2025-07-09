@@ -39,7 +39,6 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
-import com.belaku.homey.MainActivity.Companion.favContacts
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
@@ -73,9 +72,6 @@ class NewAppWidget : AppWidgetProvider() {
         appContx = context!!
         onEn = true
         Log.d("onEnabled! - ", favContacts.size.toString())
-
-        for (i in favContacts)
-        addContactInWidget(context, i.name, i.number, i.image)
 
     }
 
@@ -159,8 +155,12 @@ class NewAppWidget : AppWidgetProvider() {
                 getPendingSelfIntent(context, C4_CLICKED)
             )
 
+            for (i in favContacts)
+                addContactInWidget(context, i.name, i.number, i.image)
+
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
+
 
         appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
 
@@ -183,6 +183,9 @@ class NewAppWidget : AppWidgetProvider() {
         qT = sharedPreferences.getString("qT", "").toString()
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
+
+
+
         try {
             remoteViews?.setTextViewText(R.id.tx_desc, wD)
             remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
@@ -311,6 +314,8 @@ class NewAppWidget : AppWidgetProvider() {
 
             remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.VISIBLE)
             remoteViews?.setViewVisibility(R.id.imgbtn_set, View.INVISIBLE)
+            for (i in favContacts)
+                addContactInWidget(context, i.name, i.number, i.image)
             appContx = context
             Thread {
                 SetWallWorker.setWall()
@@ -495,6 +500,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var favContacts: ArrayList<Contact> = ArrayList()
         var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
         var Apps: ArrayList<App> = ArrayList()

@@ -66,6 +66,7 @@ import com.android.volley.toolbox.Volley
 import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.Apps
 import com.belaku.homey.NewAppWidget.Companion.addAppInWidget
+import com.belaku.homey.NewAppWidget.Companion.favContacts
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.databinding.ActivityMainBinding
@@ -148,7 +149,7 @@ class MainActivity : AppCompatActivity() {
         fabMain.setOnClickListener { view ->
 
             if (fabDay.visibility == View.GONE) {
-                Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.LENGTH_SHORT)
                     .setAction("Action", null)
                     .setAnchorView(R.id.fab_main).show()
                 fabDay.visibility = View.VISIBLE
@@ -676,7 +677,6 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
-        var favContacts: ArrayList<Contact> = ArrayList()
         lateinit var sN: Snackbar
         lateinit var parentLayout: View
         var delayUnit: String = ""
