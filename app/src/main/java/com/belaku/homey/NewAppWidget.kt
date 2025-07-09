@@ -7,16 +7,13 @@ import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
-import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.NameNotFoundException
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -39,15 +36,13 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
-import com.belaku.homey.MainActivity.Companion.delayUnit
+import com.belaku.homey.MainActivity.Companion.favContacts
 import com.belaku.homey.MainActivity.Companion.makeToast
-import com.belaku.homey.MainActivity.Companion.queryType
-import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
-import com.belaku.homey.MainActivity.Companion.updateTime
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -70,7 +65,6 @@ class NewAppWidget : AppWidgetProvider() {
     private var currentHour by Delegates.notNull<Int>()
     private var currentMin by Delegates.notNull<Int>()
     val choosenApps: ArrayList<App> = ArrayList()
-    var favContacts: ArrayList<Contact> = ArrayList()
     lateinit var gpName: String
 
 
@@ -78,7 +72,10 @@ class NewAppWidget : AppWidgetProvider() {
         super.onEnabled(context)
         appContx = context!!
         onEn = true
-        makeToast("onEnabled!")
+        Log.d("onEnabled! - ", favContacts.size.toString())
+
+        for (i in favContacts)
+        addContactInWidget(context, i.name, i.number, i.image)
 
     }
 
@@ -197,11 +194,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         }
 
-
-
-
         appIndex = 0
-        conIndex = 0
+
 
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
@@ -283,13 +277,13 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         if (choosenApps.size == 0) {
-            appUsageStats(context, timeOfDay)
+            //   appUsageStats(context, timeOfDay)
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED
             ) {
                 greeting(context, remoteViews!!, timeOfDay)
-                if (favContacts.size == 0)
-                    getFavoriteContacts(context)
+                //   if (favContacts.size == 0)
+                //     getFavoriteContacts(context)
             }
         }
 
@@ -393,96 +387,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-    @SuppressLint("Range", "UseCompatLoadingForDrawables")
-    fun getFavoriteContacts(context: Context) {
-
-
-        favContacts = ArrayList()
-
-        val queryUri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
-            .appendQueryParameter(ContactsContract.Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
-            .build()
-
-        val projection = arrayOf(
-            ContactsContract.Contacts._ID,
-            ContactsContract.Contacts.DISPLAY_NAME,
-            ContactsContract.Contacts.STARRED,
-            ContactsContract.Contacts.HAS_PHONE_NUMBER
-        )
-
-        val selection = ContactsContract.Contacts.STARRED + "='1'"
-
-        val cursor = context.contentResolver.query(
-            queryUri,
-            projection, selection, null, null
-        )
-
-        while (cursor!!.moveToNext()) {
-            val contactID = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
-            var phoneNumber: String = "7"
-
-            if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
-
-                val phones: Cursor? = context.getContentResolver().query(
-                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                    null,
-                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactID,
-                    null,
-                    null
-                )
-                while (phones!!.moveToNext()) {
-                    phoneNumber =
-                        phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
-                    phoneNumber = phoneNumber.filter { !it.isWhitespace() }
-                }
-
-
-            }
-
-            val intent = Intent(Intent.ACTION_VIEW)
-            val uri = Uri.withAppendedPath(
-                ContactsContract.Contacts.CONTENT_URI, contactID.toString()
-            )
-            intent.data = uri
-            val cPhUri = intent.toUri(0)
-
-            val cNme = cursor.getString(
-                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
-            )
-
-            var c = Contact(cNme, phoneNumber, cPhUri)
-
-            favContacts.add(c)
-        }
-
-        cursor.close()
-
-
-
-
-        for (i in 0 until favContacts.size) {
-
-            Log.d(
-                "cLog",
-                "cName: ${favContacts.get(i).name}, cPic: ${favContacts.get(i).image}, cNum: ${
-                    favContacts.get(i).number
-                } "
-            )
-
-            val input =
-                ContactsContract.Contacts.openContactPhotoInputStream(
-                    context.contentResolver,
-                    Uri.parse(favContacts.get(i).image)
-                )
-            val bm = BitmapFactory.decodeStream(input)
-            val d: Drawable = BitmapDrawable(bm)
-
-            addContactInWidget(context, favContacts.get(i).name, favContacts.get(i).number, d)
-        }
-
-    }
-
-
     private fun todaysDate(context: Context) {
 
         val c: Date = Calendar.getInstance().time
@@ -501,91 +405,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-    private fun appUsageStats(context: Context, timeOfDay: String) {
-
-        choosenApps.clear()
-
-        var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-
-        val usageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
-
-
-        val beginCal = Calendar.getInstance()
-        val endCal = Calendar.getInstance()
-        if (timeOfDay.equals("Morning")) {
-            beginCal.set(2025, 5, cDate - 1, 9, 0)
-            endCal.set(2025, 5, cDate - 1, 12, 0)
-        } else if (timeOfDay.equals("Afternoon")) {
-            beginCal.set(2025, 5, cDate - 5, 12, 0)
-            endCal.set(2025, 5, cDate - 1, 17, 0)
-        } else if (timeOfDay.equals("Evening")) {
-            beginCal.set(2025, 5, cDate - 1, 17, 0)
-            endCal.set(2025, 5, cDate - 1, 21, 0)
-        } else if (timeOfDay.equals("Night")) {
-            beginCal.set(2025, 5, cDate - 1, 21, 0)
-            endCal.set(2025, 5, cDate - 1, 23, 57)
-        }
-
-        val queryUsageStats = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_BEST,
-            beginCal.timeInMillis,
-            endCal.timeInMillis
-        )
-        println("results for " + beginCal.time.toGMTString() + " - " + endCal.time.toGMTString())
-        println("QUS - " + queryUsageStats.size)
-        sortApps(queryUsageStats)
-
-
-        var appNames = HashSet<String>()
-        for (i in 0 until queryUsageStats.size) {
-
-            var appName = getAppNameFromPkg(context, queryUsageStats.get(i).packageName)
-            var appIcon = getAppIconFromPkg(context, queryUsageStats.get(i).packageName)
-
-            Log.d(
-                "queryUsageStats",
-                "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground
-            )
-
-            //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
-            if (!appName.contains("Launcher"))
-                if (context.packageManager.getLaunchIntentForPackage(queryUsageStats[i].packageName) != null)
-                    if (appNames.add(appName))
-                        if (choosenApps.size < 5) {
-                            choosenApps.add(
-                                App(
-                                    appName, appIcon
-                                )
-                            )
-                            Log.d("cLogSetAppIcon", appIcon.toString())
-                            addAppInWidget(
-                                context,
-                                App(queryUsageStats.get(i).packageName, appIcon)
-                            )
-                        }
-        }
-        saveApps(Apps)
-
-    }
-
-    private fun saveApps(apps: java.util.ArrayList<App>) {
-
-        val set: MutableSet<String> = HashSet()
-
-        for (i in 0 until apps.size)
-            set.add(apps.get(i).name)
-
-        sharedPreferencesEditor.putInt("Status_size", set.size)
-
-        for (i in 0 until set.size) {
-            sharedPreferencesEditor.remove("Status_$i")
-            sharedPreferencesEditor.putString("Status_$i", apps.get(i).name)
-        }
-        sharedPreferencesEditor.commit()
-
-    }
-
     private fun readApps(): ArrayList<String> {
         val apps = ArrayList<String>()
 
@@ -597,30 +416,6 @@ class NewAppWidget : AppWidgetProvider() {
         return apps
     }
 
-
-    private fun getAppIconFromPkg(context: Context, packageName: String?): Drawable? {
-        try {
-            val icon: Drawable =
-                context.getPackageManager().getApplicationIcon(packageName.toString())
-            return icon
-        } catch (e: NameNotFoundException) {
-            e.printStackTrace()
-            return context.getDrawable(R.drawable.calls)
-        }
-    }
-
-    private fun getAppNameFromPkg(context: Context, packageName: String?): String {
-        val pm: PackageManager = context.getPackageManager()
-        var ai = try {
-            pm.getApplicationInfo(packageName.toString(), 0)
-        } catch (e: NameNotFoundException) {
-            null
-        }
-        val applicationName =
-            (if (ai != null) pm.getApplicationLabel(ai) else "(unknown)") as String
-
-        return applicationName
-    }
 
     private fun sortApps(queryUsageStats: List<UsageStats>) {
 
@@ -702,41 +497,44 @@ class NewAppWidget : AppWidgetProvider() {
     companion object {
         var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
-        private var Apps: ArrayList<App> = ArrayList()
+        var Apps: ArrayList<App> = ArrayList()
 
 
-        fun addContactInWidget(context: Context, strN: String, strNu: String, drawable: Drawable) {
+        fun addContactInWidget(context: Context, strN: String, strNu: String, cDrawable: String) {
 
-            //     makeToast("mC - " + "addContactInWidget")
-            var nullD: Drawable
-            if (drawable == null)
-                nullD = context.getDrawable(R.drawable.face_holder)!!
-            else nullD = drawable
+            makeToast("addContactInWidget!")
+            newAppWidget = ComponentName(context, NewAppWidget::class.java)
+            remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
+
+            val input =
+                ContactsContract.Contacts.openContactPhotoInputStream(
+                    context.contentResolver,
+                    Uri.parse(cDrawable)
+                )
+            val bm = BitmapFactory.decodeStream(input)
+            val d: Drawable = BitmapDrawable(bm)
+
+
             if (conIndex == 0) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_contact1,
-                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews?.setTextViewText(R.id.tx_c1, strN)
+                remoteViews!!.setImageViewBitmap(R.id.imgv_contact1, drawableToBitmap(context, d).getCircledBitmap())
+                remoteViews!!.setTextViewText(R.id.tx_c1, strN)
                 conIndex = 1
             } else if (conIndex == 1) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_contact2,
-                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews?.setTextViewText(R.id.tx_c2, strN)
+                remoteViews!!.setImageViewBitmap(R.id.imgv_contact2, drawableToBitmap(context, d).getCircledBitmap())
+                remoteViews!!.setTextViewText(R.id.tx_c2, strN)
                 conIndex = 2
             } else if (conIndex == 2) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_contact3,
-                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews?.setTextViewText(R.id.tx_c3, strN)
+                remoteViews!!.setImageViewBitmap(R.id.imgv_contact3, drawableToBitmap(context, d).getCircledBitmap())
+                remoteViews!!.setTextViewText(R.id.tx_c3, strN)
                 conIndex = 3
             } else if (conIndex == 3) {
-                remoteViews?.setImageViewBitmap(
-                    R.id.imgv_contact4,
-                    nullD?.let { drawableToBitmap(context, it).getCircledBitmap() })
-                remoteViews?.setTextViewText(R.id.tx_c4, strN)
+                remoteViews!!.setImageViewBitmap(R.id.imgv_contact4, drawableToBitmap(context, d).getCircledBitmap())
+                remoteViews!!.setTextViewText(R.id.tx_c4, strN)
                 conIndex = 4
             }
+
+
+            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
         }
 
         private fun Bitmap.getCircledBitmap(): Bitmap {
@@ -755,8 +553,6 @@ class NewAppWidget : AppWidgetProvider() {
         fun addAppInWidget(context: Context, app: App) {
 
             Apps.add(app)
-
-
 
             if (appIndex == 0) {
                 remoteViews?.setImageViewBitmap(
@@ -794,20 +590,18 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 
-        fun drawableToBitmap(context: Context, drawable: Drawable): Bitmap {
-            var bitmap: Bitmap? = null
+        private fun drawableToBitmap(context: Context, drawable: Drawable): Bitmap {
 
             if (drawable is BitmapDrawable) {
-                val bitmapDrawable = drawable
-                if (bitmapDrawable.bitmap != null) {
-                    return bitmapDrawable.bitmap
+                if (drawable.bitmap != null) {
+                    return drawable.bitmap
                 } else return drawableToBitmap(
                     context,
-                    context.getDrawable(R.drawable.face_holder)!!
+                    AppCompatResources.getDrawable(context, R.drawable.face_holder)!!
                 )
             }
 
-            bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+            val bitmap: Bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
                 Bitmap.createBitmap(
                     1,
                     1,

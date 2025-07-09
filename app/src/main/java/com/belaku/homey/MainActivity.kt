@@ -11,17 +11,26 @@ import android.app.Dialog
 import android.app.ProgressDialog
 import android.app.WallpaperManager
 import android.app.admin.DevicePolicyManager
+import android.app.usage.UsageStats
+import android.app.usage.UsageStatsManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
+import android.database.Cursor
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
+import android.provider.ContactsContract
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
@@ -54,6 +63,9 @@ import com.android.volley.Response
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.belaku.homey.AppChooserDialog.Companion.choosenApps
+import com.belaku.homey.NewAppWidget.Companion.Apps
+import com.belaku.homey.NewAppWidget.Companion.addAppInWidget
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.databinding.ActivityMainBinding
@@ -68,6 +80,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
+import java.util.Collections
 import java.util.concurrent.TimeUnit
 
 
@@ -128,6 +141,7 @@ class MainActivity : AppCompatActivity() {
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
         checkP()
+        appUsageStats(applicationContext)
 
         sharedPreferencesEditor.putString("qT", queryType).apply()
 
@@ -159,6 +173,219 @@ class MainActivity : AppCompatActivity() {
              startActivityForResult(intent, RESULT_ENABLE)*/
         }
 
+    }
+
+    private fun appUsageStats(applicationContext: Context?) {
+
+        choosenApps.clear()
+
+        val currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
+
+        val timeOfDay = if (currentHour >= 6 && currentHour < 12) {
+            "Morning"
+        } else if (currentHour >= 12 && currentHour < 17) {
+            "Afternoon"
+        } else if (currentHour >= 17 && currentHour < 21) {
+            "Evening"
+        } else {
+            "Night"
+        }
+
+        var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+
+        val usageStatsManager =
+            applicationContext?.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
+
+
+        val beginCal = Calendar.getInstance()
+        val endCal = Calendar.getInstance()
+        if (timeOfDay.equals("Morning")) {
+            beginCal.set(2025, 5, cDate - 1, 9, 0)
+            endCal.set(2025, 5, cDate - 1, 12, 0)
+        } else if (timeOfDay.equals("Afternoon")) {
+            beginCal.set(2025, 5, cDate - 5, 12, 0)
+            endCal.set(2025, 5, cDate - 1, 17, 0)
+        } else if (timeOfDay.equals("Evening")) {
+            beginCal.set(2025, 5, cDate - 1, 17, 0)
+            endCal.set(2025, 5, cDate - 1, 21, 0)
+        } else if (timeOfDay.equals("Night")) {
+            beginCal.set(2025, 5, cDate - 1, 21, 0)
+            endCal.set(2025, 5, cDate - 1, 23, 57)
+        }
+
+        val queryUsageStats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_BEST,
+            beginCal.timeInMillis,
+            endCal.timeInMillis
+        )
+        println("results for " + beginCal.time.toGMTString() + " - " + endCal.time.toGMTString())
+        println("QUS - " + queryUsageStats.size)
+        sortApps(queryUsageStats)
+
+
+        var appNames = HashSet<String>()
+        for (i in 0 until queryUsageStats.size) {
+
+            var appName = getAppNameFromPkg(applicationContext, queryUsageStats.get(i).packageName)
+            var appIcon = getAppIconFromPkg(applicationContext, queryUsageStats.get(i).packageName)
+
+            Log.d(
+                "queryUsageStats",
+                "$appName ... - $i : " + queryUsageStats.get(i).totalTimeInForeground
+            )
+
+            //    if (queryUsageStats.get(i).totalTimeInForeground > 0)
+            if (!appName.contains("Launcher"))
+                if (applicationContext.packageManager.getLaunchIntentForPackage(queryUsageStats[i].packageName) != null)
+                    if (appNames.add(appName))
+                        if (choosenApps.size < 5) {
+                            choosenApps.add(
+                                App(
+                                    appName, appIcon
+                                )
+                            )
+                            Log.d("cLogSetAppIcon", appIcon.toString())
+                            addAppInWidget(
+                                applicationContext,
+                                App(queryUsageStats.get(i).packageName, appIcon)
+                            )
+                        }
+        }
+        saveApps(Apps)
+
+    }
+
+
+    @SuppressLint("Range", "UseCompatLoadingForDrawables")
+    fun getFavoriteContacts(context: Context) {
+
+        favContacts = ArrayList()
+
+        val queryUri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
+            .appendQueryParameter(ContactsContract.Contacts.EXTRA_ADDRESS_BOOK_INDEX, "true")
+            .build()
+
+        val projection = arrayOf(
+            ContactsContract.Contacts._ID,
+            ContactsContract.Contacts.DISPLAY_NAME,
+            ContactsContract.Contacts.STARRED,
+            ContactsContract.Contacts.HAS_PHONE_NUMBER
+        )
+
+        val selection = ContactsContract.Contacts.STARRED + "='1'"
+
+        val cursor = context.contentResolver.query(
+            queryUri,
+            projection, selection, null, null
+        )
+
+        while (cursor!!.moveToNext()) {
+            val contactID = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
+            var phoneNumber: String = "7"
+
+            if (Integer.parseInt(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER))) > 0) {
+
+                val phones: Cursor? = context.getContentResolver().query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactID,
+                    null,
+                    null
+                )
+                while (phones!!.moveToNext()) {
+                    phoneNumber =
+                        phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+                    phoneNumber = phoneNumber.filter { !it.isWhitespace() }
+                }
+            }
+
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uri = Uri.withAppendedPath(
+                ContactsContract.Contacts.CONTENT_URI, contactID.toString()
+            )
+            intent.data = uri
+            val cPhUri = intent.toUri(0)
+
+            val cNme = cursor.getString(
+                cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+            )
+
+            var c = Contact(cNme, phoneNumber, cPhUri)
+
+            favContacts.add(c)
+        }
+
+        cursor.close()
+
+
+
+
+        for (i in 0 until favContacts.size) {
+
+            Log.d(
+                "cLog",
+                "cName: ${favContacts.get(i).name}, cPic: ${favContacts.get(i).image}, cNum: ${
+                    favContacts.get(i).number
+                } "
+            )
+
+
+
+        }
+
+    }
+
+    private fun saveApps(apps: java.util.ArrayList<App>) {
+
+        val set: MutableSet<String> = HashSet()
+
+        for (i in 0 until apps.size)
+            set.add(apps.get(i).name)
+
+        sharedPreferencesEditor.putInt("Status_size", set.size)
+
+        for (i in 0 until set.size) {
+            sharedPreferencesEditor.remove("Status_$i")
+            sharedPreferencesEditor.putString("Status_$i", apps.get(i).name)
+        }
+        sharedPreferencesEditor.commit()
+
+    }
+
+    private fun sortApps(queryUsageStats: List<UsageStats>) {
+
+        Collections.sort<UsageStats>(
+            queryUsageStats
+        ) { p1: UsageStats, p2: UsageStats ->
+            p2.totalTimeInForeground.compareTo(p1.totalTimeInForeground)
+            //   p1.name.compareTo(p2.name)
+        }
+
+    }
+
+
+    private fun getAppIconFromPkg(context: Context, packageName: String?): Drawable? {
+        try {
+            val icon: Drawable =
+                context.getPackageManager().getApplicationIcon(packageName.toString())
+            return icon
+        } catch (e: NameNotFoundException) {
+            e.printStackTrace()
+            return context.getDrawable(R.drawable.calls)
+        }
+    }
+
+    private fun getAppNameFromPkg(context: Context, packageName: String?): String {
+        val pm: PackageManager = context.getPackageManager()
+        var ai = try {
+            pm.getApplicationInfo(packageName.toString(), 0)
+        } catch (e: NameNotFoundException) {
+            null
+        }
+        val applicationName =
+            (if (ai != null) pm.getApplicationLabel(ai) else "(unknown)") as String
+
+        return applicationName
     }
 
     private fun setWalls(delay: Long) {
@@ -288,7 +515,9 @@ class MainActivity : AppCompatActivity() {
 
         } else {
             cGranted = true
-            UsageStatsPermissionDialog()
+            // UsageStatsPermissionDialog()
+            if (favContacts.size == 0)
+                getFavoriteContacts(applicationContext)
         }
 
         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -296,6 +525,21 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
         intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
         startActivityForResult(intent, RESULT_ENABLE)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+        deviceId: Int
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
+
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_CONTACTS) {
+            if (grantResults.size > 0) {
+                getFavoriteContacts(applicationContext)
+            }
+        }
     }
 
     private fun UsageStatsPermissionDialog() {
@@ -432,6 +676,7 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+        var favContacts: ArrayList<Contact> = ArrayList()
         lateinit var sN: Snackbar
         lateinit var parentLayout: View
         var delayUnit: String = ""
