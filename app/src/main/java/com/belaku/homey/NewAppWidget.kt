@@ -54,6 +54,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private var timelyWish: String = ""
     private val TAG: String = "NewAppWidget LOG7"
     private lateinit var wD: String
     private lateinit var qT: String
@@ -184,7 +185,7 @@ class NewAppWidget : AppWidgetProvider() {
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
 
-        makeToast("chKING - " + wD + " : " + qT + " : " + dU + " : " + uT)
+//        makeToast("chKING - " + wD + " : " + qT + " : " + dU + " : " + uT)
 
 
         appContx = context
@@ -271,21 +272,13 @@ class NewAppWidget : AppWidgetProvider() {
 
         //     makeToast("onReceive!")
 
-        todaysDate(context)
-
-
-        if (choosenApps.size == 0) {
-            //   appUsageStats(context, timeOfDay)
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED
             ) {
                 greeting(context, remoteViews!!, timeOfDay)
-                //   if (favContacts.size == 0)
-                //     getFavoriteContacts(context)
             }
-        }
 
-   //     readApps()
+        todaysDate(context)
 
 
         if (LOCK_PHONE == intent.action) {
@@ -403,6 +396,7 @@ class NewAppWidget : AppWidgetProvider() {
             R.id.tx_walltype,
             qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
         )
+        remoteViews?.setTextViewText(R.id.time_text_view, timelyWish)
     }
 
     private fun launchApp(context: Context, pkgName: String) {
@@ -467,7 +461,7 @@ class NewAppWidget : AppWidgetProvider() {
     @SuppressLint("Range")
     private fun greeting(context: Context, remoteViews: RemoteViews, timeOfDay: String) {
 
-        var timeOfDay = timeOfDay
+        timelyWish = timeOfDay
 
         val c: Cursor? = context.getContentResolver()
             .query(ContactsContract.Profile.CONTENT_URI, null, null, null, null)
@@ -476,16 +470,16 @@ class NewAppWidget : AppWidgetProvider() {
         c?.close()
 
         if (timeOfDay.equals("Morning"))
-            timeOfDay = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83C\uDF3B "
+            timelyWish = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83C\uDF3B "
         else if (timeOfDay.equals("Afternoon"))
-            timeOfDay = "$timeOfDay, ${gpName.split(" ").get(0)}  ☀\uFE0F "
+            timelyWish = "$timeOfDay, ${gpName.split(" ").get(0)}  ☀\uFE0F "
         else if (timeOfDay.equals("Evening"))
-            timeOfDay = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83C\uDF41 "
+            timelyWish = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83C\uDF41 "
         else if (timeOfDay.equals("Night"))
-            timeOfDay = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83D\uDCA4 "
+            timelyWish = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83D\uDCA4 "
 
 
-        remoteViews.setTextViewText(R.id.time_text_view, timeOfDay)
+
 
     }
 
