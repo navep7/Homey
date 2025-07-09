@@ -44,7 +44,7 @@ android {
 dependencies {
 
     implementation(libs.picasso.v28)
-
+    implementation(libs.gson)
     implementation(libs.glide)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

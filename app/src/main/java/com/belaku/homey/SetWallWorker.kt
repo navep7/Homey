@@ -103,10 +103,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
-                    /*remoteViews?.setTextViewText(R.id.tx_desc, wallDesc.split(" + ")[1])
-                    remoteViews?.setTextViewText(R.id.tx_timestamp, updateTime)
-                    remoteViews?.setTextViewText(R.id.tx_walltype, queryType)
-                  */  newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
                     AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
 
                     val intent = Intent(appContx, NewAppWidget::class.java)

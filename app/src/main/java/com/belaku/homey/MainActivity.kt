@@ -13,7 +13,6 @@ import android.app.WallpaperManager
 import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
-import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -21,8 +20,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.database.Cursor
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
 import android.net.Uri
@@ -43,7 +40,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.RemoteViews
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
@@ -55,7 +51,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequest
 import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkManager
 import com.android.volley.AuthFailureError
@@ -67,17 +62,12 @@ import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.Apps
 import com.belaku.homey.NewAppWidget.Companion.addAppInWidget
 import com.belaku.homey.NewAppWidget.Companion.favContacts
-import com.belaku.homey.NewAppWidget.Companion.newAppWidget
-import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.gson.Gson
 import org.json.JSONException
 import org.json.JSONObject
 import java.net.URL
@@ -316,6 +306,8 @@ class MainActivity : AppCompatActivity() {
             favContacts.add(c)
         }
 
+        saveContacts()
+
         cursor.close()
 
 
@@ -334,6 +326,19 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun saveContacts() {
+
+        val key = "CTS"
+
+        val gson = Gson()
+        val json = gson.toJson(favContacts)
+
+        sharedPreferencesEditor.remove(key).commit()
+        sharedPreferencesEditor.putString(key, json)
+        if (sharedPreferencesEditor.commit())
+            makeToast("CTS saved")
     }
 
     private fun saveApps(apps: java.util.ArrayList<App>) {

@@ -1,7 +1,6 @@
 package com.belaku.homey
 
 import android.Manifest
-
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
@@ -42,6 +41,9 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.InputStream
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -155,8 +157,6 @@ class NewAppWidget : AppWidgetProvider() {
                 getPendingSelfIntent(context, C4_CLICKED)
             )
 
-            for (i in favContacts)
-                addContactInWidget(context, i.name, i.number, i.image)
 
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
@@ -184,18 +184,12 @@ class NewAppWidget : AppWidgetProvider() {
         dU = sharedPreferences.getString("dU", "").toString()
         uT = sharedPreferences.getString("uT", "").toString()
 
+        makeToast("chKING - " + wD + " : " + qT + " : " + dU + " : " + uT)
 
 
-        try {
-            remoteViews?.setTextViewText(R.id.tx_desc, wD)
-            remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
-            remoteViews?.setTextViewText(
-                R.id.tx_walltype,
-                qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
-            )
-        } catch (ex: Exception) {
-
-        }
+        appContx = context
+        readContacts()
+        makeToast("CTS RED - " + favContacts.size)
 
         appIndex = 0
 
@@ -314,9 +308,7 @@ class NewAppWidget : AppWidgetProvider() {
 
             remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.VISIBLE)
             remoteViews?.setViewVisibility(R.id.imgbtn_set, View.INVISIBLE)
-            for (i in favContacts)
-                addContactInWidget(context, i.name, i.number, i.image)
-            appContx = context
+
             Thread {
                 SetWallWorker.setWall()
             }.start()
@@ -373,6 +365,20 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
+    private fun readContacts() {
+
+        val gson = Gson()
+        val response: String = sharedPreferences.getString("CTS", "").toString()
+        favContacts = gson.fromJson(
+            response,
+            object : TypeToken<List<Contact?>?>() {}.type
+        )
+
+        conIndex = 0
+
+            addContactInWidget(appContx, favContacts)
+    }
+
 
     private fun clickSound(context: Context) {
 
@@ -401,6 +407,12 @@ class NewAppWidget : AppWidgetProvider() {
         remoteViews?.setTextViewText(
             R.id.tx_day,
             SimpleDateFormat("EEEE", Locale.getDefault()).format(c)
+        )
+        remoteViews?.setTextViewText(R.id.tx_desc, wD)
+        remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
+        remoteViews?.setTextViewText(
+            R.id.tx_walltype,
+            qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
         )
     }
 
@@ -506,41 +518,55 @@ class NewAppWidget : AppWidgetProvider() {
         var Apps: ArrayList<App> = ArrayList()
 
 
-        fun addContactInWidget(context: Context, strN: String, strNu: String, cDrawable: String) {
+        fun addContactInWidget(context: Context, favC: ArrayList<Contact>) {
 
             makeToast("addContactInWidget!")
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
-            val input =
-                ContactsContract.Contacts.openContactPhotoInputStream(
-                    context.contentResolver,
-                    Uri.parse(cDrawable)
-                )
-            val bm = BitmapFactory.decodeStream(input)
-            val d: Drawable = BitmapDrawable(bm)
+            var input: InputStream
+            var bm: Bitmap
+            var d: Drawable
+
+            for (i in 0 until  favC.size) {
+                makeToast("IMG7 - " + Uri.parse(favC[i].image))
+
+                    input =
+                        ContactsContract.Contacts.openContactPhotoInputStream(
+                            appContx.contentResolver,
+                            Uri.parse(favC[i].image)
+                        )
+                    bm = BitmapFactory.decodeStream(input)
+                    d = BitmapDrawable(bm)
 
 
-            if (conIndex == 0) {
-                remoteViews!!.setImageViewBitmap(R.id.imgv_contact1, drawableToBitmap(context, d).getCircledBitmap())
-                remoteViews!!.setTextViewText(R.id.tx_c1, strN)
-                conIndex = 1
-            } else if (conIndex == 1) {
-                remoteViews!!.setImageViewBitmap(R.id.imgv_contact2, drawableToBitmap(context, d).getCircledBitmap())
-                remoteViews!!.setTextViewText(R.id.tx_c2, strN)
-                conIndex = 2
-            } else if (conIndex == 2) {
-                remoteViews!!.setImageViewBitmap(R.id.imgv_contact3, drawableToBitmap(context, d).getCircledBitmap())
-                remoteViews!!.setTextViewText(R.id.tx_c3, strN)
-                conIndex = 3
-            } else if (conIndex == 3) {
-                remoteViews!!.setImageViewBitmap(R.id.imgv_contact4, drawableToBitmap(context, d).getCircledBitmap())
-                remoteViews!!.setTextViewText(R.id.tx_c4, strN)
-                conIndex = 4
+                if (i == 0) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_contact1,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                    remoteViews!!.setTextViewText(R.id.tx_c1, favC[0].name)
+                } else  if (i == 1) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_contact2,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                    remoteViews!!.setTextViewText(R.id.tx_c2, favC[1].name)
+                } else if (i == 2) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_contact3,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                    remoteViews!!.setTextViewText(R.id.tx_c3, favC[2].name)
+                } else  if (i == 3) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_contact4,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                    remoteViews!!.setTextViewText(R.id.tx_c4, favC[3].name)
+                }
+
             }
-
-
-            AppWidgetManager.getInstance(context).updateAppWidget(newAppWidget, remoteViews)
         }
 
         private fun Bitmap.getCircledBitmap(): Bitmap {
