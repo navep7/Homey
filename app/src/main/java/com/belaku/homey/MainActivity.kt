@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         fabMain.setOnClickListener { view ->
 
             if (fabDay.visibility == View.GONE) {
-                Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.LENGTH_SHORT)
+                Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.ANIMATION_MODE_FADE)
                     .setAction("Action", null)
                     .setAnchorView(R.id.fab_main).show()
                 fabDay.visibility = View.VISIBLE
@@ -331,9 +331,7 @@ class MainActivity : AppCompatActivity() {
         val json = gson.toJson(favContacts)
 
         sharedPreferencesEditor.remove(key).commit()
-        sharedPreferencesEditor.putString(key, json)
-        if (sharedPreferencesEditor.commit())
-            makeToast("CTS saved")
+        sharedPreferencesEditor.putString(key, json).commit()
     }
 
     private fun saveApps(apps: java.util.ArrayList<App>) {
@@ -344,9 +342,7 @@ class MainActivity : AppCompatActivity() {
         val json = gson.toJson(apps)
 
         sharedPreferencesEditor.remove(key).commit()
-        sharedPreferencesEditor.putString(key, json)
-        if (sharedPreferencesEditor.commit())
-            makeToast("MUA saved - " + apps.size)
+        sharedPreferencesEditor.putString(key, json).commit()
     }
 
     private fun sortApps(queryUsageStats: List<UsageStats>) {

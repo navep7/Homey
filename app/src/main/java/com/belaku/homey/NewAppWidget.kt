@@ -431,7 +431,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         appIndex = 0
 
-        makeToast("readAppsSz - " + choosenApps.size)
         addAppInWidget(appContx, choosenApps)
     }
 
@@ -522,8 +521,6 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addContactInWidget(context: Context, favC: ArrayList<Contact>) {
 
-            makeToast("addContactInWidget!")
-
             var input: InputStream
             var bm: Bitmap
             var d: Drawable
@@ -593,9 +590,6 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         fun addAppInWidget(context: Context, fApps: ArrayList<App>) {
-
-            makeToast("addAppInWidget! - " + fApps[0].name)
-
 
             for (i in 0 until  fApps.size) {
 
