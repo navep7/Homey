@@ -231,10 +231,9 @@ class MainActivity : AppCompatActivity() {
                         if (choosenApps.size < 5) {
                             choosenApps.add(
                                 App(
-                                    appName, favContacts[0].image
+                                    appName, queryUsageStats.get(i).packageName
                                 )
                             )
-                            Log.d("cLogSetAppIcon", appIcon.toString())
 
                         }
         }

@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.NameNotFoundException
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -313,31 +314,31 @@ class NewAppWidget : AppWidgetProvider() {
         if (APP1_CLICKED == intent.action) {
             var app = choosenApps[0]
             Log.d("APP1_CLICKED", app.name)
-         //   launchApp(context, app.name)
+            launchApp(context, app.pName)
         }
 
         if (APP2_CLICKED == intent.action) {
             var app = choosenApps[1]
             Log.d("APP2_CLICKED", app.name)
-          //  launchApp(context, app)
+            launchApp(context, app.pName)
         }
 
         if (APP3_CLICKED == intent.action) {
             var app = choosenApps[2]
             Log.d("APP3_CLICKED", app.name)
-        //    launchApp(context, app)
+            launchApp(context, app.pName)
         }
 
         if (APP4_CLICKED == intent.action) {
             var app = choosenApps[3]
             Log.d("APP4_CLICKED", app.name)
-         //   launchApp(context, app)
+            launchApp(context, app.pName)
         }
 
         if (APP5_CLICKED == intent.action) {
             var app = choosenApps[4]
             Log.d("APP5_CLICKED", app.name)
-         //   launchApp(context, app)
+            launchApp(context, app.pName)
         }
 
         if (C1_CLICKED == intent.action) {
@@ -580,23 +581,25 @@ class NewAppWidget : AppWidgetProvider() {
             return output
         }
 
+        fun getAppIconFromPkg(context: Context, packageName: String?): Drawable {
+            try {
+                val icon: Drawable =
+                    context.packageManager.getApplicationIcon(packageName.toString())
+                return icon
+            } catch (e: NameNotFoundException) {
+                e.printStackTrace()
+                return AppCompatResources.getDrawable(context, R.drawable.calls)!!
+            }
+        }
+
         fun addAppInWidget(context: Context, fApps: ArrayList<App>) {
 
-            makeToast("addAppInWidget! - " + fApps[0].image)
+            makeToast("addAppInWidget! - " + fApps[0].name)
 
-            var input: InputStream
-            var bm: Bitmap
-            var d: Drawable
 
             for (i in 0 until  fApps.size) {
 
-                input =
-                    ContactsContract.Contacts.openContactPhotoInputStream(
-                        appContx.contentResolver,
-                        Uri.parse(fApps[i].image)
-                    )
-                bm = BitmapFactory.decodeStream(input)
-                d = BitmapDrawable(bm)
+                val d: Drawable = getAppIconFromPkg(context, fApps[i].pName)
 
                 if (i == 0) {
                     remoteViews!!.setImageViewBitmap(
@@ -620,7 +623,15 @@ class NewAppWidget : AppWidgetProvider() {
                         R.id.imgv_add4,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
+
                  //   remoteViews!!.setTextViewText(R.id.tx_c4, fApps[3].name)
+                }  else  if (i == 4) {
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_add5,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+
+                    //   remoteViews!!.setTextViewText(R.id.tx_c4, fApps[3].name)
                 }
 
             }
