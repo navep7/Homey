@@ -388,6 +388,7 @@ class MainActivity : AppCompatActivity() {
         appUsageStats(applicationContext)
         delayUnit = delay.toString()
         sharedPreferencesEditor.putString("dU", delayUnit).apply()
+        sharedPreferencesEditor.putString("walltype", queryType).apply()
 
 
         val periodicWorkRequest =
