@@ -239,7 +239,7 @@
         android:textStyle="bold|italic"
         android:textSize="21sp"
         android:text="Desc.."
-        android:textColor="?attr/colorPrimaryContainer"
+        android:textColor="?attr/colorPrimaryDark"
         android:layout_below="@id/ll_contacts"
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/fab_margin"
