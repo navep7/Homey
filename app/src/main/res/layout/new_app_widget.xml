@@ -16,8 +16,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimaryFixedDim"
+        android:textColor="?attr/colorSecondaryVariant"
         android:text="a Wish..."
+        android:textStyle="bold|italic"
         android:textSize="35sp"
         tools:ignore="HardcodedText" />
 
@@ -30,7 +31,7 @@
         android:layout_gravity="center"
         android:format12Hour="k:mm:ss"
         android:format24Hour="k:mm:ss"
-        android:textColor="?attr/colorPrimary"
+        android:textColor="?attr/colorPrimaryFixedDim"
         android:textSize="50sp"
         android:textStyle="bold" />
 
@@ -43,6 +44,7 @@
         android:layout_gravity="center"
         android:textColor="?attr/colorPrimaryFixed"
         android:text="Date.."
+        android:textStyle="bold"
         tools:ignore="HardcodedText"
         android:textSize="35sp" />
 
@@ -50,7 +52,7 @@
         android:id="@+id/tx_day"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/tx_date"
-        android:textColor="?attr/colorPrimaryDark"
+        android:textColor="?attr/colorSecondaryVariant"
         android:text="Day.."
         android:textStyle="bold"
         tools:ignore="HardcodedText"
