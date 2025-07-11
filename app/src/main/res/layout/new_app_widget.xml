@@ -2,129 +2,151 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rl_widget_layout"
-    android:theme="@style/Theme.Material3.DynamicColors.Light"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_glass"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/Theme.Material3.DynamicColors.Light">
 
 
     <TextView
         android:id="@+id/time_text_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/colorPrimaryFixed"
         android:text="a Wish..."
-        android:textStyle="bold|italic"
+        android:textColor="?attr/colorPrimaryFixed"
         android:textSize="35sp"
+        android:textStyle="bold|italic"
         tools:ignore="HardcodedText" />
 
-    <android.widget.TextClock
-        android:id="@+id/clock"
-        android:layout_centerHorizontal="true"
+    <RelativeLayout
+        android:id="@+id/rl_clocks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/time_text_view"
+        android:layout_centerInParent="true">
+
+        <AnalogClock
+            android:id="@+id/a_clock"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:dial="@drawable/walp_icon" />
+
+        <android.widget.TextClock
+            android:id="@+id/clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/a_clock"
+            android:format12Hour="k:mm:ss"
+            android:textColor="?attr/colorSecondaryFixed"
+            android:textSize="35sp"
+            android:textStyle="bold" />
+
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/tx_d"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:format12Hour="k:mm:ss"
-        android:format24Hour="k:mm:ss"
-        android:textColor="?attr/colorPrimaryDark"
-        android:textSize="50sp"
-        android:textStyle="bold" />
+        android:layout_below="@+id/rl_clocks"
+        android:layout_centerHorizontal="true">
 
-    <TextView
-        android:id="@+id/tx_date"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/clock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="?attr/colorPrimaryFixed"
-        android:text="Date.."
-        android:textStyle="bold"
-        tools:ignore="HardcodedText"
-        android:textSize="35sp" />
+        <TextView
+            android:id="@+id/tx_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Date.."
+            android:layout_toEndOf="@+id/tx_day"
+            android:textColor="?attr/colorTertiaryFixed"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
 
-    <TextView
-        android:id="@+id/tx_day"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/tx_date"
-        android:textColor="?attr/colorPrimaryFixed"
-        android:text="Day.."
-        android:textStyle="bold"
-        tools:ignore="HardcodedText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/tx_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/tx_date"
+            android:layout_marginEnd="@dimen/fab_margin"
+            android:text="Day.."
+            android:textColor="?attr/colorTertiaryFixed"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/ll_apps"
-        android:background="@drawable/rounded_corner"
-        android:layout_below="@+id/tx_day"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/tx_d"
+        android:background="@drawable/rounded_corner"
         android:gravity="center">
 
         <ImageView
             android:id="@+id/imgv_add1"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:background="?android:attr/selectableItemBackground" />
 
         <ImageView
             android:id="@+id/imgv_add2"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:background="?android:attr/selectableItemBackground" />
 
         <ImageView
             android:id="@+id/imgv_add3"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:background="?android:attr/selectableItemBackground" />
 
         <ImageView
             android:id="@+id/imgv_add4"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:background="?android:attr/selectableItemBackground" />
 
         <ImageView
             android:id="@+id/imgv_add5"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_width="55dp"
             android:layout_height="55dp"
-            android:layout_margin="5dp" />
+            android:layout_margin="5dp"
+            android:background="?android:attr/selectableItemBackground" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/ll_contacts"
-        android:background="@drawable/rounded_corner"
-        android:layout_below="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_marginTop="@dimen/fab_margin">
+        android:layout_below="@+id/ll_apps"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:background="@drawable/rounded_corner"
+        android:gravity="center">
 
 
         <RelativeLayout
-            android:layout_margin="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
 
             <ImageView
                 android:id="@+id/imgv_contact1"
-                android:background="?android:attr/selectableItemBackground"
-                android:scaleType="fitXY"
                 android:layout_width="55dp"
-                android:layout_height="55dp" />
+                android:layout_height="55dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/tx_c1"
@@ -133,27 +155,27 @@
                 android:layout_alignStart="@+id/imgv_contact1"
                 android:layout_alignBottom="@+id/imgv_contact1"
                 android:layout_margin="1dp"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:maxLines="1"
-                android:maxWidth="55sp"
                 android:ellipsize="end"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimaryInverse"/>
+                android:gravity="center"
+                android:maxWidth="55sp"
+                android:maxLines="1"
+                android:textColor="?attr/colorPrimaryInverse"
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_margin="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
 
             <ImageView
                 android:id="@+id/imgv_contact2"
-                android:background="?android:attr/selectableItemBackground"
-                android:scaleType="fitXY"
                 android:layout_width="55dp"
-                android:layout_height="55dp" />
+                android:layout_height="55dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/tx_c2"
@@ -162,27 +184,27 @@
                 android:layout_alignStart="@+id/imgv_contact2"
                 android:layout_alignBottom="@+id/imgv_contact2"
                 android:layout_margin="1dp"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:maxLines="1"
-                android:maxWidth="55sp"
                 android:ellipsize="end"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimaryInverse" />
+                android:gravity="center"
+                android:maxWidth="55sp"
+                android:maxLines="1"
+                android:textColor="?attr/colorPrimaryInverse"
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_margin="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
 
             <ImageView
                 android:id="@+id/imgv_contact3"
-                android:background="?android:attr/selectableItemBackground"
-                android:scaleType="fitXY"
                 android:layout_width="55dp"
-                android:layout_height="55dp" />
+                android:layout_height="55dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/tx_c3"
@@ -191,27 +213,27 @@
                 android:layout_alignStart="@+id/imgv_contact3"
                 android:layout_alignBottom="@+id/imgv_contact3"
                 android:layout_margin="1dp"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:maxLines="1"
-                android:maxWidth="55sp"
                 android:ellipsize="end"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimaryInverse" />
+                android:gravity="center"
+                android:maxWidth="55sp"
+                android:maxLines="1"
+                android:textColor="?attr/colorPrimaryInverse"
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_margin="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp">
 
             <ImageView
                 android:id="@+id/imgv_contact4"
-                android:background="?android:attr/selectableItemBackground"
-                android:scaleType="fitXY"
                 android:layout_width="55dp"
-                android:layout_height="55dp" />
+                android:layout_height="55dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:scaleType="fitXY" />
 
             <TextView
                 android:id="@+id/tx_c4"
@@ -220,13 +242,13 @@
                 android:layout_alignStart="@+id/imgv_contact4"
                 android:layout_alignBottom="@+id/imgv_contact4"
                 android:layout_margin="1dp"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:maxLines="1"
-                android:maxWidth="55sp"
                 android:ellipsize="end"
-                android:textStyle="bold"
-                android:textColor="?attr/colorPrimaryInverse" />
+                android:gravity="center"
+                android:maxWidth="55sp"
+                android:maxLines="1"
+                android:textColor="?attr/colorPrimaryInverse"
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
         </RelativeLayout>
 
@@ -236,89 +258,88 @@
 
     <TextView
         android:id="@+id/tx_desc"
-        android:textStyle="bold|italic"
-        android:textSize="21sp"
-        android:text="Desc.."
-        android:textColor="?attr/colorPrimaryDark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/ll_contacts"
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/fab_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:text="Desc.."
+        android:textColor="?attr/colorPrimaryDark"
+        android:textSize="21sp"
+        android:textStyle="bold|italic"
         tools:ignore="HardcodedText" />
 
     <ImageButton
         android:id="@+id/imgbtn_set"
-        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_below="@+id/tx_desc"
         android:layout_alignParentEnd="true"
-        android:src="@drawable/walp_icon"
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="50dp"
+        android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
-        android:layout_width="60dp"
-        android:layout_height="60dp"/>
+        android:src="@drawable/walp_icon" />
 
     <ProgressBar
         android:id="@+id/progressBar_cyclic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:minHeight="50dp"
-        android:minWidth="50dp"
         android:layout_below="@+id/tx_desc"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="50dp"
-        android:layout_marginBottom="50dp" />
-
+        android:layout_marginBottom="50dp"
+        android:minWidth="50dp"
+        android:minHeight="50dp"
+        android:visibility="invisible" />
 
 
     <ImageButton
         android:id="@+id/imgbtn_lock"
-        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_below="@+id/tx_desc"
         android:layout_alignParentStart="true"
-        android:src="@android:drawable/ic_lock_lock"
         android:layout_marginStart="50dp"
         android:layout_marginBottom="50dp"
+        android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
-        android:layout_width="60dp"
-        android:layout_height="60dp"/>
+        android:src="@android:drawable/ic_lock_lock" />
 
     <ImageButton
         android:id="@+id/imgbtn_note"
-        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_below="@+id/tx_desc"
         android:layout_centerHorizontal="true"
-        android:src="@android:drawable/ic_menu_manage"
         android:layout_marginStart="50dp"
         android:layout_marginBottom="50dp"
+        android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
-        android:layout_width="60dp"
-        android:layout_height="60dp"/>
+        android:src="@android:drawable/ic_menu_manage" />
 
 
     <TextView
         android:id="@+id/tx_timestamp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:text="!"
-        android:layout_margin="@dimen/fab_margin"
-        android:textStyle="bold"
-        android:textColor="?attr/colorSurfaceInverse"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/fab_margin"
+        android:text="!"
+        android:textColor="?attr/colorSurfaceInverse"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tx_walltype"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:text="..."
-        android:layout_margin="@dimen/fab_margin"
-        android:textStyle="bold"
-        android:textColor="?attr/colorSurface"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/fab_margin"
+        android:text="..."
+        android:textColor="?attr/colorSurface"
+        android:textStyle="bold" />
 
 
 </RelativeLayout>
