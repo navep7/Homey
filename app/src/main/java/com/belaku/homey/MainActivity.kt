@@ -62,6 +62,8 @@ import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.Apps
 import com.belaku.homey.NewAppWidget.Companion.addAppInWidget
 import com.belaku.homey.NewAppWidget.Companion.favContacts
+import com.belaku.homey.NewAppWidget.Companion.screenHeight
+import com.belaku.homey.NewAppWidget.Companion.screenWidth
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
@@ -117,6 +119,12 @@ class MainActivity : AppCompatActivity() {
         pD = ProgressDialog(this@MainActivity)
         pD.setMessage("fetching Walls...")
 
+        val metrics = DisplayMetrics()
+        getWindowManager().getDefaultDisplay().getMetrics(metrics)
+        screenHeight = metrics.heightPixels
+        screenWidth = metrics.widthPixels
+
+        makeToast("SH - $screenHeight \t sW - $screenWidth")
 
         DynamicColors.applyToActivitiesIfAvailable(application)
 

@@ -24,8 +24,11 @@ import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.MainActivity.Companion.updateTime
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
+import com.belaku.homey.NewAppWidget.Companion.screenHeight
+import com.belaku.homey.NewAppWidget.Companion.screenWidth
 import java.io.IOException
 import java.net.URL
+import kotlin.properties.Delegates
 import kotlin.random.Random
 
 

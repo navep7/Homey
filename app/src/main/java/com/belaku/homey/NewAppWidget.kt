@@ -513,6 +513,8 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var screenWidth by Delegates.notNull<Int>()
+        var screenHeight by Delegates.notNull<Int>()
         var favContacts: ArrayList<Contact> = ArrayList()
         var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
