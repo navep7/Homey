@@ -42,6 +42,7 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
+import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStream
@@ -98,6 +99,9 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
+            remoteViews?.setOnClickPendingIntent(
+                R.id.tx_steps,
+                getPendingSelfIntent(context, RESET_STEPS))
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_lock,
@@ -202,6 +206,10 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         remoteViews?.setOnClickPendingIntent(
+            R.id.tx_steps,
+            getPendingSelfIntent(context, RESET_STEPS))
+
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
             getPendingSelfIntent(context, LOCK_PHONE)
         )
@@ -279,8 +287,12 @@ class NewAppWidget : AppWidgetProvider() {
                 greeting(context, remoteViews!!, timeOfDay)
             }
 
+
         todaysDate(context)
 
+        if (RESET_STEPS == intent.action) {
+            steps = 0
+        }
 
         if (LOCK_PHONE == intent.action) {
 
@@ -387,6 +399,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
+        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day,
             SimpleDateFormat("EEEE", Locale.getDefault()).format(c)
@@ -670,6 +683,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         lateinit var newAppWidget: ComponentName
 
+        private const val RESET_STEPS = "resetSteps"
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
         private const val SET_CLICKED = "setButtonClick"

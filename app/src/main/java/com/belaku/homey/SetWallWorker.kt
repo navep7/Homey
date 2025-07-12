@@ -6,17 +6,24 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.icu.util.Calendar
 import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
+import android.view.View.OnClickListener
 import androidx.annotation.NonNull
+import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.belaku.homey.MainActivity.Companion
 import com.belaku.homey.MainActivity.Companion.appContx
+import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.queryType
 import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
@@ -33,7 +40,7 @@ import kotlin.random.Random
 
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
-    Worker(context!!, workerParams!!) {
+    Worker(context!!, workerParams!!), SensorEventListener {
 
 
     @NonNull
@@ -54,6 +61,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
         setWall()
+
+
+
+            val sensorManager = applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
+            val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
         /*var mp = MediaPlayer.create(applicationContext, R.raw.click)
         mp.start()
         Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
@@ -70,6 +84,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
     companion object {
+        var steps: Int = 0
         val TAG: String = "SetWallWorker LOG7"
         var wallDesc: String = ""
         var wallDescs: ArrayList<String> = ArrayList()
@@ -123,6 +138,17 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
             }
         }
     }
+
+    override fun onSensorChanged(p0: SensorEvent?) {
+        steps++
+        Log.d("onSensorChanged", steps.toString())
+    }
+
+    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
+        Log.d("onAccuracyChanged", "h3r3")
+    }
+
+
 }
 
 

@@ -21,8 +21,13 @@ import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.database.Cursor
 import android.graphics.drawable.Drawable
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.icu.util.Calendar
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -44,6 +49,7 @@ import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.annotation.Nullable
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -59,11 +65,10 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.AppChooserDialog.Companion.choosenApps
-import com.belaku.homey.NewAppWidget.Companion.Apps
-import com.belaku.homey.NewAppWidget.Companion.addAppInWidget
 import com.belaku.homey.NewAppWidget.Companion.favContacts
 import com.belaku.homey.NewAppWidget.Companion.screenHeight
 import com.belaku.homey.NewAppWidget.Companion.screenWidth
+import com.belaku.homey.SetWallWorker.Companion.steps
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
@@ -172,6 +177,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
 
     private fun appUsageStats(applicationContext: Context?) {
 
@@ -500,6 +506,7 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun checkP() {
 
         if (ContextCompat.checkSelfPermission(
@@ -512,7 +519,7 @@ class MainActivity : AppCompatActivity() {
 
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.READ_CONTACTS, Manifest.permission.CALL_PHONE),
+                arrayOf(Manifest.permission.READ_CONTACTS, Manifest.permission.ACTIVITY_RECOGNITION),
                 MY_PERMISSIONS_REQUEST_READ_CONTACTS
             )
 
@@ -739,4 +746,7 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
     }
+
+    // handle sensor event
+
 }
