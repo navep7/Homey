@@ -24,6 +24,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.hardware.SensorManager
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.media.MediaPlayer
@@ -36,12 +37,16 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
+import com.belaku.homey.SetWallWorker.Companion.initSteps
+import com.belaku.homey.SetWallWorker.Companion.mSensorEventListener
+import com.belaku.homey.SetWallWorker.Companion.sensorManager
 import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -99,9 +104,11 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
+
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_steps,
-                getPendingSelfIntent(context, RESET_STEPS))
+                getPendingSelfIntent(context, RESET_STEPS)
+            )
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_lock,
@@ -203,10 +210,10 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-
         remoteViews?.setOnClickPendingIntent(
             R.id.tx_steps,
-            getPendingSelfIntent(context, RESET_STEPS))
+            getPendingSelfIntent(context, RESET_STEPS)
+        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
@@ -290,7 +297,9 @@ class NewAppWidget : AppWidgetProvider() {
         todaysDate(context)
 
         if (RESET_STEPS == intent.action) {
-            steps = 0
+            sensorManager = appContx.getSystemService(SENSOR_SERVICE) as SensorManager
+            sensorManager.unregisterListener(mSensorEventListener)
+         //   initSteps()
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -398,7 +407,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
-        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
+//        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day,
             SimpleDateFormat("EEEE", Locale.getDefault()).format(c)

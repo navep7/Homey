@@ -11,30 +11,27 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.icu.util.Calendar
-import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.view.View.OnClickListener
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.belaku.homey.MainActivity.Companion
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
-import com.belaku.homey.MainActivity.Companion.queryType
 import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.MainActivity.Companion.updateTime
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
-import com.belaku.homey.NewAppWidget.Companion.screenHeight
-import com.belaku.homey.NewAppWidget.Companion.screenWidth
 import java.io.IOException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
@@ -55,42 +52,48 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         appContx = applicationContext
         wm = WallpaperManager.getInstance(appContx)
-
-
-        var c = Calendar.getInstance()
-
-
         setWall()
-
-
-
-            val sensorManager = applicationContext.getSystemService(SENSOR_SERVICE) as SensorManager
-            val stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-            sensorManager.registerListener(this, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-        /*var mp = MediaPlayer.create(applicationContext, R.raw.click)
-        mp.start()
-        Handler(Looper.getMainLooper()).postDelayed(Runnable { mp.release() }, 3000)
-*/
-        Log.d(
-            "6J25", "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
-                Calendar.SECOND
-            )
-        )
-
+     //   initSteps()
 
         return Result.success()
     }
 
 
     companion object {
-        var steps: Int = 0
+
+        lateinit var stepCounterSensor: Sensor
+        lateinit var sensorManager: SensorManager
+        val mSensorEventListener: SensorEventListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                Log.d("onSensorChanged",  steps.toString())
+                if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
+                    steps++;
+                }
+
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+                Log.d("MY_APP", "$sensor - $accuracy")
+            }
+        }
+
+
+        var steps by Delegates.notNull<Int>()
         val TAG: String = "SetWallWorker LOG7"
         var wallDesc: String = ""
         var wallDescs: ArrayList<String> = ArrayList()
         var urls: ArrayList<String> = ArrayList()
         lateinit var wm: WallpaperManager
 
+
+
+        fun initSteps() {
+            steps = 0
+            sensorManager = appContx.getSystemService(SENSOR_SERVICE) as SensorManager
+            stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!!
+            if(sensorManager.registerListener(mSensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL))
+                Log.d(TAG, "StepS Initd")
+        }
         fun setWall() {
 
             wm = WallpaperManager.getInstance(appContx)
@@ -122,7 +125,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
                     newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
-                    AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+                    AppWidgetManager.getInstance(appContx)
+                        .updateAppWidget(newAppWidget, remoteViews)
 
                     val intent = Intent(appContx, NewAppWidget::class.java)
                     intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
