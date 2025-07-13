@@ -16,15 +16,13 @@ import android.app.usage.UsageStatsManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.Cursor
 import android.graphics.drawable.Drawable
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Build
@@ -37,6 +35,7 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -68,7 +67,6 @@ import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.favContacts
 import com.belaku.homey.NewAppWidget.Companion.screenHeight
 import com.belaku.homey.NewAppWidget.Companion.screenWidth
-import com.belaku.homey.SetWallWorker.Companion.steps
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.material.color.DynamicColors
@@ -85,6 +83,14 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private lateinit var btnContactsAccess: Button
+    private lateinit var btnDialPhone: Button
+    private lateinit var btnActRecognition: Button
+    private lateinit var btnAdminAccess: Button
+    private lateinit var btnUsageStats: Button
+    private val CONTACTS_P: Int = 1
+    private val DIAL_P: Int = 2
+    private val ACT_RP: Int = 3
     private val TAG: String = "WallWorkRequest"
     private lateinit var pD: ProgressDialog
     private lateinit var frameMin: FrameLayout
@@ -105,6 +111,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -129,8 +136,6 @@ class MainActivity : AppCompatActivity() {
         screenHeight = metrics.heightPixels
         screenWidth = metrics.widthPixels
 
-        makeToast("SH - $screenHeight \t sW - $screenWidth")
-
         DynamicColors.applyToActivitiesIfAvailable(application)
 
         queryType = sharedPreferences.getString("walltype", "nature").toString()
@@ -144,12 +149,17 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
-        checkP()
+        PermissionsDialog(applicationContext)
+        //   checkP()
+        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+        var compName = ComponentName(this, DeviceAdmin::class.java)
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Enable Admin Access for Lock screen shortcut to work from the App's Widget")
+        startActivityForResult(intent, RESULT_ENABLE)
 
         sharedPreferencesEditor.putString("qT", queryType).apply()
 
         fabMain.setOnClickListener { view ->
-
             if (fabDay.visibility == View.GONE) {
                 Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.ANIMATION_MODE_FADE)
                     .setAction("Action", null)
@@ -167,15 +177,47 @@ class MainActivity : AppCompatActivity() {
                 // Add animation here to collapse the menu
             }
 
-            //   setWalls(applicationContext)
-
-            /* val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-             var compName = ComponentName(this, DeviceAdmin::class.java)
-             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-             startActivityForResult(intent, RESULT_ENABLE)*/
         }
 
+    }
+
+    private fun PermissionsDialog(context: Context) {
+
+        val factory = LayoutInflater.from(this)
+        val permissionsDialogView: View = factory.inflate(R.layout.permissions_dialog, null)
+        val permissionsDialog = AlertDialog.Builder(this).create()
+        permissionsDialog.setTitle("App Permissions")
+
+        permissionsDialog.setView(permissionsDialogView)
+
+        btnContactsAccess = permissionsDialogView.findViewById<Button>(R.id.btn_contacts_access)
+            btnContactsAccess.setOnClickListener {
+                if (btnContactsAccess.text.length < 3)
+                //     if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(
+                        mAct,
+                        arrayOf(
+                            Manifest.permission.READ_CONTACTS
+                        ),
+                        CONTACTS_P
+                    )
+            }
+        btnDialPhone = permissionsDialogView.findViewById<Button>(R.id.btn_dial_p)
+            btnDialPhone.setOnClickListener(View.OnClickListener {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(mAct, arrayOf(Manifest.permission.CALL_PHONE), DIAL_P)
+            })
+        btnActRecognition = permissionsDialogView.findViewById<Button>(R.id.btn_act_recognition)
+            btnActRecognition.setOnClickListener(View.OnClickListener {
+                if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) != PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(mAct, arrayOf(Manifest.permission.ACTIVITY_RECOGNITION), ACT_RP)
+            })
+        btnUsageStats = permissionsDialogView.findViewById<Button>(R.id.btn_app_usage_stats)
+            btnUsageStats.setOnClickListener(View.OnClickListener {
+                UsageStatsPermissionDialog()
+            })
+
+        permissionsDialog.show()
     }
 
 
@@ -231,7 +273,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until queryUsageStats.size) {
 
             var appName = getAppNameFromPkg(applicationContext, queryUsageStats.get(i).packageName)
-            var appIcon = getAppIconFromPkg(applicationContext, queryUsageStats.get(i).packageName)
+            var appPname = queryUsageStats.get(i).packageName
 
             Log.d(
                 "queryUsageStats",
@@ -245,7 +287,7 @@ class MainActivity : AppCompatActivity() {
                         if (choosenApps.size < 5) {
                             choosenApps.add(
                                 App(
-                                    appName, queryUsageStats.get(i).packageName
+                                    appName, appPname
                                 )
                             )
 
@@ -474,6 +516,7 @@ class MainActivity : AppCompatActivity() {
         fabMin = findViewById(R.id.fab_option_1)
         fabHour = findViewById(R.id.fab_option_2)
         fabDay = findViewById(R.id.fab_option_3)
+
     }
 
     private fun GetDisplayDimens() {
@@ -531,11 +574,6 @@ class MainActivity : AppCompatActivity() {
                 getFavoriteContacts(applicationContext)
         }
 
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-        var compName = ComponentName(this, DeviceAdmin::class.java)
-        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "You should enable the app!")
-        startActivityForResult(intent, RESULT_ENABLE)
     }
 
     override fun onRequestPermissionsResult(
@@ -545,13 +583,25 @@ class MainActivity : AppCompatActivity() {
         deviceId: Int
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
-
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults.size > 0) {
-                getFavoriteContacts(applicationContext)
-            }
+        if (requestCode == CONTACTS_P) {
+            if (grantResults.size > 0)
+                if (grantResults[0].equals(PERMISSION_GRANTED)) {
+                    btnContactsAccess.setText("GRANTED")
+                    getFavoriteContacts(applicationContext)
+                }
+        } else  if (requestCode == DIAL_P) {
+            if (grantResults.size > 0)
+                if (grantResults[0].equals(PERMISSION_GRANTED)) {
+                    btnDialPhone.setText("GRANTED")
+                }
+        } else  if (requestCode == ACT_RP) {
+            if (grantResults.size > 0)
+                if (grantResults[0].equals(PERMISSION_GRANTED)) {
+                    btnActRecognition.setText("GRANTED")
+                }
         }
     }
+
 
     private fun UsageStatsPermissionDialog() {
         val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
@@ -561,13 +611,13 @@ class MainActivity : AppCompatActivity() {
             AlertDialog.BUTTON_NEUTRAL, "OK"
         ) { dialog, which ->
             val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            applicationContext.startActivity(intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            applicationContext.startActivity(intent1.setFlags(FLAG_ACTIVITY_NEW_TASK))
             dialog.dismiss()
         }
 
-        if (!getGrantStatus()) {
+        if (!getGrantStatus())
             alertDialog.show()
-        }
+        else btnUsageStats.setText("GRANTED")
 
     }
 
@@ -658,15 +708,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        cGranted = true
-        UsageStatsPermissionDialog()
-    }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -713,6 +755,8 @@ class MainActivity : AppCompatActivity() {
             sN.show()
             Log.d("makeToastinG", s)
         }
+
+
 
         fun showSelected(adapterPosition: Int) {
 

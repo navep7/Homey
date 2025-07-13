@@ -196,7 +196,6 @@ class NewAppWidget : AppWidgetProvider() {
         appContx = context
         readContacts()
         readApps()
-        makeToast("CTS RED - " + favContacts.size)
 
         appIndex = 0
 

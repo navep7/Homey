@@ -63,7 +63,6 @@ class RvAdapter internal constructor(
 
         override fun onClick(view: View) {
             if (mClickListener != null) mClickListener!!.onItemClick(view, adapterPosition)
-            makeToast(mDescs[adapterPosition])
             MainActivity.showSelected(adapterPosition)
         }
     }
