@@ -44,10 +44,8 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
-import com.belaku.homey.SetWallWorker.Companion.initSteps
-import com.belaku.homey.SetWallWorker.Companion.mSensorEventListener
-import com.belaku.homey.SetWallWorker.Companion.sensorManager
 import com.belaku.homey.SetWallWorker.Companion.steps
+
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStream
@@ -297,9 +295,7 @@ class NewAppWidget : AppWidgetProvider() {
         todaysDate(context)
 
         if (RESET_STEPS == intent.action) {
-            sensorManager = appContx.getSystemService(SENSOR_SERVICE) as SensorManager
-            sensorManager.unregisterListener(mSensorEventListener)
-         //   initSteps()
+            steps = 0
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -407,7 +403,7 @@ class NewAppWidget : AppWidgetProvider() {
         val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
-//        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
+        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day,
             SimpleDateFormat("EEEE", Locale.getDefault()).format(c)

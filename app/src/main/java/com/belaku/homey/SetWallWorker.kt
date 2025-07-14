@@ -37,7 +37,7 @@ import kotlin.random.Random
 
 
 class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
-    Worker(context!!, workerParams!!), SensorEventListener {
+    Worker(context!!, workerParams!!) {
 
 
     @NonNull
@@ -53,7 +53,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         appContx = applicationContext
         wm = WallpaperManager.getInstance(appContx)
         setWall()
-     //   initSteps()
 
         return Result.success()
     }
@@ -63,19 +62,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
         lateinit var stepCounterSensor: Sensor
         lateinit var sensorManager: SensorManager
-        val mSensorEventListener: SensorEventListener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                Log.d("onSensorChanged",  steps.toString())
-                if (event.sensor.getType() == Sensor.TYPE_STEP_DETECTOR) {
-                    steps++;
-                }
 
-            }
-
-            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
-                Log.d("MY_APP", "$sensor - $accuracy")
-            }
-        }
 
 
         var steps by Delegates.notNull<Int>()
@@ -87,15 +74,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
 
 
-        fun initSteps() {
-            steps = 0
-            sensorManager = appContx.getSystemService(SENSOR_SERVICE) as SensorManager
-            stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!!
-            if(sensorManager.registerListener(mSensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL))
-                Log.d(TAG, "StepS Initd")
-        }
         fun setWall() {
-
             wm = WallpaperManager.getInstance(appContx)
 
             try {
@@ -142,16 +121,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
             }
         }
     }
-
-    override fun onSensorChanged(p0: SensorEvent?) {
-        steps++
-        Log.d("onSensorChanged", steps.toString())
-    }
-
-    override fun onAccuracyChanged(p0: Sensor?, p1: Int) {
-        Log.d("onAccuracyChanged", "h3r3")
-    }
-
 
 }
 

@@ -3,6 +3,7 @@ package com.belaku.homey
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.AlertDialog
 import android.app.AppOpsManager
 import android.app.AppOpsManager.MODE_ALLOWED
@@ -83,6 +84,11 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private var boolContactsP: Boolean = false
+    private var boolDialP: Boolean = false
+    private var boolAdminAccess : Boolean = false
+    private var boolUsageStats: Boolean = false
+    private var boolActivityRecognition = false
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
     private lateinit var btnActRecognition: Button
@@ -90,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnUsageStats: Button
     private val CONTACTS_P: Int = 1
     private val DIAL_P: Int = 2
-    private val ACT_RP: Int = 3
+    private val ACT_R: Int = 3
     private val TAG: String = "WallWorkRequest"
     private lateinit var pD: ProgressDialog
     private lateinit var frameMin: FrameLayout
@@ -149,6 +155,7 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
+        if (!(boolContactsP && boolDialP && boolActivityRecognition && boolUsageStats))
         PermissionsDialog(applicationContext)
         //   checkP()
         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -184,6 +191,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun PermissionsDialog(context: Context) {
 
         val factory = LayoutInflater.from(this)
@@ -228,8 +246,9 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(
                     mAct,
                     arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                    ACT_RP
+                    ACT_R
                 )
+            else startStepsService()
         })
         btnUsageStats = permissionsDialogView.findViewById<Button>(R.id.btn_app_usage_stats)
         btnUsageStats.setOnClickListener(View.OnClickListener {
@@ -469,6 +488,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun startWallWork(delay: Long) {
 
+
+
         val periodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
                 .setConstraints(Constraints.NONE)
@@ -612,19 +633,32 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnContactsAccess.setText("GRANTED")
+                    boolContactsP = true
                     getFavoriteContacts(applicationContext)
                 }
         } else if (requestCode == DIAL_P) {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnDialPhone.setText("GRANTED")
+                    boolDialP = true
                 }
-        } else if (requestCode == ACT_RP) {
+        } else if (requestCode == ACT_R) {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnActRecognition.setText("GRANTED")
+                    boolActivityRecognition = true
+                    startStepsService()
                 }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun startStepsService() {
+        if (!isMyServiceRunning(StepsService::class.java)) {
+            val intentSteps = Intent(this, StepsService::class.java)
+            makeToast("starting StepsService")
+            startForegroundService(intentSteps)
+        } else makeToast("StepsService already Running..")
     }
 
 
@@ -642,7 +676,10 @@ class MainActivity : AppCompatActivity() {
 
         if (!getGrantStatus())
             alertDialog.show()
-        else btnUsageStats.setText("GRANTED")
+        else {
+            btnUsageStats.setText("GRANTED")
+            boolUsageStats = true
+        }
 
     }
 
