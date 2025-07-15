@@ -400,13 +400,13 @@ class NewAppWidget : AppWidgetProvider() {
     private fun todaysDate(context: Context) {
 
         val c: Date = Calendar.getInstance().time
-        val df = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val df = SimpleDateFormat("dd MMM", Locale.getDefault())
         val formattedDate: String = df.format(c)
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day,
-            SimpleDateFormat("EEEE", Locale.getDefault()).format(c)
+            SimpleDateFormat("EEE", Locale.getDefault()).format(c)
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
         remoteViews?.setTextViewText(R.id.tx_timestamp, uT)

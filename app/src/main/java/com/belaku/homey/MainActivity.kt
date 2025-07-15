@@ -83,12 +83,6 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
-
-    private var boolContactsP: Boolean = false
-    private var boolDialP: Boolean = false
-    private var boolAdminAccess : Boolean = false
-    private var boolUsageStats: Boolean = false
-    private var boolActivityRecognition = false
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
     private lateinit var btnActRecognition: Button
@@ -155,8 +149,8 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
-        if (!(boolContactsP && boolDialP && boolActivityRecognition && boolUsageStats))
-        PermissionsDialog(applicationContext)
+        if (!((ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_CONTACTS) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CALL_PHONE) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACTIVITY_RECOGNITION) == PERMISSION_GRANTED) && getAdminStatus()))
+            PermissionsDialog(applicationContext)
         //   checkP()
         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
         var compName = ComponentName(this, DeviceAdmin::class.java)
@@ -489,7 +483,6 @@ class MainActivity : AppCompatActivity() {
     private fun startWallWork(delay: Long) {
 
 
-
         val periodicWorkRequest =
             PeriodicWorkRequest.Builder(SetWallWorker::class.java, delay, TimeUnit.MINUTES)
                 .setConstraints(Constraints.NONE)
@@ -622,6 +615,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -633,20 +627,16 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnContactsAccess.setText("GRANTED")
-                    boolContactsP = true
                     getFavoriteContacts(applicationContext)
                 }
         } else if (requestCode == DIAL_P) {
             if (grantResults.size > 0)
-                if (grantResults[0].equals(PERMISSION_GRANTED)) {
+                if (grantResults[0].equals(PERMISSION_GRANTED))
                     btnDialPhone.setText("GRANTED")
-                    boolDialP = true
-                }
         } else if (requestCode == ACT_R) {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnActRecognition.setText("GRANTED")
-                    boolActivityRecognition = true
                     startStepsService()
                 }
         }
@@ -674,11 +664,10 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
-        if (!getGrantStatus())
+        if (!getAdminStatus())
             alertDialog.show()
         else {
             btnUsageStats.setText("GRANTED")
-            boolUsageStats = true
         }
 
     }
@@ -756,7 +745,7 @@ class MainActivity : AppCompatActivity() {
         rv.adapter = rvAdapter
     }
 
-    private fun getGrantStatus(): Boolean {
+    private fun getAdminStatus(): Boolean {
         val appOps = applicationContext.getSystemService(APP_OPS_SERVICE) as AppOpsManager
         val mode = appOps.checkOpNoThrow(
             OPSTR_GET_USAGE_STATS,

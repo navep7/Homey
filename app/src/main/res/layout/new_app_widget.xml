@@ -38,22 +38,25 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/a_clock"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/a_clock"
             android:format12Hour="k:mm:ss"
             android:textColor="?attr/colorSecondaryFixed"
             android:textSize="35sp"
             android:textStyle="bold" />
 
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/tx_d"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_clocks"
-        android:layout_centerHorizontal="true">
+        <TextView
+            android:id="@+id/tx_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/fab_margin"
+            android:layout_toEndOf="@+id/a_clock"
+            android:layout_below="@+id/clock"
+            android:text="Day.."
+            android:textColor="?attr/colorTertiaryFixed"
+            android:textSize="35sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
 
         <TextView
             android:id="@+id/tx_date"
@@ -61,18 +64,7 @@
             android:layout_height="wrap_content"
             android:text="Date.."
             android:layout_toEndOf="@+id/tx_day"
-            android:textColor="?attr/colorTertiaryFixed"
-            android:textSize="35sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-
-        <TextView
-            android:id="@+id/tx_day"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/tx_date"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:text="Day.."
+            android:layout_below="@id/clock"
             android:textColor="?attr/colorTertiaryFixed"
             android:textSize="35sp"
             android:textStyle="bold"
@@ -80,11 +72,12 @@
 
     </RelativeLayout>
 
+
     <LinearLayout
         android:id="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/tx_d"
+        android:layout_below="@+id/rl_clocks"
         android:background="@drawable/rounded_corner"
         android:gravity="center">
 
@@ -326,7 +319,7 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/fab_margin"
         android:text="!"
-        android:textColor="?attr/colorSurfaceInverse"
+        android:textColor="?attr/colorPrimaryVariant"
         android:textStyle="bold" />
 
     <TextView
@@ -337,7 +330,7 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="@dimen/fab_margin"
         android:text="..."
-        android:textColor="?attr/colorSurface"
+        android:textColor="?attr/colorPrimaryVariant"
         android:textStyle="bold" />
 
 
@@ -360,7 +353,7 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:text="..."
         android:textSize="35sp"
-        android:textColor="@android:color/holo_red_dark"
+        android:textColor="?attr/colorSecondaryVariant"
         android:textStyle="bold" />
 
 
