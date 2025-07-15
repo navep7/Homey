@@ -6,23 +6,17 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.icu.util.Calendar
 import android.util.Log
 import android.view.View
 import androidx.annotation.NonNull
-import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.belaku.homey.MainActivity.Companion.appContx
-import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.randomNumber
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
@@ -31,8 +25,6 @@ import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
 import java.io.IOException
 import java.net.URL
-import java.util.concurrent.TimeUnit
-import kotlin.properties.Delegates
 import kotlin.random.Random
 
 
@@ -92,6 +84,13 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     val inputStream =
                         URL(urls[randomNumber].substring(4, urls[randomNumber].length)).openStream()
                     wm.setStream(inputStream)
+                    // Uri.parse(urls[randomNumber].substring(4, urls[randomNumber].length))
+                    val newurl = URL(urls[randomNumber].substring(4, urls[randomNumber].length))
+                   /* val bitmapOptions = BitmapFactory.Options()
+                    bitmapOptions.inSampleSize = 4
+                    bitmapOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+                    var mIcon_val = BitmapFactory.decodeStream(newurl.openConnection().getInputStream(), null, bitmapOptions)
+                   remoteViews?.setImageViewBitmap(R.id.rl_widget_bg, mIcon_val)*/
                     var c = Calendar.getInstance()
                     updateTime =
                         "" + c.get(Calendar.HOUR_OF_DAY) + ":" + c.get(Calendar.MINUTE) + ":" + c.get(
