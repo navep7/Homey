@@ -12,6 +12,7 @@ import android.hardware.SensorManager
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.belaku.homey.MainActivity.Companion.appContx
@@ -62,6 +63,10 @@ class StepsService : Service() {
             override fun onSensorChanged(event: SensorEvent) {
                 Log.d("onSensorChanged",  steps.toString())
                 steps++
+
+                if (steps > 7)
+                    remoteViews?.setViewVisibility(R.id.tx_n_steps, View.VISIBLE)
+
 
                 if (steps % 10 == 0) {
                     remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())

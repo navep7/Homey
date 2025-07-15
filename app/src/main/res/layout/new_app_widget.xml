@@ -363,7 +363,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/imgbtn_note"
         android:layout_centerHorizontal="true"
-        android:text="Steps : start NewLap ?"
+        android:text="new Loop : Steps ?"
+        android:visibility="invisible"
         android:textSize="25sp"
         android:textColor="?attr/colorSecondaryVariant"
         android:textStyle="bold" />

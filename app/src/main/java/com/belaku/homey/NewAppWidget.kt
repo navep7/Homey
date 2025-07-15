@@ -226,6 +226,7 @@ class NewAppWidget : AppWidgetProvider() {
             PendingIntent.FLAG_IMMUTABLE)
         remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
+
         remoteViews?.setOnClickPendingIntent(
             R.id.tx_n_steps,
             getPendingSelfIntent(context, STEPS_NOW)
@@ -314,7 +315,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (STEPS_NOW == intent.action) {
             if (boolNewLap)
-            remoteViews?.setTextViewText(R.id.tx_n_steps, "Steps : start NewLap ?")
+            remoteViews?.setTextViewText(R.id.tx_n_steps, "new Loop : Steps ?")
             else remoteViews?.setTextViewText(R.id.tx_n_steps, "..,")
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
