@@ -24,7 +24,6 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.hardware.SensorManager
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.media.MediaPlayer
@@ -37,7 +36,6 @@ import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity.SENSOR_SERVICE
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
@@ -45,7 +43,6 @@ import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.SetWallWorker.Companion.steps
-
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStream
@@ -103,10 +100,17 @@ class NewAppWidget : AppWidgetProvider() {
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
 
-            remoteViews?.setOnClickPendingIntent(
-                R.id.tx_steps,
-                getPendingSelfIntent(context, RESET_STEPS)
+            val intent = Intent(
+                context,
+                DialogWidgetStepsActivity::class.java
             )
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent,
+                PendingIntent.FLAG_IMMUTABLE)
+
+
+            remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
+
+
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.imgbtn_lock,
@@ -208,10 +212,16 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
-        remoteViews?.setOnClickPendingIntent(
-            R.id.tx_steps,
-            getPendingSelfIntent(context, RESET_STEPS)
+
+        val intent = Intent(
+            context,
+            DialogWidgetStepsActivity::class.java
         )
+        val pendingIntent = PendingIntent.getActivity(context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE)
+        remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
+
+
 
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
@@ -294,8 +304,10 @@ class NewAppWidget : AppWidgetProvider() {
 
         todaysDate(context)
 
-        if (RESET_STEPS == intent.action) {
-            steps = 0
+        if (Steps_ACT == intent.action) {
+
+
+
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -536,6 +548,7 @@ class NewAppWidget : AppWidgetProvider() {
         var onEn: Boolean = false
         var remoteViews: RemoteViews? = null
         var Apps: ArrayList<App> = ArrayList()
+        var lapCount: Int = 0
 
 
         fun addContactInWidget(context: Context, favC: ArrayList<Contact>) {
@@ -687,7 +700,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         lateinit var newAppWidget: ComponentName
 
-        private const val RESET_STEPS = "resetSteps"
+        private const val Steps_ACT = "resetSteps"
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
         private const val SET_CLICKED = "setButtonClick"

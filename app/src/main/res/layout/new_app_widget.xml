@@ -335,9 +335,11 @@
 
 
     <ImageButton
+        android:id="@+id/imgv_steps"
         android:src="@drawable/steps"
         android:layout_width="25dp"
         android:layout_height="25dp"
+        android:layout_margin="@dimen/fab_margin"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
         android:layout_marginBottom="@dimen/fab_margin"
