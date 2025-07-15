@@ -56,7 +56,9 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         lateinit var sensorManager: SensorManager
 
 
+        var boolNewLap: Boolean = false
         var steps = 0
+        var initialSteps = 0
         val TAG: String = "SetWallWorker LOG7"
         var wallDesc: String = ""
         var wallDescs: ArrayList<String> = ArrayList()

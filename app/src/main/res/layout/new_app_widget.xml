@@ -305,7 +305,6 @@
         android:layout_below="@+id/tx_desc"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="50dp"
-        android:layout_marginBottom="50dp"
         android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
         android:src="@drawable/conf" />
@@ -355,6 +354,17 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:text="..."
         android:textSize="35sp"
+        android:textColor="?attr/colorSecondaryVariant"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tx_n_steps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imgbtn_note"
+        android:layout_centerHorizontal="true"
+        android:text="Steps : start NewLap ?"
+        android:textSize="25sp"
         android:textColor="?attr/colorSecondaryVariant"
         android:textStyle="bold" />
 

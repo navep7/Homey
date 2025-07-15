@@ -18,6 +18,8 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.NewAppWidget.Companion.newAppWidget
 import com.belaku.homey.NewAppWidget.Companion.remoteViews
+import com.belaku.homey.SetWallWorker.Companion.boolNewLap
+import com.belaku.homey.SetWallWorker.Companion.initialSteps
 import com.belaku.homey.SetWallWorker.Companion.steps
 
 
@@ -63,6 +65,13 @@ class StepsService : Service() {
 
                 if (steps % 10 == 0) {
                     remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
+                    if (boolNewLap) {
+                        remoteViews?.setTextViewText(
+                            R.id.tx_n_steps,
+                            (steps - initialSteps).toString()
+                        )
+                        initialSteps++
+                    }
                     AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
                 }
 
@@ -77,7 +86,7 @@ class StepsService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         Toast.makeText(
-            applicationContext, "Service has started running in the background",
+            applicationContext, "!",
             Toast.LENGTH_SHORT
         ).show()
 

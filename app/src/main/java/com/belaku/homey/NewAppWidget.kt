@@ -42,6 +42,8 @@ import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
+import com.belaku.homey.SetWallWorker.Companion.boolNewLap
+import com.belaku.homey.SetWallWorker.Companion.initialSteps
 import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -54,6 +56,7 @@ import kotlin.properties.Delegates
 
 
 class NewAppWidget : AppWidgetProvider() {
+
 
 
     private var timelyWish: String = ""
@@ -100,14 +103,18 @@ class NewAppWidget : AppWidgetProvider() {
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
 
-            val intentSD = Intent(
+           /* val intentSD = Intent(
                 context,
                 DialogWidgetStepsActivity::class.java
             )
             val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
                 PendingIntent.FLAG_IMMUTABLE)
-            remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
+            remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
+            remoteViews?.setOnClickPendingIntent(
+                R.id.tx_n_steps,
+                getPendingSelfIntent(context, STEPS_NOW)
+            )
 
 
             remoteViews?.setOnClickPendingIntent(
@@ -211,14 +218,18 @@ class NewAppWidget : AppWidgetProvider() {
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
 
-        val intentStepsDialog = Intent(
+        /*val intentStepsDialog = Intent(
             context,
             DialogWidgetStepsActivity::class.java
         )
         val pendingIntent = PendingIntent.getActivity(context, 0, intentStepsDialog,
             PendingIntent.FLAG_IMMUTABLE)
-        remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
+        remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
+        remoteViews?.setOnClickPendingIntent(
+            R.id.tx_n_steps,
+            getPendingSelfIntent(context, STEPS_NOW)
+        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
@@ -301,10 +312,14 @@ class NewAppWidget : AppWidgetProvider() {
 
         todaysDate(context)
 
-        if (Steps_ACT == intent.action) {
-
-
-
+        if (STEPS_NOW == intent.action) {
+            if (boolNewLap)
+            remoteViews?.setTextViewText(R.id.tx_n_steps, "Steps : start NewLap ?")
+            else remoteViews?.setTextViewText(R.id.tx_n_steps, "..,")
+            boolNewLap = !boolNewLap
+            if (initialSteps == 0)
+            initialSteps = steps
+            else initialSteps = 0
         }
 
         if (LOCK_PHONE == intent.action) {
@@ -697,7 +712,8 @@ class NewAppWidget : AppWidgetProvider() {
 
         lateinit var newAppWidget: ComponentName
 
-        private const val Steps_ACT = "resetSteps"
+
+        private const val STEPS_NOW = "resetSteps"
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"
         private const val SET_CLICKED = "setButtonClick"
