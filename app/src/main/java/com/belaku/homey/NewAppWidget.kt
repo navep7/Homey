@@ -100,14 +100,12 @@ class NewAppWidget : AppWidgetProvider() {
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
 
-            val intent = Intent(
+            val intentSD = Intent(
                 context,
                 DialogWidgetStepsActivity::class.java
             )
-            val pendingIntent = PendingIntent.getActivity(context, 0, intent,
+            val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
                 PendingIntent.FLAG_IMMUTABLE)
-
-
             remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
 
 
@@ -213,14 +211,13 @@ class NewAppWidget : AppWidgetProvider() {
         currentMin = Calendar.getInstance()[Calendar.MINUTE]
 
 
-        val intent = Intent(
+        val intentStepsDialog = Intent(
             context,
             DialogWidgetStepsActivity::class.java
         )
-        val pendingIntent = PendingIntent.getActivity(context, 0, intent,
+        val pendingIntent = PendingIntent.getActivity(context, 0, intentStepsDialog,
             PendingIntent.FLAG_IMMUTABLE)
         remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)
-
 
 
         remoteViews?.setOnClickPendingIntent(
