@@ -56,6 +56,7 @@ class StepsService : Service() {
             startForeground(1, notification)
         }
 
+        appContx = applicationContext
         sensorManager = appContx.getSystemService(SENSOR_SERVICE) as SensorManager
         stepCounterSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)!!
 

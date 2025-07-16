@@ -4,6 +4,7 @@ import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.WallpaperManager
 import android.app.admin.DevicePolicyManager
 import android.app.usage.UsageStats
 import android.appwidget.AppWidgetManager
@@ -18,6 +19,7 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -38,6 +40,7 @@ import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColor
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
@@ -89,6 +92,7 @@ class NewAppWidget : AppWidgetProvider() {
         makeToast("onDisabled!")
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -96,6 +100,19 @@ class NewAppWidget : AppWidgetProvider() {
     ) {
 
         Log.d(TAG, "onUpdate")
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        val wallpaperColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+
+        if (wallpaperColors != null) {
+            primaryColor = wallpaperColors.primaryColor!!.toArgb()
+            secondaryColor = wallpaperColors.secondaryColor!!.toArgb()
+            tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
+            // Apply primaryColor to your widget's text views
+            primaryColorVariant = wallpaperColors.colorHints.inv()
+            secondaryColor = wallpaperColors.colorHints.dec()
+            tertianaryColor = wallpaperColors.colorHints.inc()
+        }
 
 
         for (appWidgetId in appWidgetIds) {
@@ -195,6 +212,16 @@ class NewAppWidget : AppWidgetProvider() {
         remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
 
         Log.d(TAG, "onReceive ${intent.action}")
+
+        val wallpaperManager = WallpaperManager.getInstance(context)
+        val wallpaperColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+
+        if (wallpaperColors != null) {
+            primaryColor = wallpaperColors.primaryColor!!.toArgb()
+            secondaryColor = wallpaperColors.secondaryColor!!.toArgb()
+            tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
+            // Apply primaryColor to your widget's text views
+        }
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
@@ -438,6 +465,16 @@ class NewAppWidget : AppWidgetProvider() {
             SimpleDateFormat("EEE", Locale.getDefault()).format(c)
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
+
+        remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
+        remoteViews?.setTextColor(R.id.clock, secondaryColor)
+        remoteViews?.setTextColor(R.id.tx_day, tertianaryColor)
+        remoteViews?.setTextColor(R.id.tx_date, tertianaryColor)
+
+        remoteViews?.setTextColor(R.id.tx_desc, primaryColor)
+        remoteViews?.setTextColor(R.id.tx_steps, secondaryColor)
+        remoteViews?.setTextColor(R.id.tx_walltype, tertianaryColor)
+        remoteViews?.setTextColor(R.id.tx_timestamp, tertianaryColor)
         remoteViews?.setTextViewText(R.id.tx_timestamp, "Updated ~ $uT")
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
@@ -559,6 +596,12 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var primaryColor by Delegates.notNull<Int>()
+        var secondaryColor by Delegates.notNull<Int>()
+        var tertianaryColor by Delegates.notNull<Int>()
+        var primaryColorVariant by Delegates.notNull<Int>()
+        var secondaryColorVariant by Delegates.notNull<Int>()
+        var tertianaryColorVariant by Delegates.notNull<Int>()
         var screenWidth by Delegates.notNull<Int>()
         var screenHeight by Delegates.notNull<Int>()
         var favContacts: ArrayList<Contact> = ArrayList()
