@@ -319,7 +319,7 @@
         android:layout_marginEnd="@dimen/fab_margin"
         android:layout_marginBottom="@dimen/fab_margin"
         android:text="!"
-        android:textColor="?attr/colorSecondaryVariant"
+        android:textColor="?attr/colorTertiaryContainer"
         android:textStyle="bold" />
 
     <TextView
@@ -330,7 +330,7 @@
         android:layout_above="@+id/tx_timestamp"
         android:layout_marginEnd="@dimen/fab_margin"
         android:text="..."
-        android:textColor="?attr/colorOnSecondaryFixedVariant"
+        android:textColor="?attr/colorTertiaryContainer"
         android:textStyle="bold" />
 
 
@@ -355,7 +355,7 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:text="..."
         android:textSize="35sp"
-        android:textColor="?attr/colorOnTertiaryFixedVariant"
+        android:textColor="?attr/colorSecondaryContainer"
         android:textStyle="bold" />
 
 
