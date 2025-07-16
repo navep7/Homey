@@ -103,9 +103,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     Log.d(TAG, "Set successfully")
                     remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
                     remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
-                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
-                    AppWidgetManager.getInstance(appContx)
-                        .updateAppWidget(newAppWidget, remoteViews)
 
                     val intent = Intent(appContx, NewAppWidget::class.java)
                     intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
@@ -113,12 +110,20 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
                     appContx.sendBroadcast(intent)
 
                 } catch (ex: Exception) {
+                    remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
+                    remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
                     Log.d(TAG, "setWallEx1 - $ex")
                 }
 
             } catch (e: IOException) {
+                remoteViews?.setViewVisibility(R.id.progressBar_cyclic, View.INVISIBLE)
+                remoteViews?.setViewVisibility(R.id.imgbtn_set, View.VISIBLE)
                 Log.d(TAG, "setWallEx2 - $e")
             }
+            newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
+            AppWidgetManager.getInstance(appContx)
+                .updateAppWidget(newAppWidget, remoteViews)
+
         }
     }
 

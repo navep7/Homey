@@ -90,17 +90,12 @@ class StepsService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        Toast.makeText(
-            applicationContext, "!",
-            Toast.LENGTH_SHORT
-        ).show()
-
         Log.d("Service Status","Starting Service")
 
         steps = 0
         if(sensorManager.registerListener(mSensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL))
-          makeToast("StepS Initd")
-            //  Log.d(TAG, "StepS Initd")
+          makeToast("step UP!")
+
 
     //    stopSelf()
         return START_STICKY

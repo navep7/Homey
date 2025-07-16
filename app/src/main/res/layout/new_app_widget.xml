@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:text="a Wish..."
-        android:textColor="?attr/colorPrimaryFixed"
+        android:textColor="?attr/colorPrimary"
         android:textSize="35sp"
         android:textStyle="bold|italic"
         tools:ignore="HardcodedText" />
@@ -41,7 +41,7 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/a_clock"
             android:format12Hour="k:mm:ss"
-            android:textColor="?attr/colorSecondaryFixed"
+            android:textColor="?attr/colorPrimaryContainer"
             android:textSize="35sp"
             android:textStyle="bold" />
 
@@ -53,7 +53,7 @@
             android:layout_toEndOf="@+id/a_clock"
             android:layout_below="@+id/clock"
             android:text="Day.."
-            android:textColor="?attr/colorTertiaryFixed"
+            android:textColor="?attr/colorPrimary"
             android:textSize="35sp"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
@@ -65,7 +65,7 @@
             android:text="Date.."
             android:layout_toEndOf="@+id/tx_day"
             android:layout_below="@id/clock"
-            android:textColor="?attr/colorTertiaryFixed"
+            android:textColor="?attr/colorPrimary"
             android:textSize="35sp"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
@@ -256,7 +256,7 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="@dimen/fab_margin"
         android:text="Desc.."
-        android:textColor="?attr/colorPrimaryDark"
+        android:textColor="?attr/colorPrimaryContainer"
         android:textSize="21sp"
         android:textStyle="bold|italic"
         tools:ignore="HardcodedText" />
@@ -316,20 +316,21 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:text="!"
-        android:textColor="?attr/colorPrimaryVariant"
+        android:textColor="?attr/colorSecondaryVariant"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tx_walltype"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/tx_timestamp"
+        android:layout_marginEnd="@dimen/fab_margin"
         android:text="..."
-        android:textColor="?attr/colorPrimaryVariant"
+        android:textColor="?attr/colorOnSecondaryFixedVariant"
         android:textStyle="bold" />
 
 
@@ -343,7 +344,20 @@
         android:scaleType="fitXY"
         android:layout_marginBottom="@dimen/fab_margin"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/tx_steps"/>
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:id="@+id/tx_steps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/imgv_steps"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:text="..."
+        android:textSize="35sp"
+        android:textColor="?attr/colorOnTertiaryFixedVariant"
+        android:textStyle="bold" />
+
 
     <TextView
         android:id="@+id/tx_add_remove_newlap"
@@ -352,31 +366,20 @@
         android:textColor="@android:color/holo_red_light"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
         android:background="@android:color/transparent"
         android:scaleType="fitXY"
-        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_margin="@dimen/fab_margin"
         android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/tx_steps"/>
 
-    <TextView
-        android:id="@+id/tx_steps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:text="..."
-        android:textSize="35sp"
-        android:textColor="?attr/colorSecondaryVariant"
-        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tx_n_steps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/imgbtn_note"
-        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@+id/tx_add_remove_newlap"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:visibility="invisible"
         android:textSize="25sp"
         android:textColor="?attr/colorSecondaryVariant"

@@ -319,7 +319,7 @@ class NewAppWidget : AppWidgetProvider() {
                 remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
             } else {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, ",")
-                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "-")
+                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
             }
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
@@ -438,7 +438,7 @@ class NewAppWidget : AppWidgetProvider() {
             SimpleDateFormat("EEE", Locale.getDefault()).format(c)
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
-        remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
+        remoteViews?.setTextViewText(R.id.tx_timestamp, "Updated ~ $uT")
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
             qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once."
