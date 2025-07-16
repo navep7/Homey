@@ -112,7 +112,7 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.tx_n_steps,
+                R.id.tx_add_remove_newlap,
                 getPendingSelfIntent(context, STEPS_NOW)
             )
 
@@ -228,7 +228,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         remoteViews?.setOnClickPendingIntent(
-            R.id.tx_n_steps,
+            R.id.tx_add_remove_newlap,
             getPendingSelfIntent(context, STEPS_NOW)
         )
 
@@ -314,9 +314,13 @@ class NewAppWidget : AppWidgetProvider() {
         todaysDate(context)
 
         if (STEPS_NOW == intent.action) {
-            if (boolNewLap)
-            remoteViews?.setTextViewText(R.id.tx_n_steps, "new Loop : Steps ?")
-            else remoteViews?.setTextViewText(R.id.tx_n_steps, "..,")
+            if (boolNewLap) {
+                remoteViews?.setTextViewText(R.id.tx_n_steps, "")
+                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
+            } else {
+                remoteViews?.setTextViewText(R.id.tx_n_steps, ",")
+                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "-")
+            }
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
             initialSteps = steps
@@ -437,7 +441,7 @@ class NewAppWidget : AppWidgetProvider() {
         remoteViews?.setTextViewText(R.id.tx_timestamp, uT)
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
-            qT.substring(0, 1).uppercase() + qT.substring(1) + " ~ " + dU
+            qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once."
         )
         remoteViews?.setTextViewText(R.id.time_text_view, timelyWish)
     }

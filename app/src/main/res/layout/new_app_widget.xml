@@ -343,6 +343,20 @@
         android:scaleType="fitXY"
         android:layout_marginBottom="@dimen/fab_margin"
         android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/tx_steps"/>
+
+    <TextView
+        android:id="@+id/tx_add_remove_newlap"
+        android:text="+"
+        android:textSize="35sp"
+        android:textColor="@android:color/holo_red_light"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@android:color/transparent"
+        android:scaleType="fitXY"
+        android:layout_marginBottom="@dimen/fab_margin"
+        android:layout_alignParentBottom="true"
         android:layout_toRightOf="@+id/tx_steps"/>
 
     <TextView
@@ -363,7 +377,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/imgbtn_note"
         android:layout_centerHorizontal="true"
-        android:text="new Loop : Steps ?"
         android:visibility="invisible"
         android:textSize="25sp"
         android:textColor="?attr/colorSecondaryVariant"
