@@ -109,9 +109,7 @@ class NewAppWidget : AppWidgetProvider() {
             secondaryColor = wallpaperColors.secondaryColor!!.toArgb()
             tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
             // Apply primaryColor to your widget's text views
-            primaryColorVariant = wallpaperColors.colorHints.inv()
-            secondaryColor = wallpaperColors.colorHints.dec()
-            tertianaryColor = wallpaperColors.colorHints.inc()
+
         }
 
 
@@ -599,9 +597,6 @@ class NewAppWidget : AppWidgetProvider() {
         var primaryColor by Delegates.notNull<Int>()
         var secondaryColor by Delegates.notNull<Int>()
         var tertianaryColor by Delegates.notNull<Int>()
-        var primaryColorVariant by Delegates.notNull<Int>()
-        var secondaryColorVariant by Delegates.notNull<Int>()
-        var tertianaryColorVariant by Delegates.notNull<Int>()
         var screenWidth by Delegates.notNull<Int>()
         var screenHeight by Delegates.notNull<Int>()
         var favContacts: ArrayList<Contact> = ArrayList()
