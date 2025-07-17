@@ -106,6 +106,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
                     val intent = Intent(appContx, NewAppWidget::class.java)
                     intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                    newAppWidget = ComponentName(appContx, NewAppWidget::class.java)
                     intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, newAppWidget)
                     appContx.sendBroadcast(intent)
 

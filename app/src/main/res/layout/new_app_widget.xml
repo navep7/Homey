@@ -5,31 +5,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/gradient_glass"
+    android:background="@drawable/transparent_bg"
     android:theme="@style/Theme.Material3.DynamicColors.Light">
 
-    <TextView
-        android:id="@+id/time_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:text="a Wish..."
-        android:textColor="?attr/colorPrimary"
-        android:textSize="35sp"
-        android:textStyle="bold|italic"
-        tools:ignore="HardcodedText" />
 
     <RelativeLayout
         android:id="@+id/rl_clocks"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/gradient_glass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/time_text_view"
-        android:layout_alignParentStart="true">
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/time_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_alignParentTop="true"
+            android:text="a Wish..."
+            android:textSize="35sp"
+            android:textStyle="bold|italic"
+            tools:ignore="HardcodedText" />
+
 
         <AnalogClock
             android:id="@+id/a_clock"
+            android:layout_below="@+id/time_text_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:dial="@drawable/walp_icon" />
@@ -38,69 +42,51 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/time_text_view"
             android:layout_toEndOf="@+id/a_clock"
             android:format12Hour="k:mm:ss"
-            android:textColor="?attr/colorPrimaryContainer"
             android:textSize="35sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tx_day"
+            android:id="@+id/tx_day_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/fab_margin"
             android:layout_toEndOf="@+id/a_clock"
             android:layout_below="@+id/clock"
-            android:text="Day.."
-            android:textColor="?attr/colorPrimary"
+            android:text="Day.. Date"
             android:textSize="35sp"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
         <TextView
-            android:id="@+id/tx_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Date.."
-            android:layout_toEndOf="@+id/tx_day"
-            android:layout_below="@id/clock"
-            android:textColor="?attr/colorPrimary"
-            android:textSize="35sp"
-            android:textStyle="bold"
-            tools:ignore="HardcodedText" />
-
-    </RelativeLayout>
-
-
-    <RelativeLayout
-        android:id="@+id/weather_info_layout"
-        android:layout_below="@+id/rl_clocks"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-
-        <TextView
-            android:id="@+id/tx_weather_temp"
+            android:id="@+id/tx_placeandweather"
+            android:text="Place.. Weather"
             android:gravity="center"
+            android:layout_below="@+id/tx_day_date"
+            android:layout_centerHorizontal="true"
             android:textStyle="bold"
-            android:textColor="?attr/colorPrimaryContainer"
             android:textSize="21sp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            tools:ignore="HardcodedText" />
+
 
 
     </RelativeLayout>
+
 
 
     <LinearLayout
         android:id="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/weather_info_layout"
-        android:background="@drawable/rounded_corner"
+        android:layout_below="@+id/rl_clocks"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:background="@drawable/gradient_glass"
         android:gravity="center">
 
         <ImageView
@@ -145,8 +131,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ll_apps"
-        android:layout_marginTop="@dimen/fab_margin"
-        android:background="@drawable/rounded_corner"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
+        android:background="@drawable/gradient_glass"
         android:gravity="center">
 
 
@@ -276,9 +263,10 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/ll_contacts"
         android:layout_centerHorizontal="true"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_marginStart="@dimen/fab_margin"
+        android:layout_marginEnd="@dimen/fab_margin"
         android:text="Desc.."
-        android:textColor="?attr/colorPrimaryContainer"
+        android:background="@drawable/gradient_glass"
         android:textSize="21sp"
         android:textStyle="bold|italic"
         tools:ignore="HardcodedText" />
@@ -332,27 +320,16 @@
         android:src="@drawable/conf" />
 
 
-    <TextView
-        android:id="@+id/tx_timestamp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:text="!"
-        android:textColor="?attr/colorTertiaryContainer"
-        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tx_walltype"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_above="@+id/tx_timestamp"
-        android:layout_marginEnd="@dimen/fab_margin"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/fab_margin"
         android:text="..."
-        android:textColor="?attr/colorTertiaryContainer"
+        android:background="@drawable/gradient_glass"
         android:textStyle="bold" />
 
 
@@ -377,7 +354,6 @@
         android:layout_marginBottom="@dimen/fab_margin"
         android:text="..."
         android:textSize="35sp"
-        android:textColor="?attr/colorSecondaryContainer"
         android:textStyle="bold" />
 
 

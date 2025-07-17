@@ -22,7 +22,6 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -43,7 +42,6 @@ import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.toColor
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.cityname
 import com.belaku.homey.MainActivity.Companion.makeToast
@@ -137,7 +135,7 @@ class NewAppWidget : AppWidgetProvider() {
             )
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.tx_weather_temp,
+                R.id.tx_placeandweather,
                 getPendingSelfIntent(context, GET_WEATHER)
             )
 
@@ -268,7 +266,7 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
-            R.id.tx_weather_temp,
+            R.id.tx_placeandweather,
             getPendingSelfIntent(context, GET_WEATHER)
         )
 
@@ -490,32 +488,31 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (MainActivity.tempC.length > 3)
             remoteViews?.setTextViewText(
-                R.id.tx_weather_temp,
-                cityname + " . " + MainActivity.tempC.substring(0, 4) + "° C" + " . " + MainActivity.tempKind
+                R.id.tx_placeandweather,
+                cityname + " | " + MainActivity.tempC.substring(0, 4) + "° C" + " | " + MainActivity.tempKind
             )
-        remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
+       // remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         sharedPreferencesEditor.putBoolean("DateSet", true).apply()
         sharedPreferencesEditor.putString("fD", formattedDate).apply()
         remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
-            R.id.tx_day,
-            SimpleDateFormat("EEE", Locale.getDefault()).format(c)
+            R.id.tx_day_date,
+            SimpleDateFormat("EEE", Locale.getDefault()).format(c) +
+                    " | " + formattedDate
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
 
-        remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
+        remoteViews?.setTextColor(R.id.time_text_view, secondaryColor)
         remoteViews?.setTextColor(R.id.clock, secondaryColor)
-        remoteViews?.setTextColor(R.id.tx_day, tertianaryColor)
-        remoteViews?.setTextColor(R.id.tx_date, tertianaryColor)
+        remoteViews?.setTextColor(R.id.tx_day_date, secondaryColor)
+        remoteViews?.setTextColor(R.id.tx_placeandweather, secondaryColor)
 
         remoteViews?.setTextColor(R.id.tx_desc, primaryColor)
-        remoteViews?.setTextColor(R.id.tx_steps, secondaryColor)
+      //  remoteViews?.setTextColor(R.id.tx_steps, primaryColor)
         remoteViews?.setTextColor(R.id.tx_walltype, tertianaryColor)
-        remoteViews?.setTextColor(R.id.tx_timestamp, tertianaryColor)
-        remoteViews?.setTextViewText(R.id.tx_timestamp, "Updated ~ $uT")
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
-            qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once."
+            qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once.\n" + "Updated ~ $uT"
         )
         remoteViews?.setTextViewText(R.id.time_text_view, timelyWish)
     }

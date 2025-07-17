@@ -51,6 +51,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.Nullable
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -99,7 +100,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
     private lateinit var btnActRecognition: Button
-    private lateinit var btnAdminAccess: Button
     private lateinit var btnUsageStats: Button
     private val CONTACTS_P: Int = 1
     private val DIAL_P: Int = 2
@@ -175,30 +175,30 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.ACTIVITY_RECOGNITION
             ) == PERMISSION_GRANTED) && getAdminStatus())
         )
-            PermissionsDialog(applicationContext)
+        //    PermissionsDialog(applicationContext)
         //   checkP()
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+         intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
         var compName = ComponentName(this, DeviceAdmin::class.java)
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
         intent.putExtra(
             DevicePolicyManager.EXTRA_ADD_EXPLANATION,
             "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
         )
-        startActivityForResult(intent, RESULT_ENABLE)
+
+        // Receiver
+        val getResult =
+            registerForActivityResult(
+                ActivityResultContracts.StartActivityForResult()) {
+                if(it.resultCode == Activity.RESULT_OK){
+                    PermissionsDialog(applicationContext)
+                }
+            }
+
+        getResult.launch(intent)
 
         sharedPreferencesEditor.putString("qT", queryType).apply()
 
         fabMain.setOnClickListener { view ->
-
-            if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED)
-            getCity()
-            else ActivityCompat.requestPermissions(
-                mAct,
-                arrayOf(
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                LOC_P)
-            getWeatherData()
 
             if (fabDay.visibility == View.GONE) {
                 Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.ANIMATION_MODE_FADE)
@@ -217,6 +217,8 @@ class MainActivity : AppCompatActivity() {
                 // Add animation here to collapse the menu
             }
 
+            UsageStatsPermissionDialog()
+
         }
 
 
@@ -233,11 +235,9 @@ class MainActivity : AppCompatActivity() {
                 cityLat = location.latitude
                 cityLng = location.longitude
                 val geocoder = Geocoder(this, Locale.getDefault())
-                /*val addresses: List<Address>? = geocoder.getFromLocation(location.latitude, location.longitude, 1)
-                cityname = addresses!![0].getAddressLine(0)*/
+
                 val Adress = geocoder.getFromLocation(location.latitude,location.longitude,3)
                 cityname = Adress?.get(0)?.locality ?: "cNul"
-                makeToast("cityname - $cityname")
 
             }
         }
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.Q)
     private fun PermissionsDialog(context: Context) {
 
         val factory = LayoutInflater.from(this)
@@ -272,7 +272,11 @@ class MainActivity : AppCompatActivity() {
                 ActivityCompat.requestPermissions(
                     mAct,
                     arrayOf(
-                        Manifest.permission.READ_CONTACTS
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.ACTIVITY_RECOGNITION,
+
+
                     ),
                     CONTACTS_P
                 )
@@ -624,57 +628,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, @Nullable data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            RESULT_ENABLE -> {
-                if (resultCode == RESULT_OK) {
-
-                } else {
-                    Toast.makeText(
-                        applicationContext, "Failed!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-                return
-            }
-        }
-    }
 
 
     override fun onDestroy() {
         super.onDestroy()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun checkP() {
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.READ_CONTACTS
-            )
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-
-
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.READ_CONTACTS,
-                    Manifest.permission.ACTIVITY_RECOGNITION
-                ),
-                MY_PERMISSIONS_REQUEST_READ_CONTACTS
-            )
-
-
-        } else {
-            cGranted = true
-            // UsageStatsPermissionDialog()
-            if (favContacts.size == 0)
-                getFavoriteContacts(applicationContext)
-        }
-
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onRequestPermissionsResult(
@@ -686,22 +645,22 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
 
         if (requestCode == LOC_P) {
-            if (grantResults.size > 0)
+            if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     getCity()
                 }
         } else if (requestCode == CONTACTS_P) {
-            if (grantResults.size > 0)
+            if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnContactsAccess.setText("GRANTED")
                     getFavoriteContacts(applicationContext)
                 }
         } else if (requestCode == DIAL_P) {
-            if (grantResults.size > 0)
+            if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED))
                     btnDialPhone.setText("GRANTED")
         } else if (requestCode == ACT_R) {
-            if (grantResults.size > 0)
+            if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnActRecognition.setText("GRANTED")
                     startStepsService()
@@ -711,11 +670,11 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startStepsService() {
+        makeToast("startStepsService!")
         if (!isMyServiceRunning(StepsService::class.java)) {
             val intentSteps = Intent(this, StepsService::class.java)
-            makeToast("starting StepsService")
             startForegroundService(intentSteps)
-        } else makeToast("StepsService already Running..")
+        }
     }
 
 
@@ -915,7 +874,6 @@ class MainActivity : AppCompatActivity() {
 
         fun getWeatherData() {
 
-            makeToast("getWeatherData!start")
 
             // Replace "CityName" with the desired city
             try {
@@ -945,7 +903,6 @@ class MainActivity : AppCompatActivity() {
                 Log.d("WD Excep7 - ", ex.toString())
             }
 
-            makeToast("getWeatherData!End - $tempC")
 
         }
     }
