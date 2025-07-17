@@ -25,6 +25,9 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.Cursor
 import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
+import android.location.Address
+import android.location.Geocoder
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -70,6 +73,8 @@ import com.belaku.homey.NewAppWidget.Companion.screenHeight
 import com.belaku.homey.NewAppWidget.Companion.screenWidth
 import com.belaku.homey.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.Task
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -84,6 +89,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
 import java.util.Collections
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
@@ -98,6 +104,7 @@ class MainActivity : AppCompatActivity() {
     private val CONTACTS_P: Int = 1
     private val DIAL_P: Int = 2
     private val ACT_R: Int = 3
+    private val LOC_P: Int = 4
     private val TAG: String = "WallWorkRequest"
     private lateinit var pD: ProgressDialog
     private lateinit var frameMin: FrameLayout
@@ -118,6 +125,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,6 +190,14 @@ class MainActivity : AppCompatActivity() {
 
         fabMain.setOnClickListener { view ->
 
+            if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACCESS_COARSE_LOCATION) == PERMISSION_GRANTED)
+            getCity()
+            else ActivityCompat.requestPermissions(
+                mAct,
+                arrayOf(
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                LOC_P)
             getWeatherData()
 
             if (fabDay.visibility == View.GONE) {
@@ -203,6 +219,28 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun getCity() {
+
+        var task: Task<Location> = LocationServices.getFusedLocationProviderClient(this).lastLocation
+
+        task.addOnSuccessListener { location ->
+            if (location != null) {
+
+                cityLat = location.latitude
+                cityLng = location.longitude
+                val geocoder = Geocoder(this, Locale.getDefault())
+                /*val addresses: List<Address>? = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                cityname = addresses!![0].getAddressLine(0)*/
+                val Adress = geocoder.getFromLocation(location.latitude,location.longitude,3)
+                cityname = Adress?.get(0)?.locality ?: "cNul"
+                makeToast("cityname - $cityname")
+
+            }
+        }
 
     }
 
@@ -646,7 +684,13 @@ class MainActivity : AppCompatActivity() {
         deviceId: Int
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults, deviceId)
-        if (requestCode == CONTACTS_P) {
+
+        if (requestCode == LOC_P) {
+            if (grantResults.size > 0)
+                if (grantResults[0].equals(PERMISSION_GRANTED)) {
+                    getCity()
+                }
+        } else if (requestCode == CONTACTS_P) {
             if (grantResults.size > 0)
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
                     btnContactsAccess.setText("GRANTED")
@@ -802,6 +846,10 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
 
+        var cityname: String = "cN"
+        var cityLat: Double = 0.0
+        var cityLng: Double = 0.0
+
         var tempC: String = ""
         var tempKind: String = ""
         lateinit var weatherData: WeatherData
@@ -884,6 +932,8 @@ class MainActivity : AppCompatActivity() {
                         //  updateUI(weatherData)
                         tempC = "${weatherData.main.temp - 273}°C"
                         tempKind = weatherData.weather.get(0).main
+
+                        Log.d("weatherInfo", tempC + " - " + tempKind)
 
                         sharedPreferencesEditor.putString(
                             "weatherTemp",

@@ -45,6 +45,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColor
 import com.belaku.homey.MainActivity.Companion.appContx
+import com.belaku.homey.MainActivity.Companion.cityname
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
@@ -133,6 +134,11 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_add_remove_newlap,
                 getPendingSelfIntent(context, STEPS_NOW)
+            )
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.tx_weather_temp,
+                getPendingSelfIntent(context, GET_WEATHER)
             )
 
 
@@ -262,6 +268,11 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
+            R.id.tx_weather_temp,
+            getPendingSelfIntent(context, GET_WEATHER)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
             R.id.imgbtn_lock,
             getPendingSelfIntent(context, LOCK_PHONE)
         )
@@ -341,6 +352,11 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         todaysDate(context)
+
+
+        if (GET_WEATHER == intent.action) {
+            MainActivity.getWeatherData()
+        }
 
         if (STEPS_NOW == intent.action) {
             if (boolNewLap) {
@@ -470,10 +486,12 @@ class NewAppWidget : AppWidgetProvider() {
 
         formattedDate = df.format(c)
 
+     //   remoteViews?.setTextViewText(R.id.tx_cityname, MainActivity.cityname)
+
         if (MainActivity.tempC.length > 3)
             remoteViews?.setTextViewText(
                 R.id.tx_weather_temp,
-                MainActivity.tempC.substring(0, 4) + "° C" + "\n" + MainActivity.tempKind
+                cityname + " . " + MainActivity.tempC.substring(0, 4) + "° C" + " . " + MainActivity.tempKind
             )
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         sharedPreferencesEditor.putBoolean("DateSet", true).apply()
@@ -776,6 +794,7 @@ class NewAppWidget : AppWidgetProvider() {
         lateinit var newAppWidget: ComponentName
 
 
+        private const val GET_WEATHER = "getWeather"
         private const val STEPS_NOW = "resetSteps"
         private const val LOCK_PHONE = "lockPhone"
         private const val WALL_CHANGE = "wallChange"

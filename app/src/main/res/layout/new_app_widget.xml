@@ -73,22 +73,33 @@
     </RelativeLayout>
 
 
-    <TextView
-        android:id="@+id/tx_weather_temp"
-        android:layout_below="@+id/time_text_view"
-        android:layout_alignParentEnd="true"
-        android:text=""
-        android:textColor="?attr/colorPrimaryContainer"
-        android:textSize="21sp"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+    <RelativeLayout
+        android:id="@+id/weather_info_layout"
+        android:layout_below="@+id/rl_clocks"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+
+        <TextView
+            android:id="@+id/tx_weather_temp"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textColor="?attr/colorPrimaryContainer"
+            android:textSize="21sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+    </RelativeLayout>
+
 
     <LinearLayout
         android:id="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_clocks"
+        android:layout_below="@+id/weather_info_layout"
         android:background="@drawable/rounded_corner"
         android:gravity="center">
 

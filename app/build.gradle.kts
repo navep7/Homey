@@ -43,6 +43,7 @@ android {
 
 dependencies {
 
+    implementation(libs.gms.play.services.location)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.okhttp)
