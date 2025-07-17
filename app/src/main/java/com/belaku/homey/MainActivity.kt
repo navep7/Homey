@@ -189,8 +189,17 @@ class MainActivity : AppCompatActivity() {
         val getResult =
             registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult()) {
-                if(it.resultCode == Activity.RESULT_OK){
-                    PermissionsDialog(applicationContext)
+                if(it.resultCode == Activity.RESULT_OK || it.resultCode == Activity.RESULT_CANCELED){
+                    ActivityCompat.requestPermissions(
+                        mAct,
+                        arrayOf(
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.ACTIVITY_RECOGNITION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ),
+                        CONTACTS_P
+                    )
                 }
             }
 
@@ -227,7 +236,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     private fun getCity() {
 
-        var task: Task<Location> = LocationServices.getFusedLocationProviderClient(this).lastLocation
+        val task: Task<Location> = LocationServices.getFusedLocationProviderClient(this).lastLocation
 
         task.addOnSuccessListener { location ->
             if (location != null) {
@@ -242,6 +251,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        makeToast("getCity! - " + cityname)
+
     }
 
 
@@ -255,66 +266,6 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun PermissionsDialog(context: Context) {
-
-        val factory = LayoutInflater.from(this)
-        val permissionsDialogView: View = factory.inflate(R.layout.permissions_dialog, null)
-        val permissionsDialog = AlertDialog.Builder(this).create()
-        permissionsDialog.setTitle("App Permissions")
-
-        permissionsDialog.setView(permissionsDialogView)
-
-        btnContactsAccess = permissionsDialogView.findViewById<Button>(R.id.btn_contacts_access)
-        btnContactsAccess.setOnClickListener {
-            if (btnContactsAccess.text.length < 3)
-            //     if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) != PERMISSION_GRANTED)
-                ActivityCompat.requestPermissions(
-                    mAct,
-                    arrayOf(
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.ACTIVITY_RECOGNITION,
-
-
-                    ),
-                    CONTACTS_P
-                )
-        }
-        btnDialPhone = permissionsDialogView.findViewById<Button>(R.id.btn_dial_p)
-        btnDialPhone.setOnClickListener(View.OnClickListener {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.CALL_PHONE
-                ) != PERMISSION_GRANTED
-            )
-                ActivityCompat.requestPermissions(
-                    mAct,
-                    arrayOf(Manifest.permission.CALL_PHONE),
-                    DIAL_P
-                )
-        })
-        btnActRecognition = permissionsDialogView.findViewById<Button>(R.id.btn_act_recognition)
-        btnActRecognition.setOnClickListener(View.OnClickListener {
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACTIVITY_RECOGNITION
-                ) != PERMISSION_GRANTED
-            )
-                ActivityCompat.requestPermissions(
-                    mAct,
-                    arrayOf(Manifest.permission.ACTIVITY_RECOGNITION),
-                    ACT_R
-                )
-            else startStepsService()
-        })
-        btnUsageStats = permissionsDialogView.findViewById<Button>(R.id.btn_app_usage_stats)
-        btnUsageStats.setOnClickListener(View.OnClickListener {
-            UsageStatsPermissionDialog()
-        })
-
-        permissionsDialog.show()
-    }
 
 
     private fun appUsageStats(applicationContext: Context?) {
@@ -647,13 +598,15 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == LOC_P) {
             if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
-                    getCity()
+
                 }
         } else if (requestCode == CONTACTS_P) {
             if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
-                    btnContactsAccess.setText("GRANTED")
+//                    btnContactsAccess.setText("GRANTED")
                     getFavoriteContacts(applicationContext)
+                    getCity()
+                    startStepsService()
                 }
         } else if (requestCode == DIAL_P) {
             if (grantResults.isNotEmpty())
