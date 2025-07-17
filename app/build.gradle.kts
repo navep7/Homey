@@ -43,6 +43,9 @@ android {
 
 dependencies {
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.okhttp)
     implementation(libs.picasso.v28)
     implementation(libs.gson)
     implementation(libs.glide)

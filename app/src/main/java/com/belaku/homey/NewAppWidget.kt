@@ -1,5 +1,8 @@
 package com.belaku.homey
 
+
+// Weather Key - 9fa8e101240ab18615e3133b051e767e
+
 import android.Manifest
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
@@ -61,7 +64,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-
+    private lateinit var formattedDate: String
     private var timelyWish: String = ""
     private val TAG: String = "NewAppWidget LOG7"
     private lateinit var wD: String
@@ -83,6 +86,7 @@ class NewAppWidget : AppWidgetProvider() {
         appContx = context!!
         onEn = true
         Log.d("onEnabled! - ", favContacts.size.toString())
+        MainActivity.getWeatherData()
 
     }
 
@@ -118,13 +122,13 @@ class NewAppWidget : AppWidgetProvider() {
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
 
-           /* val intentSD = Intent(
-                context,
-                DialogWidgetStepsActivity::class.java
-            )
-            val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
-                PendingIntent.FLAG_IMMUTABLE)
-            remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
+            /* val intentSD = Intent(
+                 context,
+                 DialogWidgetStepsActivity::class.java
+             )
+             val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
+                 PendingIntent.FLAG_IMMUTABLE)
+             remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_add_remove_newlap,
@@ -329,11 +333,11 @@ class NewAppWidget : AppWidgetProvider() {
 
         //     makeToast("onReceive!")
 
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-                greeting(context, remoteViews!!, timeOfDay)
-            }
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            greeting(context, remoteViews!!, timeOfDay)
+        }
 
 
         todaysDate(context)
@@ -348,7 +352,7 @@ class NewAppWidget : AppWidgetProvider() {
             }
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
-            initialSteps = steps
+                initialSteps = steps
             else initialSteps = 0
         }
 
@@ -431,8 +435,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-
-
     private fun clickSound(context: Context) {
 
         mp = MediaPlayer.create(context, R.raw.click)
@@ -455,8 +457,27 @@ class NewAppWidget : AppWidgetProvider() {
 
         val c: Date = Calendar.getInstance().time
         val df = SimpleDateFormat("dd MMM", Locale.getDefault())
-        val formattedDate: String = df.format(c)
+
+        if (sharedPreferences.getBoolean("DateSet", false)) {
+            var newfD = df.format(c)
+            if (sharedPreferences.getString("fD", "") == newfD)
+                makeToast("same Day!")
+            else {
+                makeToast("diff Day!")
+                MainActivity.getWeatherData()
+            }
+        }
+
+        formattedDate = df.format(c)
+
+        if (MainActivity.tempC.length > 3)
+            remoteViews?.setTextViewText(
+                R.id.tx_weather_temp,
+                MainActivity.tempC.substring(0, 4) + "° C" + "\n" + MainActivity.tempKind
+            )
         remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
+        sharedPreferencesEditor.putBoolean("DateSet", true).apply()
+        sharedPreferencesEditor.putString("fD", formattedDate).apply()
         remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day,
@@ -560,8 +581,6 @@ class NewAppWidget : AppWidgetProvider() {
             timelyWish = "$timeOfDay, ${gpName.split(" ").get(0)}  \uD83D\uDCA4 "
 
 
-
-
     }
 
     @SuppressLint("Range", "Recycle")
@@ -612,15 +631,15 @@ class NewAppWidget : AppWidgetProvider() {
             var bm: Bitmap
             var d: Drawable
 
-            for (i in 0 until  favC.size) {
+            for (i in 0 until favC.size) {
 
-                    input =
-                        ContactsContract.Contacts.openContactPhotoInputStream(
-                            appContx.contentResolver,
-                            Uri.parse(favC[i].image)
-                        )
-                    bm = BitmapFactory.decodeStream(input)
-                    d = BitmapDrawable(bm)
+                input =
+                    ContactsContract.Contacts.openContactPhotoInputStream(
+                        appContx.contentResolver,
+                        Uri.parse(favC[i].image)
+                    )
+                bm = BitmapFactory.decodeStream(input)
+                d = BitmapDrawable(bm)
 
 
                 if (i == 0) {
@@ -629,7 +648,7 @@ class NewAppWidget : AppWidgetProvider() {
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c1, favC[0].name)
-                } else  if (i == 1) {
+                } else if (i == 1) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact2,
                         drawableToBitmap(context, d).getCircledBitmap()
@@ -641,7 +660,7 @@ class NewAppWidget : AppWidgetProvider() {
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c3, favC[2].name)
-                } else  if (i == 3) {
+                } else if (i == 3) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact4,
                         drawableToBitmap(context, d).getCircledBitmap()
@@ -678,7 +697,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addAppInWidget(context: Context, fApps: ArrayList<App>) {
 
-            for (i in 0 until  fApps.size) {
+            for (i in 0 until fApps.size) {
 
                 val d: Drawable = getAppIconFromPkg(context, fApps[i].pName)
 
@@ -687,26 +706,26 @@ class NewAppWidget : AppWidgetProvider() {
                         R.id.imgv_add1,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
-                } else  if (i == 1) {
+                } else if (i == 1) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_add2,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
-                 //   remoteViews!!.setTextViewText(R.id.tx_c2, fApps[1].name)
+                    //   remoteViews!!.setTextViewText(R.id.tx_c2, fApps[1].name)
                 } else if (i == 2) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_add3,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
-               //     remoteViews!!.setTextViewText(R.id.tx_c3, fApps[2].name)
-                } else  if (i == 3) {
+                    //     remoteViews!!.setTextViewText(R.id.tx_c3, fApps[2].name)
+                } else if (i == 3) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_add4,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
 
-                 //   remoteViews!!.setTextViewText(R.id.tx_c4, fApps[3].name)
-                }  else  if (i == 4) {
+                    //   remoteViews!!.setTextViewText(R.id.tx_c4, fApps[3].name)
+                } else if (i == 4) {
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_add5,
                         drawableToBitmap(context, d).getCircledBitmap()
@@ -730,19 +749,20 @@ class NewAppWidget : AppWidgetProvider() {
                 )
             }
 
-            val bitmap: Bitmap = if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
-                Bitmap.createBitmap(
-                    1,
-                    1,
-                    Bitmap.Config.ARGB_8888
-                ) // Single color bitmap will be created of 1x1 pixel
-            } else {
-                Bitmap.createBitmap(
-                    drawable.intrinsicWidth,
-                    drawable.intrinsicHeight,
-                    Bitmap.Config.ARGB_8888
-                )
-            }
+            val bitmap: Bitmap =
+                if (drawable.intrinsicWidth <= 0 || drawable.intrinsicHeight <= 0) {
+                    Bitmap.createBitmap(
+                        1,
+                        1,
+                        Bitmap.Config.ARGB_8888
+                    ) // Single color bitmap will be created of 1x1 pixel
+                } else {
+                    Bitmap.createBitmap(
+                        drawable.intrinsicWidth,
+                        drawable.intrinsicHeight,
+                        Bitmap.Config.ARGB_8888
+                    )
+                }
 
             val canvas = Canvas(bitmap)
             drawable.setBounds(0, 0, canvas.width, canvas.height)

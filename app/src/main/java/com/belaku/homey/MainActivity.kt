@@ -74,14 +74,21 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONException
 import org.json.JSONObject
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
+
 
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
@@ -149,7 +156,17 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
-        if (!((ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.READ_CONTACTS) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.CALL_PHONE) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.ACTIVITY_RECOGNITION) == PERMISSION_GRANTED) && getAdminStatus()))
+        if (!((ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.READ_CONTACTS
+            ) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.CALL_PHONE
+            ) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.ACTIVITY_RECOGNITION
+            ) == PERMISSION_GRANTED) && getAdminStatus())
+        )
             PermissionsDialog(applicationContext)
         //   checkP()
         val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
@@ -164,6 +181,9 @@ class MainActivity : AppCompatActivity() {
         sharedPreferencesEditor.putString("qT", queryType).apply()
 
         fabMain.setOnClickListener { view ->
+
+            getWeatherData()
+
             if (fabDay.visibility == View.GONE) {
                 Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.ANIMATION_MODE_FADE)
                     .setAction("Action", null)
@@ -183,7 +203,9 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+
     }
+
 
     private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
         val manager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
@@ -470,6 +492,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setWalls(delay: Long) {
         //    val oneTimeWorkRequest = OneTimeWorkRequest.Builder(SetWallWorker::class.java).build()
+
 
         appUsageStats(applicationContext)
         delayUnit = delay.toString()
@@ -778,6 +801,10 @@ class MainActivity : AppCompatActivity() {
 
 
     companion object {
+
+        var tempC: String = ""
+        var tempKind: String = ""
+        lateinit var weatherData: WeatherData
         lateinit var sN: Snackbar
         lateinit var parentLayout: View
         var delayUnit: String = ""
@@ -836,6 +863,40 @@ class MainActivity : AppCompatActivity() {
                 .into(image)
 
             dialog.show()
+        }
+
+        fun getWeatherData() {
+
+            makeToast("getWeatherData!start")
+
+            // Replace "CityName" with the desired city
+            try {
+                var weatherService = Retrofit.Builder()
+                    .baseUrl("https://api.openweathermap.org/data/2.5/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(WeatherService::class.java)
+
+                GlobalScope.launch(Dispatchers.IO) {
+                    val openWeatherApiKey: String = "9fa8e101240ab18615e3133b051e767e"
+                    weatherData = weatherService.getWeather("Bangalore", openWeatherApiKey)
+                    withContext(Dispatchers.Main) {
+                        //  updateUI(weatherData)
+                        tempC = "${weatherData.main.temp - 273}°C"
+                        tempKind = weatherData.weather.get(0).main
+
+                        sharedPreferencesEditor.putString(
+                            "weatherTemp",
+                            tempC
+                        ).apply()
+                    }
+                }
+            } catch (ex: Exception) {
+                Log.d("WD Excep7 - ", ex.toString())
+            }
+
+            makeToast("getWeatherData!End - $tempC")
+
         }
     }
 
