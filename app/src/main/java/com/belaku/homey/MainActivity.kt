@@ -645,9 +645,6 @@ class MainActivity : AppCompatActivity() {
 
         if (!getAdminStatus())
             alertDialog.show()
-        else {
-            btnUsageStats.setText("GRANTED")
-        }
 
     }
 

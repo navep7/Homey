@@ -502,13 +502,13 @@ class NewAppWidget : AppWidgetProvider() {
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
 
-        remoteViews?.setTextColor(R.id.time_text_view, secondaryColor)
+        remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
         remoteViews?.setTextColor(R.id.clock, secondaryColor)
-        remoteViews?.setTextColor(R.id.tx_day_date, secondaryColor)
-        remoteViews?.setTextColor(R.id.tx_placeandweather, secondaryColor)
+        remoteViews?.setTextColor(R.id.tx_day_date, tertianaryColor)
+        remoteViews?.setTextColor(R.id.tx_placeandweather, primaryColor)
+        remoteViews?.setTextColor(R.id.tx_desc, tertianaryColor)
 
-        remoteViews?.setTextColor(R.id.tx_desc, primaryColor)
-      //  remoteViews?.setTextColor(R.id.tx_steps, primaryColor)
+
         remoteViews?.setTextColor(R.id.tx_walltype, tertianaryColor)
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
