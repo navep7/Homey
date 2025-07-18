@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -111,8 +112,6 @@ class NewAppWidget : AppWidgetProvider() {
             primaryColor = wallpaperColors.primaryColor!!.toArgb()
             secondaryColor = wallpaperColors.secondaryColor!!.toArgb()
             tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
-            // Apply primaryColor to your widget's text views
-
         }
 
 
@@ -128,6 +127,11 @@ class NewAppWidget : AppWidgetProvider() {
              val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
                  PendingIntent.FLAG_IMMUTABLE)
              remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.rl_clocks,
+                getPendingSelfIntent(context, RL_INVERT)
+            )
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.tx_add_remove_newlap,
@@ -151,7 +155,7 @@ class NewAppWidget : AppWidgetProvider() {
             )
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.imgbtn_note,
+                R.id.imgbtn_conf,
                 getPendingSelfIntent(context, SET_CLICKED)
             )
 
@@ -209,6 +213,16 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
+    fun getComplementaryColor(colorToInvert: Int): Int {
+        val hsv = FloatArray(3)
+        Color.RGBToHSV(
+            Color.red(colorToInvert), Color.green(colorToInvert),
+            Color.blue(colorToInvert), hsv
+        )
+        hsv[0] = (hsv[0] + 180) % 360
+        return Color.HSVToColor(hsv)
+    }
+
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
@@ -228,6 +242,10 @@ class NewAppWidget : AppWidgetProvider() {
             tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
             // Apply primaryColor to your widget's text views
         }
+
+        remoteViews?.setColorInt(R.id.imgbtn_lock, "setColorFilter", primaryColor, tertianaryColor)
+        remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
+        remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
@@ -261,6 +279,11 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         remoteViews?.setOnClickPendingIntent(
+            R.id.rl_clocks,
+            getPendingSelfIntent(context, RL_INVERT)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
             R.id.tx_add_remove_newlap,
             getPendingSelfIntent(context, STEPS_NOW)
         )
@@ -281,7 +304,7 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
-            R.id.imgbtn_note,
+            R.id.imgbtn_conf,
             getPendingSelfIntent(context, SET_CLICKED)
         )
 
@@ -354,6 +377,26 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (GET_WEATHER == intent.action) {
             MainActivity.getWeatherData()
+        }
+
+        if (RL_INVERT == intent.action) {
+            if (sharedPreferences.getBoolean("dark", false)) {
+                sharedPreferencesEditor.putBoolean("dark", false).apply()
+                remoteViews?.setTextColor(R.id.tx_desc, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(R.id.tx_placeandweather, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(R.id.tx_day_date, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(R.id.clock, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(R.id.tx_wish, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(R.id.tx_walltype, appContx.resources.getColor(android.R.color.white))
+            } else {
+                sharedPreferencesEditor.putBoolean("dark", true).apply()
+                remoteViews?.setTextColor(R.id.tx_desc, appContx.resources.getColor(android.R.color.black))
+                remoteViews?.setTextColor(R.id.tx_placeandweather, appContx.resources.getColor(android.R.color.black))
+                remoteViews?.setTextColor(R.id.tx_day_date, appContx.resources.getColor(android.R.color.black))
+                remoteViews?.setTextColor(R.id.clock, appContx.resources.getColor(android.R.color.black))
+                remoteViews?.setTextColor(R.id.tx_wish, appContx.resources.getColor(android.R.color.black))
+                remoteViews?.setTextColor(R.id.tx_walltype, appContx.resources.getColor(android.R.color.black))
+            }
         }
 
         if (STEPS_NOW == intent.action) {
@@ -502,19 +545,21 @@ class NewAppWidget : AppWidgetProvider() {
         )
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
 
-        remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
+
+        /*remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
         remoteViews?.setTextColor(R.id.clock, secondaryColor)
         remoteViews?.setTextColor(R.id.tx_day_date, tertianaryColor)
         remoteViews?.setTextColor(R.id.tx_placeandweather, primaryColor)
-        remoteViews?.setTextColor(R.id.tx_desc, tertianaryColor)
+        remoteViews?.setTextColor(R.id.tx_desc, tertianaryColor)*/
 
 
-        remoteViews?.setTextColor(R.id.tx_walltype, tertianaryColor)
+
+
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
             qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once.\n" + "Updated ~ $uT"
         )
-        remoteViews?.setTextViewText(R.id.time_text_view, timelyWish)
+        remoteViews?.setTextViewText(R.id.tx_wish, timelyWish)
     }
 
     private fun launchApp(context: Context, pkgName: String) {
@@ -791,6 +836,7 @@ class NewAppWidget : AppWidgetProvider() {
         lateinit var newAppWidget: ComponentName
 
 
+        private const val RL_INVERT = "rlInvert"
         private const val GET_WEATHER = "getWeather"
         private const val STEPS_NOW = "resetSteps"
         private const val LOCK_PHONE = "lockPhone"

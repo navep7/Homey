@@ -20,7 +20,7 @@
         android:layout_alignParentTop="true">
 
         <TextView
-            android:id="@+id/time_text_view"
+            android:id="@+id/tx_wish"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -34,7 +34,7 @@
 
         <AnalogClock
             android:id="@+id/a_clock"
-            android:layout_below="@+id/time_text_view"
+            android:layout_below="@+id/tx_wish"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:dial="@drawable/walp_icon" />
@@ -43,7 +43,7 @@
             android:id="@+id/clock"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/time_text_view"
+            android:layout_below="@+id/tx_wish"
             android:layout_toEndOf="@+id/a_clock"
             android:format12Hour="k:mm:ss"
             android:textSize="35sp"
@@ -311,7 +311,7 @@
         android:src="@android:drawable/ic_lock_lock" />
 
     <ImageButton
-        android:id="@+id/imgbtn_note"
+        android:id="@+id/imgbtn_conf"
         android:outlineSpotShadowColor="?attr/colorSecondary"
         android:layout_width="60dp"
         android:layout_height="60dp"
