@@ -264,18 +264,13 @@ class NewAppWidget : AppWidgetProvider() {
 
         appIndex = 0
 
+        var now = Calendar.getInstance()
 
-        currentHour = Calendar.getInstance()[Calendar.HOUR_OF_DAY]
-        currentMin = Calendar.getInstance()[Calendar.MINUTE]
+        currentHour = now[Calendar.HOUR_OF_DAY]
+        currentMin = now[Calendar.MINUTE]
 
-
-        /*val intentStepsDialog = Intent(
-            context,
-            DialogWidgetStepsActivity::class.java
-        )
-        val pendingIntent = PendingIntent.getActivity(context, 0, intentStepsDialog,
-            PendingIntent.FLAG_IMMUTABLE)
-        remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
+        if(currentHour > 23 && currentMin > 30)
+            steps = 0
 
 
         remoteViews?.setOnClickPendingIntent(
@@ -364,6 +359,8 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
         //     makeToast("onReceive!")
+
+
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED

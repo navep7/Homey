@@ -251,7 +251,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        makeToast("getCity! - " + cityname)
 
     }
 
@@ -623,7 +622,6 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun startStepsService() {
-        makeToast("startStepsService!")
         if (!isMyServiceRunning(StepsService::class.java)) {
             val intentSteps = Intent(this, StepsService::class.java)
             startForegroundService(intentSteps)

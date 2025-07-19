@@ -94,8 +94,8 @@ class StepsService : Service() {
         Log.d("Service Status","Starting Service")
 
         steps = 0
-        if(sensorManager.registerListener(mSensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL))
-          makeToast("step UP!")
+       sensorManager.registerListener(mSensorEventListener, stepCounterSensor, SensorManager.SENSOR_DELAY_NORMAL)
+      //    makeToast("step UP!")
 
 
     //    stopSelf()
