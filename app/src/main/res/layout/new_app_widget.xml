@@ -37,6 +37,7 @@
             android:layout_below="@+id/tx_wish"
             android:layout_width="100dp"
             android:layout_height="100dp"
+            android:hand_second="@drawable/s_hand"
             android:dial="@drawable/walp_icon" />
 
         <android.widget.TextClock

@@ -837,7 +837,7 @@ class MainActivity : AppCompatActivity() {
                     withContext(Dispatchers.Main) {
                         //  updateUI(weatherData)
                         tempC = "${weatherData.main.temp - 273}°C"
-                        tempKind = weatherData.weather.get(0).main
+                        tempKind = weatherData.weather.get(0).description
 
                         Log.d("weatherInfo", tempC + " - " + tempKind)
 
