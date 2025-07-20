@@ -245,11 +245,13 @@ class MainActivity : AppCompatActivity() {
                 cityLng = location.longitude
                 val geocoder = Geocoder(this, Locale.getDefault())
 
-                val Adress = geocoder.getFromLocation(location.latitude,location.longitude,3)
+                val Adress = geocoder.getFromLocation(location.latitude,location.longitude,1)
                 cityname = Adress?.get(0)?.locality ?: "cNul"
 
             }
         }
+
+        makeToast(cityname)
 
 
     }
@@ -833,7 +835,8 @@ class MainActivity : AppCompatActivity() {
 
                 GlobalScope.launch(Dispatchers.IO) {
                     val openWeatherApiKey: String = "9fa8e101240ab18615e3133b051e767e"
-                    weatherData = weatherService.getWeather("Bangalore", openWeatherApiKey)
+                    weatherData = weatherService.getWeather(cityLat.toString(),
+                        cityLng.toString(), openWeatherApiKey)
                     withContext(Dispatchers.Main) {
                         //  updateUI(weatherData)
                         tempC = "${weatherData.main.temp - 273}°C"
