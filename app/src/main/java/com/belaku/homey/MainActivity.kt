@@ -246,12 +246,11 @@ class MainActivity : AppCompatActivity() {
                 val geocoder = Geocoder(this, Locale.getDefault())
 
                 val Adress = geocoder.getFromLocation(location.latitude,location.longitude,1)
-                cityname = Adress?.get(0)?.locality ?: "cNul"
+                cityname = Adress?.toString()?.split(",")?.get(2) ?: Adress?.get(0)?.locality.toString()
 
             }
         }
 
-        makeToast(cityname)
 
 
     }

@@ -514,12 +514,9 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (sharedPreferences.getBoolean("DateSet", false)) {
             var newfD = df.format(c)
-            if (sharedPreferences.getString("fD", "") == newfD)
-                makeToast("same Day!")
-            else {
-                makeToast("diff Day!")
+            if (sharedPreferences.getString("fD", "") != newfD)
                 MainActivity.getWeatherData()
-            }
+
         }
 
         formattedDate = df.format(c)
