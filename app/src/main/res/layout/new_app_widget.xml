@@ -31,6 +31,28 @@
             android:textStyle="bold|italic"
             tools:ignore="HardcodedText" />
 
+        <ImageButton
+            android:id="@+id/fab_wifi"
+            android:outlineSpotShadowColor="?attr/colorSecondary"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_below="@+id/tx_wish"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/fab_margin"
+            android:background="?android:attr/selectableItemBackground"
+            android:scaleType="fitXY"
+            android:src="@android:drawable/toast_frame" />
+
+        <TextView
+            android:id="@+id/tx_wifiname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Off"
+            android:layout_below="@+id/fab_wifi"
+            android:layout_marginEnd="10dp"
+            android:layout_alignEnd="@+id/fab_wifi"/>
+
+
 
         <AnalogClock
             android:id="@+id/a_clock"
@@ -310,6 +332,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
         android:src="@android:drawable/ic_lock_lock" />
+
 
     <ImageButton
         android:id="@+id/imgbtn_conf"

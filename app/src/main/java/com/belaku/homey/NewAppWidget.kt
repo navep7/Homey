@@ -15,6 +15,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
+import android.content.Context.WIFI_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
@@ -33,13 +34,18 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.media.MediaPlayer
 import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -64,6 +70,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
+    private lateinit var wifiManager: WifiManager
     private lateinit var formattedDate: String
     private var timelyWish: String = ""
     private val TAG: String = "NewAppWidget LOG7"
@@ -109,7 +116,7 @@ class NewAppWidget : AppWidgetProvider() {
         val wallpaperColors = wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
 
         if (wallpaperColors != null) {
-            primaryColor = wallpaperColors.primaryColor!!.toArgb()
+            primaryColor = wallpaperColors.primaryColor.toArgb()
             secondaryColor = wallpaperColors.secondaryColor!!.toArgb()
             tertianaryColor = wallpaperColors.tertiaryColor!!.toArgb()
         }
@@ -127,6 +134,11 @@ class NewAppWidget : AppWidgetProvider() {
              val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
                  PendingIntent.FLAG_IMMUTABLE)
              remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.fab_wifi,
+                getPendingSelfIntent(context, WIFI_AUTO)
+            )
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.rl_clocks,
@@ -213,17 +225,10 @@ class NewAppWidget : AppWidgetProvider() {
 
     }
 
-    fun getComplementaryColor(colorToInvert: Int): Int {
-        val hsv = FloatArray(3)
-        Color.RGBToHSV(
-            Color.red(colorToInvert), Color.green(colorToInvert),
-            Color.blue(colorToInvert), hsv
-        )
-        hsv[0] = (hsv[0] + 180) % 360
-        return Color.HSVToColor(hsv)
-    }
 
 
+
+    @SuppressLint("ResourceAsColor")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
         // TODO Auto-generated method stub
@@ -272,6 +277,10 @@ class NewAppWidget : AppWidgetProvider() {
         if(currentHour > 23 && currentMin > 30)
             steps = 0
 
+        remoteViews?.setOnClickPendingIntent(
+            R.id.fab_wifi,
+            getPendingSelfIntent(context, WIFI_AUTO)
+        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.rl_clocks,
@@ -360,7 +369,10 @@ class NewAppWidget : AppWidgetProvider() {
 
         //     makeToast("onReceive!")
 
-
+        wifiManager = appContx.getSystemService(WIFI_SERVICE) as WifiManager
+        if (wifiManager.isWifiEnabled)
+            remoteViews?.setTextViewText(R.id.tx_wifiname, "On")
+        else remoteViews?.setTextViewText(R.id.tx_wifiname, "Off")
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
@@ -374,6 +386,23 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (GET_WEATHER == intent.action) {
             MainActivity.getWeatherData()
+        }
+
+        if (WIFI_AUTO == intent.action) {
+
+            var wifiIntent = Intent(Settings.ACTION_WIFI_SETTINGS)
+            wifiIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            appContx.startActivity(wifiIntent)
+
+            Handler().postDelayed(Runnable {
+                if (wifiManager.isWifiEnabled) {
+                    remoteViews?.setTextViewText(R.id.tx_wifiname, "On")
+
+                } else remoteViews?.setTextViewText(R.id.tx_wifiname, "Off")
+
+                AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
+            }, 3000)
+
         }
 
         if (RL_INVERT == intent.action) {
@@ -830,6 +859,7 @@ class NewAppWidget : AppWidgetProvider() {
         lateinit var newAppWidget: ComponentName
 
 
+        private const val WIFI_AUTO = "wifiAuto"
         private const val RL_INVERT = "rlInvert"
         private const val GET_WEATHER = "getWeather"
         private const val STEPS_NOW = "resetSteps"
