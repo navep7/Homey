@@ -367,12 +367,14 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
 
-        //     makeToast("onReceive!")
 
         wifiManager = appContx.getSystemService(WIFI_SERVICE) as WifiManager
         if (wifiManager.isWifiEnabled)
-            remoteViews?.setTextViewText(R.id.tx_wifiname, "On")
+            if (!wifiManager.connectionInfo.ssid.equals("<unknown ssid>"))
+            remoteViews?.setTextViewText(R.id.tx_wifiname, wifiManager.connectionInfo.ssid)
         else remoteViews?.setTextViewText(R.id.tx_wifiname, "Off")
+
+
 
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
@@ -395,13 +397,8 @@ class NewAppWidget : AppWidgetProvider() {
             appContx.startActivity(wifiIntent)
 
             Handler().postDelayed(Runnable {
-                if (wifiManager.isWifiEnabled) {
-                    remoteViews?.setTextViewText(R.id.tx_wifiname, "On")
-
-                } else remoteViews?.setTextViewText(R.id.tx_wifiname, "Off")
-
                 AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
-            }, 3000)
+            }, 5000)
 
         }
 

@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
                             Manifest.permission.READ_CONTACTS,
                             Manifest.permission.CALL_PHONE,
                             Manifest.permission.ACTIVITY_RECOGNITION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
+                            Manifest.permission.ACCESS_FINE_LOCATION
                         ),
                         CONTACTS_P
                     )
