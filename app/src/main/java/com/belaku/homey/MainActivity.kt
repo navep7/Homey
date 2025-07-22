@@ -25,10 +25,14 @@ import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.database.Cursor
 import android.graphics.drawable.Drawable
 import android.icu.util.Calendar
-import android.location.Address
 import android.location.Geocoder
 import android.location.Location
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.Uri
+import android.net.wifi.WifiInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -39,7 +43,6 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -51,12 +54,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.Nullable
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.work.Constraints
@@ -97,6 +100,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private lateinit var connectivityManager: ConnectivityManager
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
     private lateinit var btnActRecognition: Button
@@ -158,25 +162,18 @@ class MainActivity : AppCompatActivity() {
         sharedPreferences.getStringSet("walls", null)?.let { imgUrls.addAll(it) }
         sharedPreferences.getStringSet("wallDescs", null)?.let { imgDescs.addAll(it) }
 
+        connectivityManager = this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
 
         findViewByIds()
         setRV(imgUrls, imgDescs)
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
-        if (!((ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.READ_CONTACTS
-            ) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.CALL_PHONE
-            ) == PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-                applicationContext,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) == PERMISSION_GRANTED) && getAdminStatus())
-        )
-        //    PermissionsDialog(applicationContext)
-        //   checkP()
+
+        if (intent != null)
+            Log.d(TAG, "gtgInt")
+
          intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
         var compName = ComponentName(this, DeviceAdmin::class.java)
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
@@ -185,6 +182,15 @@ class MainActivity : AppCompatActivity() {
             "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
         )
 
+
+        launcher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result: ActivityResult ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+              //  tvResult.setText(data!!.getStringExtra("result"))
+            }
+        }
         // Receiver
         val getResult =
             registerForActivityResult(
@@ -226,7 +232,7 @@ class MainActivity : AppCompatActivity() {
                 // Add animation here to collapse the menu
             }
 
-            UsageStatsPermissionDialog()
+            usageStatsPermissionDialog()
 
         }
 
@@ -606,7 +612,10 @@ class MainActivity : AppCompatActivity() {
 //                    btnContactsAccess.setText("GRANTED")
                     getFavoriteContacts(applicationContext)
                     getCity()
+                //    checkWifi()
                     startStepsService()
+
+
                 }
         } else if (requestCode == DIAL_P) {
             if (grantResults.isNotEmpty())
@@ -621,7 +630,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
+
     private fun startStepsService() {
         if (!isMyServiceRunning(StepsService::class.java)) {
             val intentSteps = Intent(this, StepsService::class.java)
@@ -630,7 +639,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun UsageStatsPermissionDialog() {
+    private fun usageStatsPermissionDialog() {
         val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
         alertDialog.setTitle("Permission Request")
         alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
@@ -754,6 +763,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
 
+        private val TAG: String = "MainActTAG"
+        var SSID: String = ""
+        lateinit var launcher: ActivityResultLauncher<Intent>
         var cityname: String = "cN"
         var cityLat: Double = 0.0
         var cityLng: Double = 0.0
@@ -853,6 +865,50 @@ class MainActivity : AppCompatActivity() {
                 Log.d("WD Excep7 - ", ex.toString())
             }
 
+
+        }
+
+        /*
+         {
+            var wifiIntent = Intent(Settings.ACTION_WIFI_SETTINGS)
+            wifiIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            appContx.startActivity(wifiIntent)
+
+            Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                MainActivity.checkWifi()
+            }, 5000)
+        }*/
+
+        fun checkWifi() {
+
+                Log.d(TAG, "after 5s")
+                val connManager =
+                    mAct.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+                val mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
+                if (mWifi != null) {
+                    if (mWifi.isConnected) {
+                        Log.d(TAG, "Wconnc")
+
+                        val request = NetworkRequest.Builder()
+                            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                            .build()
+                        val networkCallback = @RequiresApi(Build.VERSION_CODES.S)
+                        object : ConnectivityManager.NetworkCallback(
+                            FLAG_INCLUDE_LOCATION_INFO) {
+                            override fun onCapabilitiesChanged(
+                                network: Network,
+                                networkCapabilities: NetworkCapabilities
+                            ) {
+                                super.onCapabilitiesChanged(network, networkCapabilities)
+                                val wifiInfo = networkCapabilities.transportInfo as WifiInfo
+                                val ssid = wifiInfo.ssid
+                                Log.d(TAG, ssid)
+                            }
+                        }
+                        connManager.registerNetworkCallback(request, networkCallback)
+
+                    }else Log.d(TAG, "notWconnc")
+                }
 
         }
     }

@@ -8,12 +8,19 @@ import android.content.Context.MODE_PRIVATE
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.icu.util.Calendar
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.util.Log
 import android.view.View
 import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.belaku.homey.MainActivity.Companion.appContx
@@ -32,6 +39,8 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     Worker(context!!, workerParams!!) {
 
 
+    private val appWidM: AppWidgetManager = AppWidgetManager.getInstance(appContx)
+
     @NonNull
     override fun doWork(): Result {
 
@@ -46,14 +55,52 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
         wm = WallpaperManager.getInstance(appContx)
         setWall()
 
+        WifiState()
+
         return Result.success()
+    }
+
+    private fun WifiState() {
+        var wTAG = "WifiState ~"
+
+         var networkCallback = object : ConnectivityManager.NetworkCallback() {
+            @RequiresApi(Build.VERSION_CODES.S)
+            override fun onLost(network: Network) {
+                remoteViews?.setImageViewResource(R.id.fab_wifi, R.drawable.wifi_off)
+                appWidM.updateAppWidget(newAppWidget, remoteViews)
+                Log.d(TAG, "NetworkCallback called from onLost")
+            }
+            @RequiresApi(Build.VERSION_CODES.S)
+            override fun onUnavailable() {
+                remoteViews?.setColorInt(R.id.fab_wifi, "setColorFilter", Color.YELLOW, Color.YELLOW)
+                appWidM.updateAppWidget(newAppWidget, remoteViews)
+                Log.d(wTAG,"NetworkCallback OFF")
+            }
+            @RequiresApi(Build.VERSION_CODES.S)
+            override fun onLosing(network: Network, maxMsToLive: Int) {
+                remoteViews?.setColorInt(R.id.fab_wifi, "setColorFilter", Color.RED, Color.RED)
+                appWidM.updateAppWidget(newAppWidget, remoteViews)
+                Log.d(wTAG,"NetworkCallback called from onLosing")
+            }
+            override fun onAvailable(network: Network) {
+                Log.d(wTAG,"NetworkCallback ON")
+                remoteViews?.setImageViewResource(R.id.fab_wifi, R.drawable.wifi_on)
+                appWidM.updateAppWidget(newAppWidget, remoteViews)
+                //record wi-fi connect event
+            }
+        }
+
+        val connectivityManager =
+            appContx.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
     }
 
 
     companion object {
 
-        lateinit var stepCounterSensor: Sensor
-        lateinit var sensorManager: SensorManager
 
 
         var boolNewLap: Boolean = false

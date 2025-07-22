@@ -38,6 +38,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.CalendarContract.Colors
 import android.provider.ContactsContract
 import android.provider.Settings
 import android.util.Log
@@ -367,15 +368,6 @@ class NewAppWidget : AppWidgetProvider() {
             "Night"
         }
 
-
-        wifiManager = appContx.getSystemService(WIFI_SERVICE) as WifiManager
-        if (wifiManager.isWifiEnabled)
-            if (!wifiManager.connectionInfo.ssid.equals("<unknown ssid>"))
-            remoteViews?.setTextViewText(R.id.tx_wifiname, wifiManager.connectionInfo.ssid)
-        else remoteViews?.setTextViewText(R.id.tx_wifiname, "Off")
-
-
-
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS)
             == PackageManager.PERMISSION_GRANTED
         ) {
@@ -395,10 +387,6 @@ class NewAppWidget : AppWidgetProvider() {
             var wifiIntent = Intent(Settings.ACTION_WIFI_SETTINGS)
             wifiIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             appContx.startActivity(wifiIntent)
-
-            Handler().postDelayed(Runnable {
-                AppWidgetManager.getInstance(appContx).updateAppWidget(newAppWidget, remoteViews)
-            }, 5000)
 
         }
 
