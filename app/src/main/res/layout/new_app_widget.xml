@@ -151,6 +151,47 @@
 
     </LinearLayout>
 
+
+    <TextView
+        android:id="@+id/tx_news"
+        android:background="@drawable/gradient_glass"
+        android:layout_below="@+id/imgbtn_lock"
+        android:text="Single-line text view that scrolls automatically if the text is too long to fit in the widget"
+        android:textStyle="italic"
+        android:textSize="21dp"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"
+        android:duplicateParentState="true"
+        android:ellipsize="marquee"
+        android:fadingEdge="horizontal"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="false"
+        android:singleLine="true" >
+        <requestFocus android:duplicateParentState="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+    </TextView>
+
+<!--
+    <TextView
+        android:id="@+id/tx_news"
+        android:text="Single-line text view that scrolls automatically if the text is too long to fit in the widget"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit ="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:textStyle="italic"
+        android:textSize="21dp"
+        android:layout_below="@+id/imgbtn_lock"
+        android:layout_width="match_parent"
+        android:layout_height="25dp"/>
+-->
+
     <LinearLayout
         android:id="@+id/ll_contacts"
         android:layout_width="match_parent"
@@ -318,7 +359,7 @@
         android:layout_below="@+id/ll_contacts"
         android:layout_alignParentStart="true"
         android:layout_marginStart="50dp"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="@dimen/fab_margin"
         android:background="?android:attr/selectableItemBackground"
         android:scaleType="fitXY"
         android:src="@android:drawable/ic_lock_lock" />

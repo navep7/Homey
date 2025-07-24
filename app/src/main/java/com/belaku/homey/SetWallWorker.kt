@@ -101,8 +101,6 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
 
     companion object {
 
-
-
         var boolNewLap: Boolean = false
         var steps = 0
         var initialSteps = 0

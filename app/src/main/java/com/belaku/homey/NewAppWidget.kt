@@ -61,6 +61,7 @@ import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStream
+import java.util.Arrays
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -69,6 +70,7 @@ import kotlin.properties.Delegates
 
 
 class NewAppWidget : AppWidgetProvider() {
+
 
 
     private lateinit var wifiManager: WifiManager
@@ -127,7 +129,6 @@ class NewAppWidget : AppWidgetProvider() {
             remoteViews = RemoteViews(context.packageName, R.layout.new_app_widget)
             newAppWidget = ComponentName(context, NewAppWidget::class.java)
 
-
             /* val intentSD = Intent(
                  context,
                  DialogWidgetStepsActivity::class.java
@@ -135,6 +136,7 @@ class NewAppWidget : AppWidgetProvider() {
              val pendingIntent = PendingIntent.getActivity(context, 0, intentSD,
                  PendingIntent.FLAG_IMMUTABLE)
              remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
+
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.fab_wifi,
@@ -220,6 +222,7 @@ class NewAppWidget : AppWidgetProvider() {
 
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
+
 
 
         appWidgetManager.updateAppWidget(newAppWidget, remoteViews)
@@ -374,6 +377,11 @@ class NewAppWidget : AppWidgetProvider() {
             greeting(context, remoteViews!!, timeOfDay)
         }
 
+        var newsStr = ""
+        for (i in newsList)
+            newsStr = "$newsStr$i\t\t\t\t\t\t\t | \t\t\t\t\t\t\t"
+
+        remoteViews?.setTextViewText(R.id.tx_news, newsStr)
 
         todaysDate(context)
 
@@ -681,6 +689,7 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
+        var newsList: List<String> = Arrays.asList("News Headlines 1", "News Headlines 2", "News Headlines 3", "News Headlines 4", "News Headlines 5")
         var primaryColor by Delegates.notNull<Int>()
         var secondaryColor by Delegates.notNull<Int>()
         var tertianaryColor by Delegates.notNull<Int>()

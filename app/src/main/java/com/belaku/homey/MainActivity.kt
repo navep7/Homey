@@ -73,6 +73,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.favContacts
+import com.belaku.homey.NewAppWidget.Companion.newsList
 import com.belaku.homey.NewAppWidget.Companion.screenHeight
 import com.belaku.homey.NewAppWidget.Companion.screenWidth
 import com.belaku.homey.databinding.ActivityMainBinding
@@ -168,6 +169,7 @@ class MainActivity : AppCompatActivity() {
         findViewByIds()
         setRV(imgUrls, imgDescs)
         listeners()
+        getNews()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
 
@@ -237,6 +239,16 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    private fun getNews() {
+
+        newsList.toMutableList().clear()
+        newsList.toMutableList().add("News 1")
+        newsList.toMutableList().add("News 2")
+        newsList.toMutableList().add("News 3")
+        newsList.toMutableList().add("News 4")
+        newsList.toMutableList().add("News 5")
     }
 
     @SuppressLint("MissingPermission")
