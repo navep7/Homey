@@ -15,7 +15,6 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
-import android.content.Context.WIFI_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
@@ -23,7 +22,6 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -38,15 +36,11 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.provider.CalendarContract.Colors
 import android.provider.ContactsContract
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
@@ -72,7 +66,7 @@ import kotlin.properties.Delegates
 class NewAppWidget : AppWidgetProvider() {
 
 
-
+    private var newsStr: String = ""
     private lateinit var wifiManager: WifiManager
     private lateinit var formattedDate: String
     private var timelyWish: String = ""
@@ -377,9 +371,8 @@ class NewAppWidget : AppWidgetProvider() {
             greeting(context, remoteViews!!, timeOfDay)
         }
 
-        var newsStr = ""
-        for (i in newsList)
-            newsStr = "$newsStr$i\t\t\t\t\t\t\t | \t\t\t\t\t\t\t"
+        for (i in 0 until newsList.size)
+            newsStr = newsStr + "\t\t\t\t\t | ${newsList.get(i)}"
 
         remoteViews?.setTextViewText(R.id.tx_news, newsStr)
 
@@ -689,7 +682,9 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
-        var newsList: List<String> = Arrays.asList("News Headlines 1", "News Headlines 2", "News Headlines 3", "News Headlines 4", "News Headlines 5")
+    //    var newsList: ArrayList<String> = Arrays.asList("News Headlines 1")
+        var newsList: ArrayList<String> =
+            ArrayList(mutableListOf(""))
         var primaryColor by Delegates.notNull<Int>()
         var secondaryColor by Delegates.notNull<Int>()
         var tertianaryColor by Delegates.notNull<Int>()

@@ -25,6 +25,7 @@ workRuntimeKtx = "2.10.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-multidex = { module = "androidx.multidex:multidex" }
 blur_tutorial = { module = "com.cleveroad.blur_tutorial:blur_tutorial", version.ref = "blur_tutorial" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }

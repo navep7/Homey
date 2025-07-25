@@ -90,6 +90,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONException
 import org.json.JSONObject
+import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.net.URL
@@ -101,6 +103,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
+    private val newSAPIKEY: String = "3fa88b5851974caea39bcc59bd2e5746"
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
@@ -169,9 +172,9 @@ class MainActivity : AppCompatActivity() {
         findViewByIds()
         setRV(imgUrls, imgDescs)
         listeners()
-        getNews()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
+        getNews()
 
         if (intent != null)
             Log.d(TAG, "gtgInt")
@@ -249,6 +252,29 @@ class MainActivity : AppCompatActivity() {
         newsList.toMutableList().add("News 3")
         newsList.toMutableList().add("News 4")
         newsList.toMutableList().add("News 5")
+
+
+        ApiUtilities.getApiInterface()?.getNews("bangalore", newSAPIKEY)?.enqueue(object : Callback<MainNews> {
+
+            override fun onFailure(call: Call<MainNews>, t: Throwable) {
+
+                makeToast("onFailure - " + t.message)
+            }
+
+            override fun onResponse(call: Call<MainNews>, response: retrofit2.Response<MainNews>) {
+              //  newsList.toMutableList().clear()
+                if (response.isSuccessful) {
+                    makeToast("SZ - " + response)
+                    makeToast("SZ - " + response.body()?.totalResults)
+                    makeToast("SZ - " + response.body()?.articles!!.size)
+                    for (i in 0 until response.body()?.articles!!.size) {
+                        newsList.add(response.body()?.articles!!.get(i).title)
+                    }
+                }
+                makeToast("Added - " + newsList.size)
+            }
+        })
+
     }
 
     @SuppressLint("MissingPermission")
