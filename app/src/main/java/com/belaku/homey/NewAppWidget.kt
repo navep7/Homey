@@ -140,6 +140,11 @@ class NewAppWidget : AppWidgetProvider() {
             )
 
             remoteViews?.setOnClickPendingIntent(
+                R.id.imgbtn_news_prev,
+                getPendingSelfIntent(context, NEWS_PREV)
+            )
+
+            remoteViews?.setOnClickPendingIntent(
                 R.id.tx_news,
                 getPendingSelfIntent(context, NEWS_CLICK)
             )
@@ -155,7 +160,7 @@ class NewAppWidget : AppWidgetProvider() {
             )
 
             remoteViews?.setOnClickPendingIntent(
-                R.id.tx_add_remove_newlap,
+                R.id.imgv_steps,
                 getPendingSelfIntent(context, STEPS_NOW)
             )
 
@@ -256,9 +261,9 @@ class NewAppWidget : AppWidgetProvider() {
             // Apply primaryColor to your widget's text views
         }
 
-        remoteViews?.setColorInt(R.id.imgbtn_lock, "setColorFilter", primaryColor, tertianaryColor)
-        remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
-        remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
+//        remoteViews?.setColorInt(R.id.imgbtn_lock, "setColorFilter", primaryColor, tertianaryColor)
+  //      remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
+    //    remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
@@ -289,6 +294,11 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
+            R.id.imgbtn_news_prev,
+            getPendingSelfIntent(context, NEWS_PREV)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
             R.id.tx_news,
             getPendingSelfIntent(context, NEWS_CLICK)
         )
@@ -304,7 +314,7 @@ class NewAppWidget : AppWidgetProvider() {
         )
 
         remoteViews?.setOnClickPendingIntent(
-            R.id.tx_add_remove_newlap,
+            R.id.imgv_steps,
             getPendingSelfIntent(context, STEPS_NOW)
         )
 
@@ -421,6 +431,18 @@ class NewAppWidget : AppWidgetProvider() {
             else MainActivity.getNews()
         }
 
+        if (NEWS_PREV == intent.action) {
+
+            if (newsIndex == 1)
+                newsIndex = newsList.size - 1
+            else newsIndex--
+
+            makeToast(newsIndex.toString() + " n-I " + newsList.size)
+            if (newsList.size > 3)
+                remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
+            else MainActivity.getNews()
+        }
+
         if (WIFI_AUTO == intent.action) {
 
             var wifiIntent = Intent(Settings.ACTION_WIFI_SETTINGS)
@@ -497,10 +519,10 @@ class NewAppWidget : AppWidgetProvider() {
         if (STEPS_NOW == intent.action) {
             if (boolNewLap) {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, "")
-                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
+              //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
             } else {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, ",")
-                remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
+              //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
             }
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
@@ -643,10 +665,11 @@ class NewAppWidget : AppWidgetProvider() {
 
 
 
+
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
-            qT.substring(0, 1)
-                .uppercase() + qT.substring(1) + "\t ||| \t" + dU + " mins, once.\t ||| \t" + "lastUpdated $uT"
+            qT.split(" ")[0].substring(0, 1)
+                .uppercase() + qT.split(" ")[0].substring(1) + "..,\t ||| \t" + dU + " mins, once.\t ||| \t" + "↺ @ $uT"
         )
         remoteViews?.setTextViewText(R.id.tx_wish, timelyWish)
     }
@@ -932,6 +955,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         private const val NEWS_CLICK = "newsClick"
         private const val NEWS_NEXT = "newsNext"
+        private const val NEWS_PREV = "newsPrev"
         private const val WIFI_AUTO = "wifiAuto"
         private const val RL_INVERT = "rlInvert"
         private const val GET_WEATHER = "getWeather"

@@ -946,7 +946,7 @@ class MainActivity : AppCompatActivity() {
                             newsLinks.add(response.body()?.articles!!.get(i).url)
                         }
                     }
-                    makeToast("Added - " + newsList.size)
+              //      makeToast("Added - " + newsList.size)
                 }
             })
 

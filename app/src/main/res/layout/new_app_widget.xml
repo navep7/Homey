@@ -97,53 +97,65 @@
             android:textStyle="bold|italic"
             tools:ignore="HardcodedText" />
 
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/rl_news"
-        android:layout_width="match_parent"
-        android:layout_height="75dp"
-        android:layout_marginTop="3dp"
-        android:layout_below="@+id/rl_clocks"
-        android:background="@drawable/gradient_glass_dark">
-
-
-        <ImageButton
-            android:id="@+id/imgbtn_news_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentStart="true"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:background="@android:color/transparent"
-            android:foregroundGravity="center"
-            android:src="@android:drawable/alert_dark_frame"/>
-
-        <TextView
-            android:id="@+id/tx_news"
-            android:textColor="@android:color/white"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:textStyle="bold|italic"
-            android:text="NEWS"
-            android:textSize="21sp"
-            android:layout_toLeftOf="@+id/imgbtn_news_next"
-            android:layout_toRightOf="@+id/imgbtn_news_view"
+        <RelativeLayout
+            android:id="@+id/rl_news"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center" />
+            android:layout_height="25dp"
+            android:layout_marginTop="1dp"
+            android:layout_below="@+id/tx_desc">
 
-        <ImageButton
-            android:id="@+id/imgbtn_news_next"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="@dimen/fab_margin"
-            android:background="@android:color/transparent"
-            android:foregroundGravity="center"
-            android:src="@android:drawable/ic_media_next"/>
+
+            <ImageButton
+                android:id="@+id/imgbtn_news_prev"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_marginEnd="@dimen/fab_margin"
+                android:background="@android:color/transparent"
+                android:foregroundGravity="center"
+                android:src="@android:drawable/ic_media_previous"/>
+
+
+            <TextView
+                android:id="@+id/tx_news"
+                android:layout_toLeftOf="@+id/imgbtn_news_next"
+                android:layout_toRightOf="@+id/imgbtn_news_prev"
+                android:text="News HeadLines..."
+                android:textStyle="italic"
+                android:textSize="21dp"
+                android:textColor="@android:color/white"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"
+                android:duplicateParentState="true"
+                android:ellipsize="marquee"
+                android:fadingEdge="horizontal"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="false"
+                android:singleLine="true" >
+                <requestFocus android:duplicateParentState="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
+            </TextView>
+
+            <ImageButton
+                android:id="@+id/imgbtn_news_next"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="@dimen/fab_margin"
+                android:background="@android:color/transparent"
+                android:foregroundGravity="center"
+                android:src="@android:drawable/ic_media_next"/>
+
+        </RelativeLayout>
+
+
 
     </RelativeLayout>
+
 
 
 
@@ -151,7 +163,7 @@
         android:id="@+id/ll_apps"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rl_news"
+        android:layout_below="@+id/rl_clocks"
         android:layout_marginStart="@dimen/fab_margin"
         android:layout_marginTop="3dp"
         android:layout_marginEnd="@dimen/fab_margin"
@@ -325,6 +337,7 @@
     </LinearLayout>
 
 
+<!--
     <ImageButton
         android:id="@+id/imgbtn_set"
         android:layout_width="60dp"
@@ -337,6 +350,7 @@
         android:scaleType="fitXY"
         android:src="@drawable/set_walp"
         app:tint="?attr/colorTertiary" />
+-->
 
     <ProgressBar
         android:id="@+id/progressBar_cyclic"
@@ -351,29 +365,93 @@
 
 
     <ImageButton
-        android:id="@+id/imgbtn_lock"
+        android:id="@+id/imgbtn_lock1"
+        android:visibility="invisible"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_below="@+id/ll_contacts"
         android:layout_alignParentStart="true"
         android:layout_marginStart="50dp"
-        android:background="?android:attr/selectableItemBackground"
         android:outlineSpotShadowColor="?attr/colorPrimary"
         android:scaleType="fitXY"
         android:src="@android:drawable/ic_lock_lock" />
 
-
-    <ImageButton
-        android:id="@+id/imgbtn_conf"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+    <Button
+        android:id="@+id/imgbtn_lock"
+        android:text="Lock"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_corner"
         android:layout_below="@+id/ll_contacts"
-        android:layout_centerHorizontal="true"
+        android:layout_alignParentStart="true"
         android:layout_marginStart="50dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:outlineSpotShadowColor="?attr/colorSecondary"
-        android:scaleType="fitXY"
-        android:src="@drawable/conf" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/imgbtn_conf"
+        android:text="Config"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_corner"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/ll_contacts"
+        android:layout_marginStart="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/imgbtn_set"
+        android:text="Next Wall"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rounded_corner"
+
+        android:layout_below="@+id/ll_contacts"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="50dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <RelativeLayout
+        android:id="@+id/rl_steps"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_below="@+id/imgbtn_set"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/imgv_steps"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitXY"
+            android:src="@drawable/steps" />
+
+        <TextView
+            android:id="@+id/tx_steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/imgv_steps"
+            android:layout_marginStart="@dimen/fab_margin"
+            android:text="..."
+            android:textSize="35sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+        <TextView
+            android:id="@+id/tx_n_steps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/fab_margin"
+            android:layout_toRightOf="@+id/tx_steps"
+            android:textColor="?attr/colorSecondaryVariant"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
 
 
     <TextView
@@ -387,56 +465,6 @@
         android:text="..."
         android:textStyle="bold" />
 
-
-    <ImageButton
-        android:id="@+id/imgv_steps"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:background="@android:color/transparent"
-        android:scaleType="fitXY"
-        android:src="@drawable/steps" />
-
-    <TextView
-        android:id="@+id/tx_steps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:layout_toRightOf="@+id/imgv_steps"
-        android:text="..."
-        android:textSize="35sp"
-        android:textStyle="bold" />
-
-
-    <TextView
-        android:id="@+id/tx_add_remove_newlap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/fab_margin"
-        android:layout_toRightOf="@+id/tx_steps"
-        android:background="@android:color/transparent"
-        android:scaleType="fitXY"
-        android:text="+"
-        android:textColor="@android:color/holo_red_light"
-        android:textSize="35sp" />
-
-
-    <TextView
-        android:id="@+id/tx_n_steps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="@dimen/fab_margin"
-        android:layout_toRightOf="@+id/tx_add_remove_newlap"
-        android:textColor="?attr/colorSecondaryVariant"
-        android:textSize="25sp"
-        android:textStyle="bold"
-        android:visibility="invisible" />
 
 
 </RelativeLayout>
