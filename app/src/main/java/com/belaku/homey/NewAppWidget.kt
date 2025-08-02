@@ -38,15 +38,18 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.ContactsContract
 import android.provider.Settings
+import android.text.Html
 import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.cityname
 import com.belaku.homey.MainActivity.Companion.makeToast
+import com.belaku.homey.MainActivity.Companion.newsIndex
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
 import com.belaku.homey.SetWallWorker.Companion.boolNewLap
@@ -55,7 +58,6 @@ import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.InputStream
-import java.util.Arrays
 import java.util.Collections
 import java.util.Date
 import java.util.LinkedList
@@ -131,6 +133,16 @@ class NewAppWidget : AppWidgetProvider() {
                  PendingIntent.FLAG_IMMUTABLE)
              remoteViews?.setOnClickPendingIntent(R.id.imgv_steps, pendingIntent)*/
 
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.imgbtn_news_next,
+                getPendingSelfIntent(context, NEWS_NEXT)
+            )
+
+            remoteViews?.setOnClickPendingIntent(
+                R.id.tx_news,
+                getPendingSelfIntent(context, NEWS_CLICK)
+            )
 
             remoteViews?.setOnClickPendingIntent(
                 R.id.fab_wifi,
@@ -224,8 +236,6 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
 
-
-
     @SuppressLint("ResourceAsColor")
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onReceive(context: Context, intent: Intent) {
@@ -272,8 +282,16 @@ class NewAppWidget : AppWidgetProvider() {
         currentHour = now[Calendar.HOUR_OF_DAY]
         currentMin = now[Calendar.MINUTE]
 
-        if(currentHour > 23 && currentMin > 30)
-            steps = 0
+
+        remoteViews?.setOnClickPendingIntent(
+            R.id.imgbtn_news_next,
+            getPendingSelfIntent(context, NEWS_NEXT)
+        )
+
+        remoteViews?.setOnClickPendingIntent(
+            R.id.tx_news,
+            getPendingSelfIntent(context, NEWS_CLICK)
+        )
 
         remoteViews?.setOnClickPendingIntent(
             R.id.fab_wifi,
@@ -371,16 +389,36 @@ class NewAppWidget : AppWidgetProvider() {
             greeting(context, remoteViews!!, timeOfDay)
         }
 
-        for (i in 0 until newsList.size)
-            newsStr = newsStr + "\t\t\t\t\t | ${newsList.get(i)}"
+//        for (i in 0 until newsList.size)
+        //          newsStr = newsStr + "\t\t\t\t\t | ${newsList.get(i)}"
 
-        remoteViews?.setTextViewText(R.id.tx_news, newsStr)
+
+        if (newsList.size > 3)
+            remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY))
 
         todaysDate(context)
 
 
         if (GET_WEATHER == intent.action) {
             MainActivity.getWeatherData()
+        }
+
+        if (NEWS_CLICK == intent.action) {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(newsLinks[newsIndex]))
+            browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            appContx.startActivity(browserIntent)
+        }
+
+        if (NEWS_NEXT == intent.action) {
+
+            if (newsIndex == newsList.size)
+                newsIndex = 0
+            else newsIndex++
+
+            makeToast(newsIndex.toString() + " n-I " + newsList.size)
+            if (newsList.size > 3)
+                remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
+            else MainActivity.getNews()
         }
 
         if (WIFI_AUTO == intent.action) {
@@ -394,20 +432,65 @@ class NewAppWidget : AppWidgetProvider() {
         if (RL_INVERT == intent.action) {
             if (sharedPreferences.getBoolean("dark", false)) {
                 sharedPreferencesEditor.putBoolean("dark", false).apply()
-                remoteViews?.setTextColor(R.id.tx_desc, appContx.resources.getColor(android.R.color.white))
-                remoteViews?.setTextColor(R.id.tx_placeandweather, appContx.resources.getColor(android.R.color.white))
-                remoteViews?.setTextColor(R.id.tx_day_date, appContx.resources.getColor(android.R.color.white))
-                remoteViews?.setTextColor(R.id.clock, appContx.resources.getColor(android.R.color.white))
-                remoteViews?.setTextColor(R.id.tx_wish, appContx.resources.getColor(android.R.color.white))
-                remoteViews?.setTextColor(R.id.tx_walltype, appContx.resources.getColor(android.R.color.white))
+                remoteViews?.setTextColor(
+                    R.id.tx_news,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_desc,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_placeandweather,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_day_date,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.clock,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_wish,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_walltype,
+                    appContx.resources.getColor(android.R.color.white)
+                )
             } else {
                 sharedPreferencesEditor.putBoolean("dark", true).apply()
-                remoteViews?.setTextColor(R.id.tx_desc, appContx.resources.getColor(android.R.color.black))
-                remoteViews?.setTextColor(R.id.tx_placeandweather, appContx.resources.getColor(android.R.color.black))
-                remoteViews?.setTextColor(R.id.tx_day_date, appContx.resources.getColor(android.R.color.black))
-                remoteViews?.setTextColor(R.id.clock, appContx.resources.getColor(android.R.color.black))
-                remoteViews?.setTextColor(R.id.tx_wish, appContx.resources.getColor(android.R.color.black))
-                remoteViews?.setTextColor(R.id.tx_walltype, appContx.resources.getColor(android.R.color.black))
+
+                remoteViews?.setTextColor(
+                    R.id.tx_news,
+                    appContx.resources.getColor(android.R.color.white)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_desc,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_placeandweather,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_day_date,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.clock,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_wish,
+                    appContx.resources.getColor(android.R.color.black)
+                )
+                remoteViews?.setTextColor(
+                    R.id.tx_walltype,
+                    appContx.resources.getColor(android.R.color.black)
+                )
             }
         }
 
@@ -536,14 +619,17 @@ class NewAppWidget : AppWidgetProvider() {
 
         formattedDate = df.format(c)
 
-     //   remoteViews?.setTextViewText(R.id.tx_cityname, MainActivity.cityname)
+        //   remoteViews?.setTextViewText(R.id.tx_cityname, MainActivity.cityname)
 
         if (MainActivity.tempC.length > 3)
             remoteViews?.setTextViewText(
                 R.id.tx_placeandweather,
-                cityname + " | " + MainActivity.tempC.substring(0, 4) + "° C" + " | " + MainActivity.tempKind
+                cityname + " | " + MainActivity.tempC.substring(
+                    0,
+                    4
+                ) + "° C" + " | " + MainActivity.tempKind
             )
-       // remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
+        // remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         sharedPreferencesEditor.putBoolean("DateSet", true).apply()
         sharedPreferencesEditor.putString("fD", formattedDate).apply()
         remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
@@ -555,18 +641,12 @@ class NewAppWidget : AppWidgetProvider() {
         remoteViews?.setTextViewText(R.id.tx_desc, wD)
 
 
-        /*remoteViews?.setTextColor(R.id.time_text_view, primaryColor)
-        remoteViews?.setTextColor(R.id.clock, secondaryColor)
-        remoteViews?.setTextColor(R.id.tx_day_date, tertianaryColor)
-        remoteViews?.setTextColor(R.id.tx_placeandweather, primaryColor)
-        remoteViews?.setTextColor(R.id.tx_desc, tertianaryColor)*/
-
-
 
 
         remoteViews?.setTextViewText(
             R.id.tx_walltype,
-            qT.substring(0, 1).uppercase() + qT.substring(1) + "\n" + dU + " mins, once.\n" + "Updated ~ $uT"
+            qT.substring(0, 1)
+                .uppercase() + qT.substring(1) + "\t ||| \t" + dU + " mins, once.\t ||| \t" + "lastUpdated $uT"
         )
         remoteViews?.setTextViewText(R.id.tx_wish, timelyWish)
     }
@@ -682,8 +762,10 @@ class NewAppWidget : AppWidgetProvider() {
     }
 
     companion object {
-    //    var newsList: ArrayList<String> = Arrays.asList("News Headlines 1")
+        //    var newsList: ArrayList<String> = Arrays.asList("News Headlines 1")
         var newsList: ArrayList<String> =
+            ArrayList(mutableListOf(""))
+        var newsLinks: ArrayList<String> =
             ArrayList(mutableListOf(""))
         var primaryColor by Delegates.notNull<Int>()
         var secondaryColor by Delegates.notNull<Int>()
@@ -848,6 +930,8 @@ class NewAppWidget : AppWidgetProvider() {
         lateinit var newAppWidget: ComponentName
 
 
+        private const val NEWS_CLICK = "newsClick"
+        private const val NEWS_NEXT = "newsNext"
         private const val WIFI_AUTO = "wifiAuto"
         private const val RL_INVERT = "rlInvert"
         private const val GET_WEATHER = "getWeather"

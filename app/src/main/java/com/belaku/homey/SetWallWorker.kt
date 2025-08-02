@@ -102,6 +102,7 @@ class SetWallWorker(context: Context?, workerParams: WorkerParameters?) :
     companion object {
 
         var boolNewLap: Boolean = false
+        @kotlin.jvm.JvmField
         var steps = 0
         var initialSteps = 0
         val TAG: String = "SetWallWorker LOG7"

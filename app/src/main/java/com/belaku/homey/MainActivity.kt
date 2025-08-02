@@ -73,6 +73,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.belaku.homey.AppChooserDialog.Companion.choosenApps
 import com.belaku.homey.NewAppWidget.Companion.favContacts
+import com.belaku.homey.NewAppWidget.Companion.newsLinks
 import com.belaku.homey.NewAppWidget.Companion.newsList
 import com.belaku.homey.NewAppWidget.Companion.screenHeight
 import com.belaku.homey.NewAppWidget.Companion.screenWidth
@@ -103,7 +104,7 @@ import java.util.concurrent.TimeUnit
 class MainActivity : AppCompatActivity() {
 
 
-    private val newSAPIKEY: String = "3fa88b5851974caea39bcc59bd2e5746"
+
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var btnContactsAccess: Button
     private lateinit var btnDialPhone: Button
@@ -174,7 +175,7 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
-        getNews()
+
 
         if (intent != null)
             Log.d(TAG, "gtgInt")
@@ -220,6 +221,8 @@ class MainActivity : AppCompatActivity() {
 
         fabMain.setOnClickListener { view ->
 
+            getNews()
+
             if (fabDay.visibility == View.GONE) {
                 Snackbar.make(view, "Auto Update Wallpaper, every ?", Snackbar.ANIMATION_MODE_FADE)
                     .setAction("Action", null)
@@ -244,38 +247,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getNews() {
-
-        newsList.toMutableList().clear()
-        newsList.toMutableList().add("News 1")
-        newsList.toMutableList().add("News 2")
-        newsList.toMutableList().add("News 3")
-        newsList.toMutableList().add("News 4")
-        newsList.toMutableList().add("News 5")
-
-
-        ApiUtilities.getApiInterface()?.getNews("bangalore", newSAPIKEY)?.enqueue(object : Callback<MainNews> {
-
-            override fun onFailure(call: Call<MainNews>, t: Throwable) {
-
-                makeToast("onFailure - " + t.message)
-            }
-
-            override fun onResponse(call: Call<MainNews>, response: retrofit2.Response<MainNews>) {
-              //  newsList.toMutableList().clear()
-                if (response.isSuccessful) {
-                    makeToast("SZ - " + response)
-                    makeToast("SZ - " + response.body()?.totalResults)
-                    makeToast("SZ - " + response.body()?.articles!!.size)
-                    for (i in 0 until response.body()?.articles!!.size) {
-                        newsList.add(response.body()?.articles!!.get(i).title)
-                    }
-                }
-                makeToast("Added - " + newsList.size)
-            }
-        })
-
-    }
 
     @SuppressLint("MissingPermission")
     private fun getCity() {
@@ -801,6 +772,9 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
 
+
+        private val newSAPIKEY: String = "3fa88b5851974caea39bcc59bd2e5746"
+        var newsIndex: Int = 1
         private val TAG: String = "MainActTAG"
         var SSID: String = ""
         lateinit var launcher: ActivityResultLauncher<Intent>
@@ -949,6 +923,36 @@ class MainActivity : AppCompatActivity() {
                 }
 
         }
+
+        fun getNews() {
+
+            newsList.toMutableList().clear()
+
+            ApiUtilities.getApiInterface()?.getNews("bangalore", newSAPIKEY)?.enqueue(object : Callback<MainNews> {
+
+                override fun onFailure(call: Call<MainNews>, t: Throwable) {
+
+                    makeToast("onFailure - " + t.message)
+                }
+
+                override fun onResponse(call: Call<MainNews>, response: retrofit2.Response<MainNews>) {
+                    //  newsList.toMutableList().clear()
+                    if (response.isSuccessful) {
+                       // makeToast("SZ - " + response.raw())
+                       // makeToast("SZ - " + response.body()?.totalResults)
+                       // makeToast("SZ - " + response.body()?.articles!!.size)
+                        for (i in 0 until response.body()?.articles!!.size) {
+                            newsList.add(response.body()?.articles!!.get(i).title)
+                            newsLinks.add(response.body()?.articles!!.get(i).url)
+                        }
+                    }
+                    makeToast("Added - " + newsList.size)
+                }
+            })
+
+        }
+
+
     }
 
     // handle sensor event
