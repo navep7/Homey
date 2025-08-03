@@ -99,6 +99,7 @@ import java.net.URL
 import java.util.Collections
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity() {
@@ -175,6 +176,10 @@ class MainActivity : AppCompatActivity() {
         listeners()
         fetchWallpaper(applicationContext)
         GetDisplayDimens()
+
+        cDate = Calendar.getInstance().get(Calendar.DATE) - 2
+        cMonth = Calendar.getInstance().get(Calendar.MONTH) + 1
+        cYear = Calendar.getInstance().get(Calendar.YEAR)
 
 
         if (intent != null)
@@ -263,6 +268,8 @@ class MainActivity : AppCompatActivity() {
                 val Adress = geocoder.getFromLocation(location.latitude,location.longitude,1)
                 cityname = Adress?.toString()?.split(",")?.get(2) ?: Adress?.get(0)?.locality.toString()
 
+                makeToast(cityname)
+
             }
         }
 
@@ -299,26 +306,27 @@ class MainActivity : AppCompatActivity() {
             "Night"
         }
 
-        var cDate = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+
 
         val usageStatsManager =
             applicationContext?.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager // Context.USAGE_STATS_SERVICE);
 
 
+
         val beginCal = Calendar.getInstance()
         val endCal = Calendar.getInstance()
         if (timeOfDay.equals("Morning")) {
-            beginCal.set(2025, 5, cDate - 1, 9, 0)
-            endCal.set(2025, 5, cDate - 1, 12, 0)
+            beginCal.set(cYear, cMonth - 1, cDate, 9, 0)
+            endCal.set(cYear, cMonth, cDate, 12, 0)
         } else if (timeOfDay.equals("Afternoon")) {
-            beginCal.set(2025, 5, cDate - 5, 12, 0)
-            endCal.set(2025, 5, cDate - 1, 17, 0)
+            beginCal.set(cYear, cMonth - 1, cDate, 12, 0)
+            endCal.set(cYear, cMonth, cDate, 17, 0)
         } else if (timeOfDay.equals("Evening")) {
-            beginCal.set(2025, 5, cDate - 1, 17, 0)
-            endCal.set(2025, 5, cDate - 1, 21, 0)
+            beginCal.set(cYear, cMonth - 1, cDate, 17, 0)
+            endCal.set(cYear, cMonth, cDate, 21, 0)
         } else if (timeOfDay.equals("Night")) {
-            beginCal.set(2025, 5, cDate - 1, 21, 0)
-            endCal.set(2025, 5, cDate - 1, 23, 57)
+            beginCal.set(cYear, cMonth - 1, cDate, 21, 0)
+            endCal.set(cYear, cMonth - 1, cDate, 23, 57)
         }
 
         val queryUsageStats = usageStatsManager.queryUsageStats(
@@ -773,6 +781,9 @@ class MainActivity : AppCompatActivity() {
     companion object {
 
 
+        private var cDate by Delegates.notNull<Int>()
+        private var cMonth by Delegates.notNull<Int>()
+        private var cYear by Delegates.notNull<Int>()
         private val newSAPIKEY: String = "3fa88b5851974caea39bcc59bd2e5746"
         var newsIndex: Int = 1
         private val TAG: String = "MainActTAG"
@@ -877,19 +888,9 @@ class MainActivity : AppCompatActivity() {
                 Log.d("WD Excep7 - ", ex.toString())
             }
 
+            makeToast(tempC)
 
         }
-
-        /*
-         {
-            var wifiIntent = Intent(Settings.ACTION_WIFI_SETTINGS)
-            wifiIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            appContx.startActivity(wifiIntent)
-
-            Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                MainActivity.checkWifi()
-            }, 5000)
-        }*/
 
         fun checkWifi() {
 
@@ -928,7 +929,7 @@ class MainActivity : AppCompatActivity() {
 
             newsList.toMutableList().clear()
 
-            ApiUtilities.getApiInterface()?.getNews("bangalore", newSAPIKEY)?.enqueue(object : Callback<MainNews> {
+            ApiUtilities.getApiInterface()?.getNews("bangalore", "$cYear-$cMonth-$cDate", "publishedAt", "en", newSAPIKEY)?.enqueue(object : Callback<MainNews> {
 
                 override fun onFailure(call: Call<MainNews>, t: Throwable) {
 
@@ -946,7 +947,7 @@ class MainActivity : AppCompatActivity() {
                             newsLinks.add(response.body()?.articles!!.get(i).url)
                         }
                     }
-              //      makeToast("Added - " + newsList.size)
+                    makeToast("News - " + newsList.size)
                 }
             })
 

@@ -1,5 +1,6 @@
 package com.belaku.homey
 
+import org.intellij.lang.annotations.Language
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.Call
@@ -12,6 +13,9 @@ interface ApiInterface {
     @GET("everything")
     fun getNews(
         @Query("q") q: String,
+        @Query("from") from: String,
+        @Query("sortBy") sortBy: String,
+        @Query("language") language: String,
       //  @Query("pageSize") pagesize: Int,
         @Query("apikey") apikey: String
     ): Call<MainNews>

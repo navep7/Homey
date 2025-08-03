@@ -409,7 +409,7 @@ class NewAppWidget : AppWidgetProvider() {
         //          newsStr = newsStr + "\t\t\t\t\t | ${newsList.get(i)}"
 
 
-        if (newsList.size > 3)
+        if (newsList.size > 1)
             remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY))
 
         todaysDate(context)
@@ -431,8 +431,10 @@ class NewAppWidget : AppWidgetProvider() {
                 newsIndex = 0
             else newsIndex++
 
+            makeToast("showing $newsIndex of ${newsList.size}")
+
             makeToast(newsIndex.toString() + " n-I " + newsList.size)
-            if (newsList.size > 3)
+            if (newsList.size > 1)
                 remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
             else MainActivity.getNews()
         }
@@ -444,7 +446,7 @@ class NewAppWidget : AppWidgetProvider() {
             else newsIndex--
 
             makeToast(newsIndex.toString() + " n-I " + newsList.size)
-            if (newsList.size > 3)
+            if (newsList.size > 1)
                 remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
             else MainActivity.getNews()
         }
@@ -657,6 +659,17 @@ class NewAppWidget : AppWidgetProvider() {
                     4
                 ) + "° C" + " | " + MainActivity.tempKind
             )
+        else {
+            MainActivity.getWeatherData()
+            if (MainActivity.tempC.length > 3)
+                remoteViews?.setTextViewText(
+                    R.id.tx_placeandweather,
+                    cityname + " | " + MainActivity.tempC.substring(
+                        0,
+                        4
+                    ) + "° C" + " | " + MainActivity.tempKind
+                )
+        }
         // remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         sharedPreferencesEditor.putBoolean("DateSet", true).apply()
         sharedPreferencesEditor.putString("fD", formattedDate).apply()
