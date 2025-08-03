@@ -433,7 +433,7 @@ class NewAppWidget : AppWidgetProvider() {
 
         if (NEWS_NEXT == intent.action) {
 
-            if (newsIndex == newsList.size)
+            if (newsIndex == newsList.size - 1)
                 newsIndex = 0
             else newsIndex++
 
