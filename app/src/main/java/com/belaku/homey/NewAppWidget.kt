@@ -531,9 +531,11 @@ class NewAppWidget : AppWidgetProvider() {
         if (STEPS_NOW == intent.action) {
             if (boolNewLap) {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, "")
+                remoteViews?.setViewVisibility(R.id.vertical_divider, View.INVISIBLE)
                 //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
             } else {
-                remoteViews?.setTextViewText(R.id.tx_n_steps, "/ Now, " + "0")
+                remoteViews?.setTextViewText(R.id.tx_n_steps, "Now, " + "0")
+                remoteViews?.setViewVisibility(R.id.vertical_divider, View.VISIBLE)
                 //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
             }
             boolNewLap = !boolNewLap
@@ -551,7 +553,6 @@ class NewAppWidget : AppWidgetProvider() {
 
             if (active)
                 deviceManger.lockNow()
-            else MainActivity.adminAccess()
         }
 
         if (SET_CLICKED == intent.action) {

@@ -185,7 +185,13 @@ class MainActivity : AppCompatActivity() {
         if (intent != null)
             Log.d(TAG, "gtgInt")
 
-
+        intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+        var compName = ComponentName(this, DeviceAdmin::class.java)
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+        intent.putExtra(
+            DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+            "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
+        )
 
 
         launcher = registerForActivityResult(
@@ -792,15 +798,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        fun adminAccess() {
-            var intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-            var compName = ComponentName(appContx, DeviceAdmin::class.java)
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-            intent.putExtra(
-                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
-            )
-        }
 
         fun makeToast(s: String) {
             Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
