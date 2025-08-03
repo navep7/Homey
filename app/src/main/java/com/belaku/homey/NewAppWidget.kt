@@ -467,10 +467,6 @@ class NewAppWidget : AppWidgetProvider() {
                     appContx.resources.getColor(android.R.color.black)
                 )
                 remoteViews?.setTextColor(
-                    R.id.tx_desc,
-                    appContx.resources.getColor(android.R.color.white)
-                )
-                remoteViews?.setTextColor(
                     R.id.tx_placeandweather,
                     appContx.resources.getColor(android.R.color.white)
                 )
@@ -487,7 +483,7 @@ class NewAppWidget : AppWidgetProvider() {
                     appContx.resources.getColor(android.R.color.white)
                 )
                 remoteViews?.setTextColor(
-                    R.id.tx_walltype,
+                    R.id.tx_desc_walltype,
                     appContx.resources.getColor(android.R.color.white)
                 )
             } else {
@@ -498,10 +494,6 @@ class NewAppWidget : AppWidgetProvider() {
                     appContx.resources.getColor(android.R.color.white)
                 )
                 remoteViews?.setTextColor(
-                    R.id.tx_desc,
-                    appContx.resources.getColor(android.R.color.black)
-                )
-                remoteViews?.setTextColor(
                     R.id.tx_placeandweather,
                     appContx.resources.getColor(android.R.color.black)
                 )
@@ -518,7 +510,7 @@ class NewAppWidget : AppWidgetProvider() {
                     appContx.resources.getColor(android.R.color.black)
                 )
                 remoteViews?.setTextColor(
-                    R.id.tx_walltype,
+                    R.id.tx_desc_walltype,
                     appContx.resources.getColor(android.R.color.black)
                 )
             }
@@ -679,15 +671,14 @@ class NewAppWidget : AppWidgetProvider() {
             SimpleDateFormat("EEE", Locale.getDefault()).format(c) +
                     " | " + formattedDate
         )
-        remoteViews?.setTextViewText(R.id.tx_desc, wD)
 
 
 
 
 
         remoteViews?.setTextViewText(
-            R.id.tx_walltype,
-            qT.split(" ")[0].substring(0, 1)
+            R.id.tx_desc_walltype,
+            wD + "\n" + qT.split(" ")[0].substring(0, 1)
                 .uppercase() + qT.split(" ")[0].substring(1) + "..,\t ||| \t" + dU + " mins, once.\t ||| \t" + "↺ @ $uT"
         )
         remoteViews?.setTextViewText(R.id.tx_wish, timelyWish)

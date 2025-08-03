@@ -415,22 +415,10 @@
     </RelativeLayout>
 
 
-    <TextView
-        android:id="@+id/tx_desc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/tx_walltype"
-        android:layout_centerHorizontal="true"
-        android:gravity="center"
-        android:background="@drawable/gradient_glass_flattop"
-        android:text="Desc.."
-        android:textSize="15sp"
-        android:textStyle="bold|italic"
-        tools:ignore="HardcodedText" />
 
 
     <TextView
-        android:id="@+id/tx_walltype"
+        android:id="@+id/tx_desc_walltype"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
