@@ -22,6 +22,7 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -45,7 +46,6 @@ import android.widget.RemoteViews
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.cityname
 import com.belaku.homey.MainActivity.Companion.makeToast
@@ -264,6 +264,12 @@ class NewAppWidget : AppWidgetProvider() {
 //        remoteViews?.setColorInt(R.id.imgbtn_lock, "setColorFilter", primaryColor, tertianaryColor)
   //      remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
     //    remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
+
+
+/*        val progressDrawable: Drawable = progressBar.getProgressDrawable().mutate()
+        progressDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN)
+        progressBar.setProgressDrawable(progressDrawable)*/
+
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
         sharedPreferencesEditor = sharedPreferences.edit()
