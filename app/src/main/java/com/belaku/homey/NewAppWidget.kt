@@ -521,7 +521,7 @@ class NewAppWidget : AppWidgetProvider() {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, "")
               //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
             } else {
-                remoteViews?.setTextViewText(R.id.tx_n_steps, ",")
+                remoteViews?.setTextViewText(R.id.tx_n_steps, "/ Now, " + "0")
               //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
             }
             boolNewLap = !boolNewLap
@@ -654,7 +654,7 @@ class NewAppWidget : AppWidgetProvider() {
         // remoteViews?.setTextViewText(R.id.tx_date, formattedDate)
         sharedPreferencesEditor.putBoolean("DateSet", true).apply()
         sharedPreferencesEditor.putString("fD", formattedDate).apply()
-        remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
+        remoteViews?.setTextViewText(R.id.tx_steps, "Today, " + steps.toString())
         remoteViews?.setTextViewText(
             R.id.tx_day_date,
             SimpleDateFormat("EEE", Locale.getDefault()).format(c) +

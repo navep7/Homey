@@ -70,7 +70,7 @@ class StepsService : Service() {
 
 
                 if (steps % 10 == 0) {
-                    remoteViews?.setTextViewText(R.id.tx_steps, steps.toString())
+                    remoteViews?.setTextViewText(R.id.tx_steps, "Today, " + steps.toString())
                     if (boolNewLap) {
                         remoteViews?.setTextViewText(
                             R.id.tx_n_steps,

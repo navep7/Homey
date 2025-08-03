@@ -92,6 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tx_placeandweather"
             android:layout_centerHorizontal="true"
+            android:gravity="center"
             android:text="Desc.."
             android:textSize="21sp"
             android:textStyle="bold|italic"
@@ -121,7 +122,7 @@
                 android:layout_toLeftOf="@+id/imgbtn_news_next"
                 android:layout_toRightOf="@+id/imgbtn_news_prev"
                 android:text="News HeadLines..."
-                android:textStyle="italic"
+                android:textStyle="bold"
                 android:textSize="21dp"
                 android:textColor="@android:color/white"
                 android:layout_width="match_parent"
@@ -406,7 +407,6 @@
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:background="@drawable/rounded_corner"
-
         android:layout_below="@+id/ll_contacts"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="50dp"
@@ -417,8 +417,9 @@
         android:id="@+id/rl_steps"
         android:layout_margin="@dimen/fab_margin"
         android:layout_below="@+id/imgbtn_set"
-        android:layout_centerInParent="true"
+        android:layout_above="@+id/tx_walltype"
         android:gravity="center"
+        android:background="@drawable/rounded_corner_gray"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -426,6 +427,7 @@
             android:id="@+id/imgv_steps"
             android:layout_width="25dp"
             android:layout_height="25dp"
+            android:layout_alignParentStart="true"
             android:background="@android:color/transparent"
             android:scaleType="fitXY"
             android:src="@drawable/steps" />
@@ -436,8 +438,7 @@
             android:layout_height="wrap_content"
             android:layout_toEndOf="@+id/imgv_steps"
             android:layout_marginStart="@dimen/fab_margin"
-            android:text="..."
-            android:textSize="35sp"
+            android:textSize="25sp"
             android:textStyle="bold"
             tools:ignore="HardcodedText" />
 
@@ -446,8 +447,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/fab_margin"
-            android:layout_toRightOf="@+id/tx_steps"
-            android:textColor="?attr/colorSecondaryVariant"
+            android:layout_toEndOf="@+id/tx_steps"
             android:textSize="25sp"
             android:textStyle="bold" />
 
@@ -456,12 +456,13 @@
 
     <TextView
         android:id="@+id/tx_walltype"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_margin="5dp"
-        android:background="@drawable/gradient_glass"
+        android:background="@drawable/gradient_glass_flattop"
         android:text="..."
         android:textStyle="bold" />
 
