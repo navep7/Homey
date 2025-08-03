@@ -185,21 +185,14 @@ class MainActivity : AppCompatActivity() {
         if (intent != null)
             Log.d(TAG, "gtgInt")
 
-         intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-        var compName = ComponentName(this, DeviceAdmin::class.java)
-        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
-        intent.putExtra(
-            DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-            "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
-        )
+
 
 
         launcher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result: ActivityResult ->
             if (result.resultCode == RESULT_OK) {
-                val data = result.data
-              //  tvResult.setText(data!!.getStringExtra("result"))
+
             }
         }
         // Receiver
@@ -244,8 +237,6 @@ class MainActivity : AppCompatActivity() {
                 frameDay.visibility = View.GONE
                 // Add animation here to collapse the menu
             }
-
-            usageStatsPermissionDialog()
 
         }
 
@@ -626,23 +617,10 @@ class MainActivity : AppCompatActivity() {
         } else if (requestCode == CONTACTS_P) {
             if (grantResults.isNotEmpty())
                 if (grantResults[0].equals(PERMISSION_GRANTED)) {
-//                    btnContactsAccess.setText("GRANTED")
                     getFavoriteContacts(applicationContext)
                     getCity()
-                //    checkWifi()
                     startStepsService()
-
-
-                }
-        } else if (requestCode == DIAL_P) {
-            if (grantResults.isNotEmpty())
-                if (grantResults[0].equals(PERMISSION_GRANTED))
-                    btnDialPhone.setText("GRANTED")
-        } else if (requestCode == ACT_R) {
-            if (grantResults.isNotEmpty())
-                if (grantResults[0].equals(PERMISSION_GRANTED)) {
-                    btnActRecognition.setText("GRANTED")
-                    startStepsService()
+                    usageStatsPermissionDialog()
                 }
         }
     }
@@ -656,22 +634,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun usageStatsPermissionDialog() {
-        val alertDialog: AlertDialog = AlertDialog.Builder(this@MainActivity).create()
-        alertDialog.setTitle("Permission Request")
-        alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
-        alertDialog.setButton(
-            AlertDialog.BUTTON_NEUTRAL, "OK"
-        ) { dialog, which ->
-            val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-            applicationContext.startActivity(intent1.setFlags(FLAG_ACTIVITY_NEW_TASK))
-            dialog.dismiss()
-        }
 
-        if (!getAdminStatus())
-            alertDialog.show()
-
-    }
 
     fun fetchWallpaper(context: Context) {
 
@@ -746,19 +709,7 @@ class MainActivity : AppCompatActivity() {
         rv.adapter = rvAdapter
     }
 
-    private fun getAdminStatus(): Boolean {
-        val appOps = applicationContext.getSystemService(APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(
-            OPSTR_GET_USAGE_STATS,
-            Process.myUid(),
-            applicationContext.packageName
-        )
-        return if (mode == AppOpsManager.MODE_DEFAULT) {
-            applicationContext.checkCallingOrSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED
-        } else {
-            mode == MODE_ALLOWED
-        }
-    }
+
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -787,7 +738,6 @@ class MainActivity : AppCompatActivity() {
         private val newSAPIKEY: String = "3fa88b5851974caea39bcc59bd2e5746"
         var newsIndex: Int = 1
         private val TAG: String = "MainActTAG"
-        var SSID: String = ""
         lateinit var launcher: ActivityResultLauncher<Intent>
         var cityname: String = "cN"
         var cityLat: Double = 0.0
@@ -808,9 +758,49 @@ class MainActivity : AppCompatActivity() {
         var randomNumber: Int = 0
         val imgUrls: ArrayList<String> = ArrayList()
         var imgDescs: ArrayList<String> = ArrayList()
-        var cGranted: Boolean = false
         lateinit var appContx: Context
 
+
+         fun usageStatsPermissionDialog() {
+            val alertDialog: AlertDialog = AlertDialog.Builder(mAct).create()
+            alertDialog.setTitle("Permission Request")
+            alertDialog.setMessage("App needs permission to get Usage stats to suggest you apps to use.. Permit ?")
+            alertDialog.setButton(
+                AlertDialog.BUTTON_NEUTRAL, "OK"
+            ) { dialog, which ->
+                val intent1 = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                appContx.startActivity(intent1.setFlags(FLAG_ACTIVITY_NEW_TASK))
+                dialog.dismiss()
+            }
+
+            if (!getAdminStatus())
+                alertDialog.show()
+
+        }
+
+        private fun getAdminStatus(): Boolean {
+            val appOps = appContx.getSystemService(APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.checkOpNoThrow(
+                OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                appContx.packageName
+            )
+            return if (mode == AppOpsManager.MODE_DEFAULT) {
+                appContx.checkCallingOrSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED
+            } else {
+                mode == MODE_ALLOWED
+            }
+        }
+
+        fun adminAccess() {
+            var intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+            var compName = ComponentName(appContx, DeviceAdmin::class.java)
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName)
+            intent.putExtra(
+                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Enable Admin Access for Lock screen shortcut to work from the App's Widget"
+            )
+        }
 
         fun makeToast(s: String) {
             Toast.makeText(appContx, s, Toast.LENGTH_SHORT).show()
@@ -892,38 +882,6 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        fun checkWifi() {
-
-                Log.d(TAG, "after 5s")
-                val connManager =
-                    mAct.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-                val mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
-                if (mWifi != null) {
-                    if (mWifi.isConnected) {
-                        Log.d(TAG, "Wconnc")
-
-                        val request = NetworkRequest.Builder()
-                            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                            .build()
-                        val networkCallback = @RequiresApi(Build.VERSION_CODES.S)
-                        object : ConnectivityManager.NetworkCallback(
-                            FLAG_INCLUDE_LOCATION_INFO) {
-                            override fun onCapabilitiesChanged(
-                                network: Network,
-                                networkCapabilities: NetworkCapabilities
-                            ) {
-                                super.onCapabilitiesChanged(network, networkCapabilities)
-                                val wifiInfo = networkCapabilities.transportInfo as WifiInfo
-                                val ssid = wifiInfo.ssid
-                                Log.d(TAG, ssid)
-                            }
-                        }
-                        connManager.registerNetworkCallback(request, networkCallback)
-
-                    }else Log.d(TAG, "notWconnc")
-                }
-
-        }
 
         fun getNews() {
 

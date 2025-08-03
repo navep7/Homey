@@ -193,9 +193,11 @@
 
 
         <RelativeLayout
+            android:id="@+id/rl_contact1"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
             <ImageView
                 android:id="@+id/imgv_contact1"
@@ -222,9 +224,11 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/rl_contact2"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
             <ImageView
                 android:id="@+id/imgv_contact2"
@@ -251,9 +255,11 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/rl_contact3"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
             <ImageView
                 android:id="@+id/imgv_contact3"
@@ -280,9 +286,11 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/rl_contact4"
+            android:visibility="gone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp">
+            android:layout_margin="5dp">
 
             <ImageView
                 android:id="@+id/imgv_contact4"
@@ -297,6 +305,37 @@
                 android:layout_height="wrap_content"
                 android:layout_alignStart="@+id/imgv_contact4"
                 android:layout_alignBottom="@+id/imgv_contact4"
+                android:layout_margin="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxWidth="55sp"
+                android:maxLines="1"
+                android:textColor="?attr/colorPrimaryInverse"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_contact5"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <ImageView
+                android:id="@+id/imgv_contact5"
+                android:layout_width="55dp"
+                android:layout_height="55dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:scaleType="fitXY" />
+
+            <TextView
+                android:id="@+id/tx_c5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/imgv_contact5"
+                android:layout_alignBottom="@+id/imgv_contact5"
                 android:layout_margin="1dp"
                 android:ellipsize="end"
                 android:gravity="center"
@@ -342,7 +381,7 @@
         android:id="@+id/imgbtn_lock"
         android:text="Lock"
         android:textStyle="bold"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="?attr/colorPrimaryInverse"
         android:background="@drawable/rounded_corner"
         android:layout_below="@+id/ll_contacts"
         android:layout_alignParentStart="true"
@@ -354,7 +393,7 @@
         android:id="@+id/imgbtn_conf"
         android:text="Search"
         android:textStyle="bold"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="?attr/colorPrimaryInverse"
         android:background="@drawable/rounded_corner"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/ll_contacts"
@@ -366,7 +405,7 @@
         android:id="@+id/imgbtn_set"
         android:text="Refresh"
         android:textStyle="bold"
-        android:textColor="@android:color/darker_gray"
+        android:textColor="?attr/colorPrimaryInverse"
         android:background="@drawable/rounded_corner"
         android:layout_below="@+id/ll_contacts"
         android:layout_alignParentEnd="true"
@@ -377,7 +416,6 @@
     <RelativeLayout
         android:id="@+id/rl_steps"
         android:layout_below="@+id/imgbtn_set"
-        android:layout_above="@+id/tx_desc"
         android:gravity="center"
         android:layout_margin="@dimen/fab_margin"
         android:background="@drawable/rounded_corner_gray"

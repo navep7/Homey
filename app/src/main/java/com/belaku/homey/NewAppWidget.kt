@@ -13,6 +13,7 @@ import android.app.usage.UsageStats
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Context.MODE_PRIVATE
 import android.content.Intent
@@ -22,7 +23,6 @@ import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -48,15 +48,18 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import com.belaku.homey.MainActivity.Companion.appContx
 import com.belaku.homey.MainActivity.Companion.cityname
+import com.belaku.homey.MainActivity.Companion.getWeatherData
 import com.belaku.homey.MainActivity.Companion.makeToast
 import com.belaku.homey.MainActivity.Companion.newsIndex
 import com.belaku.homey.MainActivity.Companion.sharedPreferences
 import com.belaku.homey.MainActivity.Companion.sharedPreferencesEditor
+import com.belaku.homey.MainActivity.Companion.usageStatsPermissionDialog
 import com.belaku.homey.SetWallWorker.Companion.boolNewLap
 import com.belaku.homey.SetWallWorker.Companion.initialSteps
 import com.belaku.homey.SetWallWorker.Companion.steps
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.io.IOException
 import java.io.InputStream
 import java.util.Collections
 import java.util.Date
@@ -92,7 +95,7 @@ class NewAppWidget : AppWidgetProvider() {
         appContx = context!!
         onEn = true
         Log.d("onEnabled! - ", favContacts.size.toString())
-        MainActivity.getWeatherData()
+        getWeatherData()
 
     }
 
@@ -262,13 +265,13 @@ class NewAppWidget : AppWidgetProvider() {
         }
 
 //        remoteViews?.setColorInt(R.id.imgbtn_lock, "setColorFilter", primaryColor, tertianaryColor)
-  //      remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
-    //    remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
+        //      remoteViews?.setColorInt(R.id.imgbtn_conf, "setColorFilter", secondaryColor, secondaryColor)
+        //    remoteViews?.setColorInt(R.id.imgbtn_set, "setColorFilter", tertianaryColor, primaryColor)
 
 
-/*        val progressDrawable: Drawable = progressBar.getProgressDrawable().mutate()
-        progressDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN)
-        progressBar.setProgressDrawable(progressDrawable)*/
+        /*        val progressDrawable: Drawable = progressBar.getProgressDrawable().mutate()
+                progressDrawable.setColorFilter(Color.RED, PorterDuff.Mode.SRC_IN)
+                progressBar.setProgressDrawable(progressDrawable)*/
 
 
         sharedPreferences = context.getSharedPreferences("UserPreferences", MODE_PRIVATE)
@@ -410,7 +413,10 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         if (newsList.size > 1)
-            remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY))
+            remoteViews?.setTextViewText(
+                R.id.tx_news,
+                Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY)
+            )
 
         todaysDate(context)
 
@@ -435,7 +441,10 @@ class NewAppWidget : AppWidgetProvider() {
 
             makeToast(newsIndex.toString() + " n-I " + newsList.size)
             if (newsList.size > 1)
-                remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
+                remoteViews?.setTextViewText(
+                    R.id.tx_news,
+                    Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY)
+                );
             else MainActivity.getNews()
         }
 
@@ -447,7 +456,10 @@ class NewAppWidget : AppWidgetProvider() {
 
             makeToast(newsIndex.toString() + " n-I " + newsList.size)
             if (newsList.size > 1)
-                remoteViews?.setTextViewText(R.id.tx_news, Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY));
+                remoteViews?.setTextViewText(
+                    R.id.tx_news,
+                    Html.fromHtml("<u>" + newsList[newsIndex] + "</u>", Html.FROM_HTML_MODE_LEGACY)
+                );
             else MainActivity.getNews()
         }
 
@@ -519,10 +531,10 @@ class NewAppWidget : AppWidgetProvider() {
         if (STEPS_NOW == intent.action) {
             if (boolNewLap) {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, "")
-              //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
+                //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "+")
             } else {
                 remoteViews?.setTextViewText(R.id.tx_n_steps, "/ Now, " + "0")
-              //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
+                //  remoteViews?.setTextViewText(R.id.tx_add_remove_newlap, "x")
             }
             boolNewLap = !boolNewLap
             if (initialSteps == 0)
@@ -539,6 +551,7 @@ class NewAppWidget : AppWidgetProvider() {
 
             if (active)
                 deviceManger.lockNow()
+            else MainActivity.adminAccess()
         }
 
         if (SET_CLICKED == intent.action) {
@@ -814,45 +827,89 @@ class NewAppWidget : AppWidgetProvider() {
 
         fun addContactInWidget(context: Context, favC: ArrayList<Contact>) {
 
-            var input: InputStream
             var bm: Bitmap
             var d: Drawable
 
             for (i in 0 until favC.size) {
 
-                input =
-                    ContactsContract.Contacts.openContactPhotoInputStream(
-                        appContx.contentResolver,
-                        Uri.parse(favC[i].image)
-                    )
-                bm = BitmapFactory.decodeStream(input)
-                d = BitmapDrawable(bm)
+                val contentResolver: ContentResolver =
+                    appContx.getContentResolver() // Or getContext().getContentResolver()
+                val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(
+                    contentResolver,
+                    Uri.parse(favC[i].image)
+                )
+
+                if (inputStream != null) {
+                    // Photo exists, proceed to use the inputStream (e.g., load into an ImageView)
+                    // Example: Bitmap photo = BitmapFactory.decodeStream(inputStream);
+                    // imageView.setImageBitmap(photo);
+                    // Don't forget to close the inputStream when done
+
+                    bm = BitmapFactory.decodeStream(inputStream)
+                    d = BitmapDrawable(bm)
+
+                    try {
+                        inputStream.close()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    // No photo available for this contact, handle accordingly (e.g., display a placeholder image)
+                    // Example: imageView.setImageResource(R.drawable.placeholder_contact_photo);
+                    d = appContx.resources.getDrawable(R.drawable.face_holder)
+                }
 
 
                 if (i == 0) {
+                    remoteViews!!.setViewVisibility(
+                        R.id.rl_contact1,
+                        View.VISIBLE
+                    )
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact1,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c1, favC[0].name)
                 } else if (i == 1) {
+                    remoteViews!!.setViewVisibility(
+                        R.id.rl_contact2,
+                        View.VISIBLE
+                    )
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact2,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c2, favC[1].name)
                 } else if (i == 2) {
+                    remoteViews!!.setViewVisibility(
+                        R.id.rl_contact3,
+                        View.VISIBLE
+                    )
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact3,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c3, favC[2].name)
                 } else if (i == 3) {
+                    remoteViews!!.setViewVisibility(
+                        R.id.rl_contact4,
+                        View.VISIBLE
+                    )
                     remoteViews!!.setImageViewBitmap(
                         R.id.imgv_contact4,
                         drawableToBitmap(context, d).getCircledBitmap()
                     )
                     remoteViews!!.setTextViewText(R.id.tx_c4, favC[3].name)
+                } else if (i == 4) {
+                    remoteViews!!.setViewVisibility(
+                        R.id.rl_contact5,
+                        View.VISIBLE
+                    )
+                    remoteViews!!.setImageViewBitmap(
+                        R.id.imgv_contact5,
+                        drawableToBitmap(context, d).getCircledBitmap()
+                    )
+                    remoteViews!!.setTextViewText(R.id.tx_c5, favC[4].name)
                 }
 
             }
