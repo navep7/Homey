@@ -422,7 +422,7 @@ class NewAppWidget : AppWidgetProvider() {
 
 
         if (GET_WEATHER == intent.action) {
-            MainActivity.getWeatherData()
+            getWeatherData()
         }
 
         if (NEWS_CLICK == intent.action) {

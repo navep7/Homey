@@ -85,6 +85,7 @@ import com.google.android.material.color.DynamicColors
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -843,19 +844,20 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         }
 
+        @OptIn(DelicateCoroutinesApi::class)
         fun getWeatherData() {
 
 
             // Replace "CityName" with the desired city
             try {
-                var weatherService = Retrofit.Builder()
+                val weatherService = Retrofit.Builder()
                     .baseUrl("https://api.openweathermap.org/data/2.5/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build()
                     .create(WeatherService::class.java)
 
                 GlobalScope.launch(Dispatchers.IO) {
-                    val openWeatherApiKey: String = "9fa8e101240ab18615e3133b051e767e"
+                    val openWeatherApiKey = "9fa8e101240ab18615e3133b051e767e"
                     weatherData = weatherService.getWeather(cityLat.toString(),
                         cityLng.toString(), openWeatherApiKey)
                     withContext(Dispatchers.Main) {
@@ -864,6 +866,7 @@ class MainActivity : AppCompatActivity() {
                         tempKind = weatherData.weather.get(0).description
 
                         Log.d("weatherInfo", tempC + " - " + tempKind)
+                        makeToast("weatherInfo - " +  tempC + " - " + tempKind)
 
                         sharedPreferencesEditor.putString(
                             "weatherTemp",
